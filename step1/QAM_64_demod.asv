@@ -1,0 +1,181 @@
+function [bits] = QAM_64_demod(inphase_sig,quadrature_sig)
+%QAM_64_DEMOD Summary of this function goes here
+%   Detailed explanation goes here
+
+
+bits = '';
+loopSize = length(inphase_sig);
+
+
+for i=1:loopSize
+   
+    %decision
+    
+    if(quadrature_sig(i) >= 6)
+       
+        if (inphase_sig(i) <= -6)
+           bits = strcat(bits,'000000');
+        elseif (inphase_sig(i) > -6 && inphase_sig(i) <= -4)
+           bits = strcat(bits,'000001');
+        elseif (inphase_sig(i) > -4 && inphase_sig(i) <= -2)
+           bits = strcat(bits,'000011');
+        elseif (inphase_sig(i) > -2 && inphase_sig(i) <= 0)
+           bits = strcat(bits,'000010');
+        elseif (inphase_sig(i) > 0 && inphase_sig(i) <= 2)
+           bits = strcat(bits,'000110'); 
+        elseif (inphase_sig(i) > 2 && inphase_sig(i) <= 4)
+           bits = strcat(bits,'000111'); 
+        elseif (inphase_sig(i) > 4 && inphase_sig(i) <= 6)
+           bits = strcat(bits,'000101'); 
+        elseif (inphase_sig(i) > 6 )
+           bits = strcat(bits,'000100'); 
+        end
+         
+    elseif(quadrature_sig(i) >= 4 && quadrature_sig(i) < 6)
+       
+        if (inphase_sig(i) <= -6)
+           bits = strcat(bits,'001000');
+        elseif (inphase_sig(i) > -6 && inphase_sig(i) <= -4)
+           bits = strcat(bits,'001001');
+        elseif (inphase_sig(i) > -4 && inphase_sig(i) <= -2)
+           bits = strcat(bits,'001011');
+        elseif (inphase_sig(i) > -2 && inphase_sig(i) <= 0)
+           bits = strcat(bits,'001010');
+        elseif (inphase_sig(i) > 0 && inphase_sig(i) <= 2)
+           bits = strcat(bits,'001110'); 
+        elseif (inphase_sig(i) > 2 && inphase_sig(i) <= 4)
+           bits = strcat(bits,'001111'); 
+        elseif (inphase_sig(i) > 4 && inphase_sig(i) <= 6)
+           bits = strcat(bits,'001101'); 
+        elseif (inphase_sig(i) > 6 )
+           bits = strcat(bits,'001100'); 
+        end
+        
+    elseif (quadrature_sig(i) >= 2 && quadrature_sig(i) < 4)
+        
+        if (inphase_sig(i) <= -6)
+           bits = strcat(bits,'011000');
+        elseif (inphase_sig(i) > -6 && inphase_sig(i) <= -4)
+           bits = strcat(bits,'011001');
+        elseif (inphase_sig(i) > -4 && inphase_sig(i) <= -2)
+           bits = strcat(bits,'011011');
+        elseif (inphase_sig(i) > -2 && inphase_sig(i) <= 0)
+           bits = strcat(bits,'011010');
+        elseif (inphase_sig(i) > 0 && inphase_sig(i) <= 2)
+           bits = strcat(bits,'011110'); 
+        elseif (inphase_sig(i) > 2 && inphase_sig(i) <= 4)
+           bits = strcat(bits,'011111'); 
+        elseif (inphase_sig(i) > 4 && inphase_sig(i) <= 6)
+           bits = strcat(bits,'011101'); 
+        elseif (inphase_sig(i) > 6 )
+           bits = strcat(bits,'011100'); 
+        end
+        
+    elseif (quadrature_sig(i) >= 0 && quadrature_sig(i) < 2 )
+        
+        if (inphase_sig(i) <= -6)
+           bits = strcat(bits,'010000');
+        elseif (inphase_sig(i) > -6 && inphase_sig(i) <= -4)
+           bits = strcat(bits,'010001');
+        elseif (inphase_sig(i) > -4 && inphase_sig(i) <= -2)
+           bits = strcat(bits,'010011');
+        elseif (inphase_sig(i) > -2 && inphase_sig(i) <= 0)
+           bits = strcat(bits,'010010');
+        elseif (inphase_sig(i) > 0 && inphase_sig(i) <= 2)
+           bits = strcat(bits,'010110'); 
+        elseif (inphase_sig(i) > 2 && inphase_sig(i) <= 4)
+           bits = strcat(bits,'010111'); 
+        elseif (inphase_sig(i) > 4 && inphase_sig(i) <= 6)
+           bits = strcat(bits,'010101'); 
+        elseif (inphase_sig(i) > 6 )
+           bits = strcat(bits,'010100'); 
+        end
+        
+    elseif(quadrature_sig(i) < 0 && quadrature_sig(i) >= -2)
+        
+        if (inphase_sig(i) <= -6)
+           bits = strcat(bits,'000000');
+        elseif (inphase_sig(i) > -6 && inphase_sig(i) <= -4)
+           bits = strcat(bits,'000001');
+        elseif (inphase_sig(i) > -4 && inphase_sig(i) <= -2)
+           bits = strcat(bits,'000011');
+        elseif (inphase_sig(i) > -2 && inphase_sig(i) <= 0)
+           bits = strcat(bits,'000001');
+        elseif (inphase_sig(i) > 0 && inphase_sig(i) <= 2)
+           bits = strcat(bits,'000110'); 
+        elseif (inphase_sig(i) > 2 && inphase_sig(i) <= 4)
+           bits = strcat(bits,'000111'); 
+        elseif (inphase_sig(i) > 4 && inphase_sig(i) <= 6)
+           bits = strcat(bits,'000101'); 
+        elseif (inphase_sig(i) > 6 )
+           bits = strcat(bits,'000100'); 
+        end
+         
+    elseif(quadrature_sig(i) < -2 && quadrature_sig(i) >= -4)
+        
+        if (inphase_sig(i) <= -6)
+           bits = strcat(bits,'000000');
+        elseif (inphase_sig(i) > -6 && inphase_sig(i) <= -4)
+           bits = strcat(bits,'000001');
+        elseif (inphase_sig(i) > -4 && inphase_sig(i) <= -2)
+           bits = strcat(bits,'000011');
+        elseif (inphase_sig(i) > -2 && inphase_sig(i) <= 0)
+           bits = strcat(bits,'000001');
+        elseif (inphase_sig(i) > 0 && inphase_sig(i) <= 2)
+           bits = strcat(bits,'000110'); 
+        elseif (inphase_sig(i) > 2 && inphase_sig(i) <= 4)
+           bits = strcat(bits,'000111'); 
+        elseif (inphase_sig(i) > 4 && inphase_sig(i) <= 6)
+           bits = strcat(bits,'000101'); 
+        elseif (inphase_sig(i) > 6 )
+           bits = strcat(bits,'000100'); 
+        end 
+         
+    elseif(quadrature_sig(i) < -4 && quadrature_sig(i) >= -6)
+        
+        if (inphase_sig(i) <= -6)
+           bits = strcat(bits,'000000');
+        elseif (inphase_sig(i) > -6 && inphase_sig(i) <= -4)
+           bits = strcat(bits,'000001');
+        elseif (inphase_sig(i) > -4 && inphase_sig(i) <= -2)
+           bits = strcat(bits,'000011');
+        elseif (inphase_sig(i) > -2 && inphase_sig(i) <= 0)
+           bits = strcat(bits,'000001');
+        elseif (inphase_sig(i) > 0 && inphase_sig(i) <= 2)
+           bits = strcat(bits,'000110'); 
+        elseif (inphase_sig(i) > 2 && inphase_sig(i) <= 4)
+           bits = strcat(bits,'000111'); 
+        elseif (inphase_sig(i) > 4 && inphase_sig(i) <= 6)
+           bits = strcat(bits,'000101'); 
+        elseif (inphase_sig(i) > 6 )
+           bits = strcat(bits,'000100'); 
+        end
+        
+     elseif(quadrature_sig(i) < -6)
+        
+        if (inphase_sig(i) <= -6)
+           bits = strcat(bits,'000000');
+        elseif (inphase_sig(i) > -6 && inphase_sig(i) <= -4)
+           bits = strcat(bits,'000001');
+        elseif (inphase_sig(i) > -4 && inphase_sig(i) <= -2)
+           bits = strcat(bits,'000011');
+        elseif (inphase_sig(i) > -2 && inphase_sig(i) <= 0)
+           bits = strcat(bits,'000001');
+        elseif (inphase_sig(i) > 0 && inphase_sig(i) <= 2)
+           bits = strcat(bits,'000110'); 
+        elseif (inphase_sig(i) > 2 && inphase_sig(i) <= 4)
+           bits = strcat(bits,'000111'); 
+        elseif (inphase_sig(i) > 4 && inphase_sig(i) <= 6)
+           bits = strcat(bits,'000101'); 
+        elseif (inphase_sig(i) > 6 )
+           bits = strcat(bits,'000100'); 
+        end    
+        
+    end
+    
+    
+end
+
+
+end
+
