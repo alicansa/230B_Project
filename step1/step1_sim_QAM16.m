@@ -3,6 +3,11 @@ clear all;
 overSampleSize = 4;
 
 
+
+%%squareroot raised cosine test
+srrc = sqrt_raised_cosine(8,0.1,4,1);
+stem(srrc);
+
 %%16-QAM
 N=16;
 
