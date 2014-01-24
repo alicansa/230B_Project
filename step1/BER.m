@@ -2,6 +2,17 @@ function [ber] = BER(input_bits,decoded_bits)
 %BER Summary of this function goes here
 %   Detailed explanation goes here
 
+% FUNCTION
+%   Take the input bits and compare to the recieved output bits, then 
+%       divide by the total number of bits
+
+% INPUT
+% input_bits - the input signal
+% decoded_bits - the signal after the decoder
+
+% OUTPUT
+% ber - the bit error rate
+
 loopSize = length(input_bits);
 ber = 0;
 for i=1:loopSize

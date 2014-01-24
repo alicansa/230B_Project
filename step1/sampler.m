@@ -2,6 +2,14 @@ function [output] = sampler(input_signal, overSamplingFactor, Ts)
 %SAMPLER Summary of this function goes here
 %   Detailed explanation goes here
 
+% INPUTS
+% input_signal - the data stream received
+% overSamplingFactor - the amount to over sample
+% Ts - the symbol interval
+
+% OUTPUTS
+% output - the sampled data signal
+
 N = length(input_signal);
 output = zeros(1,N/overSamplingFactor);
 for i=1:N/overSamplingFactor

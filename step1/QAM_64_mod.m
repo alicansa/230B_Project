@@ -2,6 +2,14 @@ function [sym_quad sym_inp] = QAM_64_mod(bits,N)
 %QAM_64_MOD Summary of this function goes here
 %   Detailed explanation goes here
 
+% INPUTS
+%   bits - the data input bitstream
+%   N - 
+
+% OUTPUTS
+%   sym_quad - the quadrature component of the symbol
+%   sym_inp -  the in-phase component of the symbol
+
 sym_quad = zeros(1,N);
 sym_inp = zeros(1,N);
 

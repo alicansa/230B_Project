@@ -1,6 +1,16 @@
 function [srrc_normalized_response] = sqrt_raised_cosine(overSampleFactor, rollOffFactor,limits,Ts)
 
 
+% INPUTS
+% overSamplingFactor - the amount to over sample
+% rollOffFactor - 
+% limits - the upper limits (and negative for lower)
+% Ts - the symbol interval
+
+% OUTPUTS
+% srrc_normalized_response - the data signal after the srrc 
+
+
 t = -limits:1/overSampleFactor:limits;
 response = zeros(1,length(t));
 
