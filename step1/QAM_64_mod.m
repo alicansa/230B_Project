@@ -1,6 +1,5 @@
 function [sym_quad sym_inp] = QAM_64_mod(bits,N)
-%QAM_64_MOD Summary of this function goes here
-%   Detailed explanation goes here
+% FUNCTION - take the binary stream and modulate into QAM64 scheme
 
 % INPUTS
 %   bits - the data input bitstream

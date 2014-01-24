@@ -1,9 +1,9 @@
 function [srrc_normalized_response] = sqrt_raised_cosine(overSampleFactor, rollOffFactor,limits,Ts)
-
+% FUNCTION - this pulse is used for pulse shaping, to eliminate ISI.  
 
 % INPUTS
 % overSamplingFactor - the amount to over sample
-% rollOffFactor - 
+% rollOffFactor - the BW metric, roughly measure of the residual ripples
 % limits - the upper limits (and negative for lower)
 % Ts - the symbol interval
 

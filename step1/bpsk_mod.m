@@ -1,15 +1,28 @@
-function [ sym_quad, sym_inp ] = bpsk_mod( bits, N )
-%BPSK_MOD Summary of this function goes here
-%   Detailed explanation goes here
+function [ sym] = bpsk_mod( bits, N )
+% FUNCTION
+%   convert the bits into symbols on QAM16 scheme
 
 % INPUTS
 %   bits - the data input bitstream
 %   N - 
 
 % OUTPUTS
-%   sym_quad - the quadrature component of the symbol
-%   sym_inp -  the in-phase component of the symbol
+%   sym - the symbol representation
 
+sym = zeros(1,N);
+
+for i=1:N
+   
+    currentWord = bits(i);
+    
+    switch currentWord
+        
+        case '0'
+            sym(i) = -1; 
+        case '1'
+            sym(i) = 1;
+    end
+end
 
 end
 

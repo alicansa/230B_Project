@@ -1,6 +1,13 @@
 function [bits] = QAM_16_demod(inphase_sig,quadrature_sig)
-%QAM_16_DEMOD Summary of this function goes here
-%   Detailed explanation goes here
+% FUNCTION - this takes in the real and imaginary signals and maps
+%               back into binary chips
+
+% INPUTS
+% inphase_sig - the real component of the incoming waveform
+% quadrature_sig - the imaginary component of the waveform
+
+% OUTPUTS
+% bits - the binary stream of data received
 
 bits = '';
 loopSize = length(inphase_sig);
@@ -8,7 +15,7 @@ loopSize = length(inphase_sig);
 
 for i=1:loopSize
    
-    %decision
+    %decision based on regions of constellation
     
     if(quadrature_sig(i) >= 2)
        

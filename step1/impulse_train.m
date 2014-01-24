@@ -1,6 +1,4 @@
 function [impulseTrain] = impulse_train(overSampleSize,N,symbols)
-%IMPULSE_TRAIN 
-
 % FUNCTION
 %   Take in the symbol signal and zero-pad to create a new data waveform
 

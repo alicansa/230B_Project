@@ -1,14 +1,19 @@
 function [sym_quad sym_inp] = QAM_16_mod(bits,N)
-%QAM_16_MOD Summary of this function goes here
-%   Detailed explanation goes here
+% FUNCTION
+%   convert the bits into symbols on QAM16 scheme
 
+% INPUTS
+%   bits - the data input bitstream
+%   N - 
 
-%check if the number of bits are multiple of four
-%if not pad zero to the end
+% OUTPUTS
+%   sym_quad - the quadrature component of the symbol
+%   sym_inp -  the in-phase component of the symbol
+
 
 sym_quad = zeros(1,N);
 sym_inp = zeros(1,N);
-index =0;
+
 for i=1:N
    
     currentWord = bits((i-1)*4+1:i*4);
