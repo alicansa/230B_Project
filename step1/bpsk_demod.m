@@ -1,4 +1,4 @@
-function [bits] = bpsk_demod(inphase_sig)
+function [bits] = bpsk_demod(sig)
 % FUNCTION - this takes in the real and imaginary signals and maps
 %               back into binary chips
 
@@ -9,17 +9,17 @@ function [bits] = bpsk_demod(inphase_sig)
 % bits - the binary stream of data received
 
 bits = '';
-loopSize = length(inphase_sig);
+loopSize = length(sig);
 
 
 for i=1:loopSize
    
     %decision based on regions of constellation
     
-    if(inphase_sig(i) >= 0)
+    if(sig(i) >= 0)
         bits = strcat(bits,'1');
         
-    elseif(inphase_sig(i) < 0)
+    elseif(sig(i) < 0)
         bits = strcat(bits,'0');
     end    
     
