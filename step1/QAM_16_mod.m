@@ -67,10 +67,8 @@ for i=1:N
             sym_inp(i) = 1; 
         case '1111'
             sym_quad(i) = -1;
-            sym_inp(i) = 1;
-            
-    end
-    
+            sym_inp(i) = 1;     
+    end 
 end
 
 

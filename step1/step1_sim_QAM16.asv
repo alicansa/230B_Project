@@ -4,10 +4,10 @@ overSampleSize = 4;
 rollOffFactor = 0.1;
 Ts = 1;
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
-SNR = [3 6 10 20];
+SNR = [3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20];
 
 %%16-QAM simulation
-N= 50000;
+N= 10000;
 %random bit generation
 bits = random_bit_generator(N);
 
@@ -39,22 +39,25 @@ for i=1:length(SNR)
     %decision
     output_bits = QAM_16_demod(sampled_inphase,sampled_quad);
 
-    %BER calculation
+    %BER/SER calculation
     ber(i) = BER(bits(5:N),output_bits(5:N));    
-    
-    %BER theoretical calculation
-    ber_theo(i) = 
+    ser(i) = SER(bits(5:N),output_bits(5:N),4);
+    %SER/BER theoretical calculation (BER=SER due to grey coding)
+    ber_theo(i) = (1/4)*(2*qfunc(sqrt(2*SNR(i)))-qfunc(sqrt(2*SNR(i)))^2) + (2/4)*(3*qfunc(sqrt(2*SNR(i)))-2*qfunc(sqrt(2*SNR(i)))^2) + (1/4)*(4*qfunc(sqrt(2*SNR(i)))-4*qfunc(sqrt(2*SNR(i)))^2);
+    ber_theo(i) = (3/2)*erfc(sqrt(SNR(i)/10));
 end
-
-
 
 
 %plot theoretical/simulation BER vs SNR graph
 
 h=figure;
-semilogy(SNR,ber);
+semilogy(SNR,ber,'r');
+hold on;
+semilogy(SNR,ser, 'b');
+semilogy(SNR,ber_theo, 'g');
 ylabel('');
 xlabel('');
+
 
 
 %plot SER vs snr

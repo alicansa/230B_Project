@@ -1,13 +1,12 @@
 close all;
 clear all;
 overSampleSize = 4;
-rollOffFactor = 0.1;
+rollOffFactor = 0.2;
 Ts = 1;
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
-SNR = [3 6 10 20];
-
+SNR = [3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20];
 %%16-QAM simulation
-N= 50000;
+N= 30000;
 %random bit generation
 bits = random_bit_generator(N);
 
@@ -21,13 +20,14 @@ transmit_quad = conv(impulse_train_quad,srrc,'same');
 transmit_inphase = conv(impulse_train_inphase,srrc,'same');
 
 
-%loop this section foe BER vs SNR graphs
+%loop this section for BER vs SNR graphs
 
 for i=1:length(SNR)
    %pass through awgn channel
     received_quad = awgn_channel(transmit_quad,SNR(i));
     received_inphase = awgn_channel(transmit_inphase,SNR(i));
 
+    
     %matched filter
     matched_output_quad = conv(received_quad,srrc,'same');
     matched_output_inphase = conv(received_inphase,srrc,'same');
@@ -39,13 +39,26 @@ for i=1:length(SNR)
     %decision
     output_bits = QAM_16_demod(sampled_inphase,sampled_quad);
 
-    %BER calculation
+    %BER/SER calculation
     ber(i) = BER(bits(5:N),output_bits(5:N));    
+    ser(i) = SER(bits(5:N),output_bits(5:N),4);
+    %SER/BER theoretical calculation (BER=SER due to grey coding)
+    a = 10^(SNR(i)/10);
+   % ber_theo(i) = (1/4)*(2*qfunc(sqrt(a/2))-qfunc(sqrt(a/2))^2) + (2/4)*(3*qfunc(sqrt(a/2))-2*qfunc(sqrt(a/2))^2) + (1/4)*(4*qfunc(sqrt(a/2))-4*qfunc(sqrt(a/2))^2);
+   ber_theo(i) = (1/4)*3/2*erfc(sqrt(4*0.1*(10.^(SNR(i)/10))));
 end
 
-%plot BER vs SNR graph
+
+%plot theoretical/simulation BER vs SNR graph
 
 h=figure;
-semilogy(SNR,ber);
+semilogy(SNR,ber,'r');
+hold on;
+semilogy(SNR,ser, 'b');
+semilogy(SNR,ber_theo, 'g');
 ylabel('');
 xlabel('');
+
+
+
+%plot SER vs snr
