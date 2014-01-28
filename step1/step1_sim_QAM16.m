@@ -6,7 +6,11 @@ Ts = 1;
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
 SNR = [3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20];
 %%16-QAM simulation
+<<<<<<< HEAD
 N= 30000;
+=======
+N= 5000;
+>>>>>>> 51a84429e92d149fba3b5d071829c78dbaaa34a0
 %random bit generation
 bits = random_bit_generator(N);
 
@@ -21,7 +25,11 @@ transmit_inphase = conv(impulse_train_inphase,srrc,'same');
 
 
 %loop this section for BER vs SNR graphs
+<<<<<<< HEAD
 
+=======
+ber = zeros(1,length(SNR));
+>>>>>>> 51a84429e92d149fba3b5d071829c78dbaaa34a0
 for i=1:length(SNR)
    %pass through awgn channel
     received_quad = awgn_channel(transmit_quad,SNR(i));
@@ -52,6 +60,7 @@ end
 %plot theoretical/simulation BER vs SNR graph
 
 h=figure;
+<<<<<<< HEAD
 semilogy(SNR,ber,'r');
 hold on;
 semilogy(SNR,ser, 'b');
@@ -62,3 +71,9 @@ xlabel('');
 
 
 %plot SER vs snr
+=======
+semilogy(SNR,ber);
+ylabel('Bit Error Rate');
+xlabel('Signal to Noise');
+title('BER vs SNR');
+>>>>>>> 51a84429e92d149fba3b5d071829c78dbaaa34a0
