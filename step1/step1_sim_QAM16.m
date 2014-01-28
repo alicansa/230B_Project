@@ -5,9 +5,11 @@ rollOffFactor = 0.1;
 Ts = 1;
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
 SNR = [3 4 5 6 7 8 9 10 11 12 13 14 15 16];
-EbN0 = SNR2EbN0(SNR,4);
+
+%EbN0 = SNR2EbN0(SNR,4);
+
 %%16-QAM simulation
-N= 10000;
+N= 1000;
 
 %random bit generation
 bits = random_bit_generator(N);
