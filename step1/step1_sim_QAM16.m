@@ -6,16 +6,16 @@ Ts = 1;
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
 SNR = [3 4 5 6 7 8 9 10 11 12 13 14 15 16];
 
-%EbN0 = SNR2EbN0(SNR,4);
+EbN0 = SNR2EbN0(SNR,4);
 
-%%16-QAM simulation
+%%QPSK simulation
 N= 1000;
 
 %random bit generation
 bits = random_bit_generator(N);
 
 %mapping to symbols
-[quadrature inphase] = QAM_16_mod(bits,N/4);
+[quadrature, inphase] = QAM_16_mod(bits,N/4);
 
 %mapping symbols to signals
 impulse_train_quad = impulse_train(overSampleSize,N/4,quadrature);
@@ -27,7 +27,7 @@ transmit_inphase = conv(impulse_train_inphase,srrc,'same');
 %loop this section for BER vs SNR graphs
 
 ber = zeros(1,length(SNR));
-
+ber_theo = zeros(1,length(SNR));
 for i=1:length(SNR)
    %pass through awgn channel
     received_quad = awgn_channel(transmit_quad,SNR(i));
@@ -46,11 +46,10 @@ for i=1:length(SNR)
 
     %BER/SER calculation
     ber(i) = BER(bits(5:N),output_bits(5:N));    
-    ser(i) = SER(bits,output_bits,4);
+    ser(i) = SER(bits,output_bits,2);
     %SER/BER theoretical calculation (BER=SER due to grey coding)
     a = 10^(EbN0(i)/10);
-    ber_theo(i) = 3*qfunc(sqrt(2*a))-(9/4)*(qfunc(sqrt(2*a)))^2;
-    %ber_theo(i) = (1/4)*3/2*erfc(sqrt(4*0.1*(10.^(a/10))));
+    ber_theo(i) = 3*qfunc(sqrt(2*a))-(9/4)*qfunc(sqrt(2*a))^2;
 end
 
 

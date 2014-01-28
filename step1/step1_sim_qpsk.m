@@ -1,74 +1,64 @@
 close all;
 clear all;
-overSampleSize = 8;
-rollOffFactor = 0;
+overSampleSize = 4;
+rollOffFactor = 0.1;
 Ts = 1;
-
-%%squareroot raised cosine test
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
-stem(srrc);
-figure
-stem(conv(srrc,srrc,'same'));
+SNR = [3 4 5 6 7 8 9 10 11 12 13 14 15 16];
 
-%% QPSK
-N=16;
+EbN0 = SNR2EbN0(SNR,2);
 
-%%16-QAM constallation test
-bits = '00011110010011010110100101011011';
-[quadrature, inphase] = qpsk_mod(bits,N);
-scatter(quadrature,inphase);
-test_decode = QAM_16_demod(inphase,quadrature);
-test_ber = BER(bits,test_decode);
+%%QPSK simulation
+N= 1000;
 
-%%qpsk 
+%random bit generation
+bits = random_bit_generator(N);
 
-impulse_train_quad = impulse_train(overSampleSize,N,quadrature);
-impulse_train_inphase = impulse_train(overSampleSize,N,inphase);
-figure;
-stem(impulse_train_quad);
-figure;
-stem(impulse_train_inphase);
+%mapping to symbols
+[quadrature, inphase] = qpsk_mod(bits,N/2);
 
-
-
-%
+%mapping symbols to signals
+impulse_train_quad = impulse_train(overSampleSize,N/2,quadrature);
+impulse_train_inphase = impulse_train(overSampleSize,N/2,inphase);
 transmit_quad = conv(impulse_train_quad,srrc,'same');
 transmit_inphase = conv(impulse_train_inphase,srrc,'same');
-figure;
-stem(transmit_quad);
-figure;
-stem(transmit_inphase);
-
-%pass through channel
 
 
+%loop this section for BER vs SNR graphs
 
-%matched filter
-matched_output_quad = conv(transmit_quad,srrc,'same');
-matched_output_inphase = conv(transmit_inphase,srrc,'same');
+ber = zeros(1,length(SNR));
+ber_theo = zeros(1,length(SNR));
+for i=1:length(SNR)
+   %pass through awgn channel
+    received_quad = awgn_channel(transmit_quad,SNR(i));
+    received_inphase = awgn_channel(transmit_inphase,SNR(i));
+    
+    %matched filter
+    matched_output_quad = conv(received_quad,srrc,'same');
+    matched_output_inphase = conv(received_inphase,srrc,'same');
 
-figure;
-plot(matched_output_quad);
-hold on
-stem(impulse_train_quad,'r');
+    %sampler
+    sampled_quad = sampler(matched_output_quad,overSampleSize,Ts);
+    sampled_inphase = sampler(matched_output_inphase,overSampleSize,Ts);
+
+    %decision
+    output_bits = qpsk_demod(sampled_inphase,sampled_quad);
+
+    %BER/SER calculation
+    ber(i) = BER(bits(3:N),output_bits(3:N));    
+    ser(i) = SER(bits,output_bits,2);
+    %SER/BER theoretical calculation (BER=SER due to grey coding)
+    a = 10^(EbN0(i)/10);
+    ber_theo(i) = 2*qfunc(sqrt(2*a))-qfunc(sqrt(2*a))^2;
+end
 
 
-figure;
-plot(matched_output_inphase);
-hold on
-stem(impulse_train_inphase,'r');
+%plot theoretical/simulation BER vs SNR graph
 
-
-%sampler
-sampled_quad = sampler(matched_output_quad,overSampleSize,Ts);
-sampled_inphase = sampler(matched_output_inphase,overSampleSize,Ts);
-
-
-
-
-%decision
-output_bits = qpsk_demod(sampled_inphase,sampled_quad);
-
-%BER calculation
-ber_qpks = BER(bits,output_bits);
-
+h=figure;
+semilogy(SNR,ser,'r');
+hold on;
+%semilogy(SNR,ser, 'b');
+semilogy(SNR,ber_theo, 'g');
+ylabel('');
+xlabel('');
