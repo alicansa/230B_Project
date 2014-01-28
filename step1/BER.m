@@ -3,6 +3,10 @@ function [ber] = BER(input_bits,decoded_bits)
 %   Take the input bits and compare to the recieved output bits, then 
 %       divide by the total number of bits
 
+% NOTE
+% recall Probability_of_symb_error = BER*log2(K) where each symbol takes K
+% bits
+
 % INPUT
 % input_bits - the input signal
 % decoded_bits - the signal after the decoder
