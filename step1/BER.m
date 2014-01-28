@@ -15,14 +15,14 @@ function [ber] = BER(input_bits,decoded_bits)
 % ber - the bit error rate (lower is better)
 
 loopSize = length(input_bits);
-ber = 0;
+err = 0;
 for i=1:loopSize
     if (~strcmp(input_bits(i),decoded_bits(i)))
-        ber = ber + 1;
+        err = err + 1;
     end
 end
 
-ber = ber/loopSize;
+ber = err/loopSize;
 
 end
 
