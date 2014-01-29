@@ -12,6 +12,8 @@ function [bits] = QAM_16_demod(inphase_sig,quadrature_sig)
 bits = '';
 loopSize = length(inphase_sig);
 
+% inphase_sig = inphase_sig.*(sqrt(10));
+% quadrature_sig = quadrature_sig.*(sqrt(10));
 
 for i=1:loopSize
    

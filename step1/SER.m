@@ -6,6 +6,6 @@ for i=1:loopSize/symbol_length
         ser = ser + 1;
     end
 end
-ser = ser/loopSize;
+ser = ser/(loopSize/symbol_length);
 end
 

@@ -72,5 +72,10 @@ for i=1:N
 end
 
 
+%normalization
+% sym_quad = sym_quad.*(1/sqrt(10));
+% sym_inp = sym_inp.*(1/sqrt(10));
+
+
 end
 
