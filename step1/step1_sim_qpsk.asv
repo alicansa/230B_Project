@@ -12,7 +12,7 @@ SNR = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20];
 EbN0 = SNR2EbN0(SNR,2,B);
 
 %%QPSK simulation
-N= 10000;
+N= 1000;
 k = 2;  % bits per symbol
 
 % function checks
@@ -94,12 +94,12 @@ end
 %plot theoretical/simulation BER vs SNR graph
 
 g=figure;
-semilogy(SNR,ser,'ko');
+semilogy(SNR,ser,'r');
 hold on;
-semilogy(SNR,ser_theo, 'b');
+semilogy(SNR,ser_theo, 'g');
 title(['Comparison of Theoretical and Experimental',...
     sprintf('\nQPSK Bit Error Rates')]);
-ylabel('Symbol Error Rate');
+ylabel('Bit Error Rate (%)');
 xlabel('Signal To Noise (dB)');
-legend('Simulation','Theory');
+legend('Experimental','Eb/N0','Symbol SNR');
 
