@@ -41,8 +41,7 @@ for i=1:length(SNR)
     %sampler
     sampled_quad = sampler(matched_output_quad,overSampleSize,Ts);
     sampled_inphase = sampler(matched_output_inphase,overSampleSize,Ts);
-    scatterplot(sampled_inphase + j*sampled_quad);
-   
+   % scatterplot(sampled_inphase + j*sampled_quad);
     %decision
     output_bits = QAM_64_demod(sampled_inphase,sampled_quad);
 
@@ -59,9 +58,11 @@ end
 %plot theoretical/simulation BER vs SNR graph
 
 h=figure;
+%semilogy(SNR,ber,'o');
 semilogy(SNR,ser, 'ko');
 hold on;
 semilogy(SNR,ser_theo, 'r');
+%semilogy(SNR,ber_theo, 'g');
 ylabel('Probability of Symbol Error');
 xlabel('SNR(dB)');
 legend('Simulation','Theory');
