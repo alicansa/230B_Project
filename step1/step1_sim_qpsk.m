@@ -51,7 +51,7 @@ transmit_inphase = conv(impulse_train_inphase,srrc,'same');
 h = zeros(1,5);
 ber = zeros(1,length(SNR));
 ser = zeros(1,length(SNR));
-ser_theo = zeros(1,length(SNR));
+ser_theo_low = zeros(1,length(SNR));
 ber_EbN0 = zeros(1,length(SNR));
 
 %f = figure;
@@ -102,4 +102,3 @@ title(['Comparison of Theoretical and Experimental',...
 ylabel('Symbol Error Rate');
 xlabel('Signal To Noise (dB)');
 legend('Simulation','Theory');
-

@@ -11,7 +11,7 @@ SNR = [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20];
 EbN0 = SNR2EbN0(SNR,1,B);
 
 %%BPSK simulation
-N= 50000;
+N= 10000;
 k = 1;  % bits per symbol
 
 % function checks
@@ -61,6 +61,7 @@ for i=1:length(SNR)
     %BER theoretical calculation (BER=SER due to grey coding)
     a = 10^(EbN0(i)/10);
     ber_theo(i) = qfunc(sqrt(2*a));
+    
 end
 
 
