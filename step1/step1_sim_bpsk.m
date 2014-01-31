@@ -11,7 +11,7 @@ SNR = [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20];
 EbN0 = SNR2EbN0(SNR,1,B);
 
 %%BPSK simulation
-N= 10000;
+N= 1000;
 k = 1;  % bits per symbol
 
 % function checks
@@ -53,6 +53,18 @@ for i=1:length(SNR)
     %sampler
     sampled = sampler(matched_output,overSampleSize,Ts);
     
+    
+       if (SNR(i) == 15) 
+        scatter(sampled,zeros(1,length(sampled)));
+        xlim = [1.5*min(sampled) 1.5*max(sampled)];
+        ylim = [-2 2];
+        line(xlim,[0 0], 'Color', 'k');
+        line([0 0],ylim,'Color', 'k');
+        title(['BPSK Constellation with'...
+            sprintf('\nSNR = %d dB',SNR(i))]);
+        axis([xlim, ylim]);
+       end
+        
     %decision
     output_bits = bpsk_demod(sampled);
 

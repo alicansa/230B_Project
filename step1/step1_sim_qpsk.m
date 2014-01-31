@@ -1,5 +1,7 @@
 close all;
 clear all;
+clc;
+
 overSampleSize = 4;
 rollOffFactor = 1;
 Ts = 1;
@@ -12,7 +14,7 @@ SNR = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20];
 EbN0 = SNR2EbN0(SNR,2,B);
 
 %%QPSK simulation
-N= 10000;
+N= 1000;
 k = 2;  % bits per symbol
 
 % function checks
@@ -54,7 +56,7 @@ ser = zeros(1,length(SNR));
 ser_theo_low = zeros(1,length(SNR));
 ber_EbN0 = zeros(1,length(SNR));
 
-%f = figure;
+num = 1;
 for i=1:length(SNR)
    %pass through awgn channel
     received_quad = awgn_channel(transmit_quad,SNR(i),S);
@@ -68,17 +70,19 @@ for i=1:length(SNR)
     sampled_quad = sampler(matched_output_quad,overSampleSize,Ts);
     sampled_inphase = sampler(matched_output_inphase,overSampleSize,Ts);
 
-    
-    
-%     subplot(2,3,i);
-%     scatter(sampled_inphase,sampled_quad);
-%     xlim = [1.5*min(sampled_inphase) 1.5*max(sampled_inphase)];
-%     ylim = [1.5*min(sampled_quad) 1.5*max(sampled_quad)];
-%     line(xlim,[0 0], 'Color', 'k');
-%         line([0 0],ylim,'Color', 'k');
-%     title(['QPSK Constellation with'...
-%         sprintf('\nSNR = %d dB',SNR(i))]);
-%     axis([xlim, ylim]);
+    if (SNR(i) == 3) || SNR(i) == 6 || SNR(i) == 10 || ...
+            SNR(i) == 15 || SNR(i) == 20
+        subplot(2,3,num);
+        scatter(sampled_inphase,sampled_quad);
+        xlim = [1.5*min(sampled_inphase) 1.5*max(sampled_inphase)];
+        ylim = [1.5*min(sampled_quad) 1.5*max(sampled_quad)];
+        line(xlim,[0 0], 'Color', 'k');
+        line([0 0],ylim,'Color', 'k');
+        title(['QPSK Constellation with'...
+            sprintf('\nSNR = %d dB',SNR(i))]);
+        axis([xlim, ylim]);
+        num = num+1;
+    end
     
     %decision
     output_bits = qpsk_demod(sampled_inphase,sampled_quad);

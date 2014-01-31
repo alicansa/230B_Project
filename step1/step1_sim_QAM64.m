@@ -11,7 +11,7 @@ SNR = [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20];
 EbN0 = SNR2EbN0(SNR,6,B);
 
 %%QPSK simulation
-N=12000;
+N=1200;
 
 %random bit generation
 bits = random_bit_generator(N);
@@ -27,6 +27,7 @@ transmit_inphase = conv(impulse_train_inphase,srrc,'same');
 
 %loop this section for BER vs SNR graphs
 
+num = 1;
 ber = zeros(1,length(SNR));
 ber_theo = zeros(1,length(SNR));
 for i=1:length(SNR)
@@ -41,8 +42,21 @@ for i=1:length(SNR)
     %sampler
     sampled_quad = sampler(matched_output_quad,overSampleSize,Ts);
     sampled_inphase = sampler(matched_output_inphase,overSampleSize,Ts);
-    scatterplot(sampled_inphase + j*sampled_quad);
+    %scatterplot(sampled_inphase + j*sampled_quad);
    
+    if (SNR(i) == 3) || SNR(i) == 6 || SNR(i) == 10 || ...
+            SNR(i) == 15 || SNR(i) == 20
+        subplot(2,3,num);
+        scatter(sampled_inphase,sampled_quad);
+        xlim = [1.5*min(sampled_inphase) 1.5*max(sampled_inphase)];
+        ylim = [1.5*min(sampled_quad) 1.5*max(sampled_quad)];
+        line(xlim,[0 0], 'Color', 'k');
+        line([0 0],ylim,'Color', 'k');
+        title(['64QAM Constellation with'...
+            sprintf('\nSNR = %d dB',SNR(i))]);
+        axis([xlim, ylim]);
+        num = num+1;
+    end
     %decision
     output_bits = QAM_64_demod(sampled_inphase,sampled_quad);
 
