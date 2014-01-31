@@ -1,17 +1,17 @@
 close all;
 clear all;
 overSampleSize = 4;
-rollOffFactor = 0;
+rollOffFactor = 0.25;
 Ts = 1;
 S=10; %average signal power for 16-QAM
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts);
-srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,4000,Ts);
+srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
 SNR = [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20];
 
 EbN0 = SNR2EbN0(SNR,4,B);
 
 %%QAM-16 simulation
-N= 10000;
+N= 15000;
 
 %random bit generation
 bits = random_bit_generator(N);
@@ -50,7 +50,8 @@ for i=1:length(SNR)
     ser(i) = SER(bits(5:N),output_bits(5:N),4);
     %SER/BER theoretical calculation (BER=SER due to grey coding)
     a = 10^(EbN0(i)/10);
-    ser_theo(i) = 3*qfunc(sqrt((2)*a))-(9/4)*qfunc(sqrt((2)*a))^2;
+    ser_theo_low(i) = 3*qfunc(sqrt((2)*a))-(9/4)*qfunc(sqrt((2)*a))^2;
+    ser_theo_up(i) = 4*qfunc(sqrt((12/15)*a));
 end
 
 
@@ -59,7 +60,9 @@ end
 h=figure;
 semilogy(SNR,ser, 'ko');
 hold on;
-semilogy(SNR,ser_theo, 'r');
+semilogy(SNR,ser_theo_low, 'r');
+semilogy(SNR,ser_theo_up, 'g');
 ylabel('Probability of Symbol Error');
 xlabel('SNR(dB)');
-legend('Simulation','Theory');
+legend('Simulation','Theory Lower Bound');
+legend('Simulation','Theory Upper Bound');
