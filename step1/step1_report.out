@@ -1,0 +1,23 @@
+\BOOKMARK [1][-]{section.1}{System Setup}{}% 1
+\BOOKMARK [1][-]{section.2}{Mathematical Derivations of Probability of Error}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{BPSK}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{QPSK}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.3}{16-QAM}{section.2}% 5
+\BOOKMARK [2][-]{subsection.2.4}{64-QAM}{section.2}% 6
+\BOOKMARK [1][-]{appendix.A}{Project Assignment}{}% 7
+\BOOKMARK [1][-]{appendix.B}{Random Bit Sequence Generator}{}% 8
+\BOOKMARK [1][-]{appendix.C}{Bit to Symbol Mappers}{}% 9
+\BOOKMARK [2][-]{subsection.C.1}{BPSK Modulation }{appendix.C}% 10
+\BOOKMARK [2][-]{subsection.C.2}{QPSK Modulation}{appendix.C}% 11
+\BOOKMARK [2][-]{subsection.C.3}{16-QAM Modulation}{appendix.C}% 12
+\BOOKMARK [2][-]{subsection.C.4}{64-QAM Modulation }{appendix.C}% 13
+\BOOKMARK [1][-]{appendix.D}{Square Root Raised Cosine Filter}{}% 14
+\BOOKMARK [1][-]{appendix.E}{Up Sampler}{}% 15
+\BOOKMARK [1][-]{appendix.F}{Additive Gaussian White Noise Channel}{}% 16
+\BOOKMARK [1][-]{appendix.G}{Additive Gaussian White Noise Channel}{}% 17
+\BOOKMARK [1][-]{appendix.H}{Sampler}{}% 18
+\BOOKMARK [1][-]{appendix.I}{Decision Blocks}{}% 19
+\BOOKMARK [2][-]{subsection.I.1}{BPSK Demodulation}{appendix.I}% 20
+\BOOKMARK [2][-]{subsection.I.2}{QPSK Demodulation}{appendix.I}% 21
+\BOOKMARK [2][-]{subsection.I.3}{16-QAM Demodulation}{appendix.I}% 22
+\BOOKMARK [2][-]{subsection.I.4}{64-QAM Demodulation}{appendix.I}% 23

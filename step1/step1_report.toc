@@ -1,0 +1,23 @@
+\contentsline {section}{\numberline {1}System Setup}{3}{section.1}
+\contentsline {section}{\numberline {2}Mathematical Derivations of Probability of Error}{3}{section.2}
+\contentsline {subsection}{\numberline {2.1}BPSK}{3}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}QPSK}{3}{subsection.2.2}
+\contentsline {subsection}{\numberline {2.3}16-QAM}{3}{subsection.2.3}
+\contentsline {subsection}{\numberline {2.4}64-QAM}{3}{subsection.2.4}
+\contentsline {section}{\numberline {A}Project Assignment}{4}{appendix.A}
+\contentsline {section}{\numberline {B}Random Bit Sequence Generator}{10}{appendix.B}
+\contentsline {section}{\numberline {C}Bit to Symbol Mappers}{11}{appendix.C}
+\contentsline {subsection}{\numberline {C.1}BPSK Modulation }{11}{subsection.C.1}
+\contentsline {subsection}{\numberline {C.2}QPSK Modulation}{12}{subsection.C.2}
+\contentsline {subsection}{\numberline {C.3}16-QAM Modulation}{13}{subsection.C.3}
+\contentsline {subsection}{\numberline {C.4}64-QAM Modulation }{15}{subsection.C.4}
+\contentsline {section}{\numberline {D}Square Root Raised Cosine Filter}{20}{appendix.D}
+\contentsline {section}{\numberline {E}Up Sampler}{21}{appendix.E}
+\contentsline {section}{\numberline {F}Additive Gaussian White Noise Channel}{22}{appendix.F}
+\contentsline {section}{\numberline {G}Additive Gaussian White Noise Channel}{23}{appendix.G}
+\contentsline {section}{\numberline {H}Sampler}{24}{appendix.H}
+\contentsline {section}{\numberline {I}Decision Blocks}{25}{appendix.I}
+\contentsline {subsection}{\numberline {I.1}BPSK Demodulation}{25}{subsection.I.1}
+\contentsline {subsection}{\numberline {I.2}QPSK Demodulation}{26}{subsection.I.2}
+\contentsline {subsection}{\numberline {I.3}16-QAM Demodulation}{27}{subsection.I.3}
+\contentsline {subsection}{\numberline {I.4}64-QAM Demodulation}{29}{subsection.I.4}
