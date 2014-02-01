@@ -1,7 +1,7 @@
 close all;
 clear all;
 overSampleSize = 4;
-rollOffFactor = 1;
+rollOffFactor = 0.25;
 Ts = 1;
 S=1; %average signal power for BPSK
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts);
@@ -85,9 +85,10 @@ h=figure;
 semilogy(SNR,ber, 'ko');
 hold on;
 semilogy(SNR,ber_theo, 'b');
+semilogy(EbN0,ber_theo,'g');
 title(['Comparison of Theoretical and Experimental',...
     sprintf('\nBPSK Bit Error Rates')]);
 ylabel('BER');
 xlabel('SNR (dB)');
-legend('Simulation','Theory');
+legend('Simulation','Theory (function of symbol SNR)', 'Theory (function of Eb/No)');
 print(h,'-djpeg','-r300','bpSNR');
