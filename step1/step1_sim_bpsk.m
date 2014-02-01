@@ -11,7 +11,7 @@ SNR = [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20];
 EbN0 = SNR2EbN0(SNR,1,B);
 
 %%BPSK simulation
-N= 10000;
+N= 1000;
 k = 1;  % bits per symbol
 
 % function checks
@@ -37,7 +37,6 @@ sym = bpsk_mod(bits,N/k);
 impulse_train = impulse_train(overSampleSize,N/k,sym);
 transmit = conv(impulse_train,srrc,'same');
 
-
 %loop this section for BER vs SNR graphs
 num = 1;
 f = figure;
@@ -53,8 +52,7 @@ for i=1:length(SNR)
 
     %sampler
     sampled = sampler(matched_output,overSampleSize,Ts);
-    
-    
+      
     if (SNR(i) == 3) || SNR(i) == 6 || SNR(i) == 10 || ...
             SNR(i) == 15 || SNR(i) == 20
         subplot(2,3,num);
@@ -68,7 +66,7 @@ for i=1:length(SNR)
             sprintf('\nSNR = %d dB',SNR(i))]);
         axis([xlim, ylim]);
         num = num+1;
-       end
+    end
         
     %decision
     output_bits = bpsk_demod(sampled);
@@ -77,8 +75,7 @@ for i=1:length(SNR)
     ber(i) = BER(bits(2:N),output_bits(2:N));    
     %BER theoretical calculation (BER=SER due to grey coding)
     a = 10^(EbN0(i)/10);
-    ber_theo(i) = qfunc(sqrt(2*a));
-    
+    ber_theo(i) = qfunc(sqrt(2*a));  
 end
 print(f,'-djpeg','-r300','bpConst');
 
