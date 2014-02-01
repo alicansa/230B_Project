@@ -70,15 +70,16 @@ for i=1:length(SNR)
     sampled_quad = sampler(matched_output_quad,overSampleSize,Ts);
     sampled_inphase = sampler(matched_output_inphase,overSampleSize,Ts);
 
-    if (SNR(i) == 3) || SNR(i) == 6 || SNR(i) == 10 || ...
+  if (SNR(i) == 3) || SNR(i) == 6 || SNR(i) == 10 || ...
             SNR(i) == 15 || SNR(i) == 20
         subplot(2,3,num);
-        scatter(sampled_inphase,sampled_quad);
+        scatter(sampled_inphase,sampled_quad,'+');
         xlim = [1.5*min(sampled_inphase) 1.5*max(sampled_inphase)];
         ylim = [1.5*min(sampled_quad) 1.5*max(sampled_quad)];
         line(xlim,[0 0], 'Color', 'k');
         line([0 0],ylim,'Color', 'k');
-        title(['QPSK Constellation with'...
+        xlabel('In-Phase'),ylabel('Quadrature-Phase');
+        title(['64QAM Constellation with'...
             sprintf('\nSNR = %d dB',SNR(i))]);
         axis([xlim, ylim]);
         num = num+1;

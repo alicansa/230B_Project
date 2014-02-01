@@ -4,6 +4,7 @@ function [channel_output] = awgn_channel(transmitted_sig,snr,S)
 % INPUT
 % transmitted_sig - the signal sent over the channel
 % snr - the signal to noise ratio comparing noise and white noise variance
+% S - the average symbol power 
 
 % OUTPUT
 % channel_output - the sum of input signal and the white noise

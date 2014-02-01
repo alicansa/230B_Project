@@ -39,7 +39,7 @@ transmit = conv(impulse_train,srrc,'same');
 
 
 %loop this section for BER vs SNR graphs
-
+num = 1;
 ber = zeros(1,length(SNR));
 ber_theo = zeros(1,length(SNR));
 for i=1:length(SNR)
@@ -54,15 +54,19 @@ for i=1:length(SNR)
     sampled = sampler(matched_output,overSampleSize,Ts);
     
     
-       if (SNR(i) == 15) 
-        scatter(sampled,zeros(1,length(sampled)));
+    if (SNR(i) == 3) || SNR(i) == 6 || SNR(i) == 10 || ...
+            SNR(i) == 15 || SNR(i) == 20
+        subplot(2,3,num);
+        scatter(sampled,zeros(1,length(sampled)),'*');
         xlim = [1.5*min(sampled) 1.5*max(sampled)];
         ylim = [-2 2];
         line(xlim,[0 0], 'Color', 'k');
         line([0 0],ylim,'Color', 'k');
+        xlabel('In-Phase'),ylabel('Quadrature-Phase');
         title(['BPSK Constellation with'...
             sprintf('\nSNR = %d dB',SNR(i))]);
         axis([xlim, ylim]);
+        num = num+1;
        end
         
     %decision
