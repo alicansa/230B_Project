@@ -27,6 +27,7 @@ transmit_inphase = conv(impulse_train_inphase,srrc,'same');
 
 %loop this section for BER vs SNR graphs
 num = 1;
+f = figure;
 ber = zeros(1,length(SNR));
 ber_theo = zeros(1,length(SNR));
 for i=1:length(SNR)
@@ -66,6 +67,7 @@ for i=1:length(SNR)
     a = 10^(EbN0(i)/10);
     ser_theo(i) = 3*qfunc(sqrt((4/5)*a))-(9/4)*qfunc(sqrt((4/5)*a))^2;
 end
+print(f,'-djpeg','-r300','qam16Const');
 
 
 %plot theoretical/simulation BER vs SNR graph
@@ -78,3 +80,4 @@ semilogy(SNR,ser_theo, 'r');
 ylabel('Probability of Symbol Error');
 xlabel('SNR(dB)');
 legend('Simulation','Theory');
+print(h,'-djpeg','-r300','qam16SNR');

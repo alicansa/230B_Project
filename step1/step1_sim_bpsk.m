@@ -11,7 +11,7 @@ SNR = [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20];
 EbN0 = SNR2EbN0(SNR,1,B);
 
 %%BPSK simulation
-N= 1000;
+N= 10000;
 k = 1;  % bits per symbol
 
 % function checks
@@ -40,6 +40,7 @@ transmit = conv(impulse_train,srrc,'same');
 
 %loop this section for BER vs SNR graphs
 num = 1;
+f = figure;
 ber = zeros(1,length(SNR));
 ber_theo = zeros(1,length(SNR));
 for i=1:length(SNR)
@@ -79,7 +80,7 @@ for i=1:length(SNR)
     ber_theo(i) = qfunc(sqrt(2*a));
     
 end
-
+print(f,'-djpeg','-r300','bpConst');
 
 %plot theoretical/simulation BER vs SNR graph
 
@@ -92,3 +93,4 @@ title(['Comparison of Theoretical and Experimental',...
 ylabel('BER');
 xlabel('SNR (dB)');
 legend('Simulation','Theory');
+print(h,'-djpeg','-r300','bpSNR');

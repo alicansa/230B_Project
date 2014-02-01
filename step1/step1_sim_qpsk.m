@@ -55,7 +55,7 @@ ber = zeros(1,length(SNR));
 ser = zeros(1,length(SNR));
 ser_theo_low = zeros(1,length(SNR));
 ber_EbN0 = zeros(1,length(SNR));
-
+f = figure;
 num = 1;
 for i=1:length(SNR)
    %pass through awgn channel
@@ -94,6 +94,7 @@ for i=1:length(SNR)
     a = 10^(EbN0(i)/10);
     ser_theo(i) = 2*qfunc(sqrt(2*a))-qfunc(sqrt(2*a))^2;
 end
+print(f,'-djpeg','-r300','qpConst');
 
 
 %plot theoretical/simulation BER vs SNR graph
@@ -107,3 +108,4 @@ title(['Comparison of Theoretical and Experimental',...
 ylabel('Symbol Error Rate');
 xlabel('Signal To Noise (dB)');
 legend('Simulation','Theory');
+print(g,'-djpeg','-r300','qpSNR');
