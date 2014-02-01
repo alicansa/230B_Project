@@ -4,6 +4,7 @@
 \contentsline {subsection}{\numberline {2.2}QPSK}{3}{subsection.2.2}
 \contentsline {subsection}{\numberline {2.3}16-QAM}{3}{subsection.2.3}
 \contentsline {subsection}{\numberline {2.4}64-QAM}{3}{subsection.2.4}
+<<<<<<< HEAD
 \contentsline {section}{\numberline {A}Project Assignment}{4}{appendix.A}
 \contentsline {section}{\numberline {B}Random Bit Sequence Generator}{10}{appendix.B}
 \contentsline {section}{\numberline {C}Bit to Symbol Mappers}{11}{appendix.C}
@@ -21,3 +22,5 @@
 \contentsline {subsection}{\numberline {I.2}QPSK Demodulation}{26}{subsection.I.2}
 \contentsline {subsection}{\numberline {I.3}16-QAM Demodulation}{27}{subsection.I.3}
 \contentsline {subsection}{\numberline {I.4}64-QAM Demodulation}{29}{subsection.I.4}
+=======
+>>>>>>> 242dbe67e40107ce41964076da3a5304106ea8d6

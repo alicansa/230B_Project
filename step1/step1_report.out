@@ -4,6 +4,7 @@
 \BOOKMARK [2][-]{subsection.2.2}{QPSK}{section.2}% 4
 \BOOKMARK [2][-]{subsection.2.3}{16-QAM}{section.2}% 5
 \BOOKMARK [2][-]{subsection.2.4}{64-QAM}{section.2}% 6
+<<<<<<< HEAD
 \BOOKMARK [1][-]{appendix.A}{Project Assignment}{}% 7
 \BOOKMARK [1][-]{appendix.B}{Random Bit Sequence Generator}{}% 8
 \BOOKMARK [1][-]{appendix.C}{Bit to Symbol Mappers}{}% 9
@@ -21,3 +22,5 @@
 \BOOKMARK [2][-]{subsection.I.2}{QPSK Demodulation}{appendix.I}% 21
 \BOOKMARK [2][-]{subsection.I.3}{16-QAM Demodulation}{appendix.I}% 22
 \BOOKMARK [2][-]{subsection.I.4}{64-QAM Demodulation}{appendix.I}% 23
+=======
+>>>>>>> 242dbe67e40107ce41964076da3a5304106ea8d6
