@@ -15,6 +15,5 @@ output = zeros(1,N/overSamplingFactor);
 for i=1:N/overSamplingFactor
     output(i) = input_signal((i-1)*overSamplingFactor*Ts+1);
 end
-
 end
 

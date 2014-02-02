@@ -8,13 +8,13 @@ Ts = 1;
 S=2; %average signal power for QPSK
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts);
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
-SNR = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20];
+SNR = 0:20;
 
 
 EbN0 = SNR2EbN0(SNR,2,B);
 
 %%QPSK simulation
-N= 1000;
+N= 10000;
 k = 2;  % bits per symbol
 
 % function checks
@@ -70,7 +70,8 @@ for i=1:length(SNR)
     sampled_quad = sampler(matched_output_quad,overSampleSize,Ts);
     sampled_inphase = sampler(matched_output_inphase,overSampleSize,Ts);
 
-  if (SNR(i) == 3) || SNR(i) == 6 || SNR(i) == 10 || ...
+    %constellation plot
+    if (SNR(i) == 3) || SNR(i) == 6 || SNR(i) == 10 || ...
             SNR(i) == 15 || SNR(i) == 20
         subplot(2,3,num);
         scatter(sampled_inphase,sampled_quad,'*');
@@ -94,18 +95,22 @@ for i=1:length(SNR)
     a = 10^(EbN0(i)/10);
     ser_theo(i) = 2*qfunc(sqrt(2*a))-qfunc(sqrt(2*a))^2;
 end
+
+% save the constellation plot
 print(f,'-djpeg','-r300','qpConst');
 
 
 %plot theoretical/simulation BER vs SNR graph
-
 g=figure;
 semilogy(SNR,ser,'ko');
 hold on;
 semilogy(SNR,ser_theo, 'b');
+semilogy(EbN0,ser_theo,'g');
 title(['Comparison of Theoretical and Experimental',...
     sprintf('\nQPSK Bit Error Rates')]);
 ylabel('Symbol Error Rate');
 xlabel('Signal To Noise (dB)');
-legend('Simulation','Theory');
+legend('Simulation','Theory (function of SNR_symb)',...
+    'Theory (function of Eb/No)','Location','SouthWest');
+% save the BER graph
 print(g,'-djpeg','-r300','qpSNR');

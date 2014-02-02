@@ -28,10 +28,7 @@ for i=1:loopSize
             bits = strcat(bits,'01');
         elseif (quadrature_sig(i) < 0)
             bits = strcat(bits,'00');
-        end
-        
-        
-    end
-    
+        end 
+    end 
 end
 
