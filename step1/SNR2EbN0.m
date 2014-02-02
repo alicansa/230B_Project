@@ -2,7 +2,7 @@
 function [EbN0] = SNR2EbN0(SNR,symbolSize,B)
 % FUNCTION
 % this takes a given SNR ratio (in dB) and translates it into equivelant
-% Eb/No values
+%   Eb/No values
 
 % INPUTS
 % SNR - the db signal to noise ratio

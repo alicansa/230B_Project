@@ -10,20 +10,13 @@ function [bits] = bpsk_demod(sig)
 
 bits = '';
 loopSize = length(sig);
-
-
-for i=1:loopSize
-   
+for i=1:loopSize  
     %decision based on regions of constellation
-    
     if(sig(i) >= 0)
-        bits = strcat(bits,'1');
-        
+        bits = strcat(bits,'1');     
     elseif(sig(i) < 0)
         bits = strcat(bits,'0');
-    end    
-    
+    end      
 end
-
 end
 

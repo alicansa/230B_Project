@@ -16,7 +16,6 @@ loopSize = length(inphase_sig);
 for i=1:loopSize
    
     %decision
-    
     if(quadrature_sig(i) >= 6)
        
         if (inphase_sig(i) <= -6)
@@ -177,11 +176,7 @@ for i=1:loopSize
            bits = strcat(bits,'100100'); 
         end    
         
-    end
-    
-    
+    end  
 end
-
-
 end
 

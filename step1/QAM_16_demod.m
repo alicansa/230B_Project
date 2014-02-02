@@ -12,15 +12,11 @@ function [bits] = QAM_16_demod(inphase_sig,quadrature_sig)
 bits = '';
 loopSize = length(inphase_sig);
 
-% inphase_sig = inphase_sig.*(sqrt(10));
-% quadrature_sig = quadrature_sig.*(sqrt(10));
-
 for i=1:loopSize
    
     %decision based on regions of constellation
-    
     if(quadrature_sig(i) >= 2)
-       
+        
         if (inphase_sig(i) <= -2)
            bits = strcat(bits,'0000');
         elseif (inphase_sig(i) > -2 && inphase_sig(i) < 0)
@@ -66,14 +62,7 @@ for i=1:loopSize
         elseif (inphase_sig(i) >= 2 )
            bits = strcat(bits,'1010'); 
          end
-    end
-    
-    
+    end  
 end
-
-
-
-
-
 end
 

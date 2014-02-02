@@ -1,5 +1,6 @@
 function [channel_output] = awgn_channel(transmitted_sig,snr,S)
-% FUNCTION - this models WGN noise sequence added to the signal waveform
+% FUNCTION
+% this models WGN noise sequence added to the signal waveform
 
 % INPUT
 % transmitted_sig - the signal sent over the channel

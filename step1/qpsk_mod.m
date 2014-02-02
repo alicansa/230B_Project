@@ -4,7 +4,7 @@ function [ sym_quad, sym_inp ] = qpsk_mod( bits, N )
 
 % INPUTS
 %   bits - the data input bitstream
-%   N - the input binary datastream length
+%   N - the number of symbols to make
 
 % OUTPUTS
 %   sym_quad - the quadrature component of the symbol (sin)
@@ -33,6 +33,5 @@ for i=1:N
             sym_inp(i) = 1;
     end
 end
-
 end
 

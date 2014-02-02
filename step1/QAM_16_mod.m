@@ -4,7 +4,7 @@ function [sym_quad sym_inp] = QAM_16_mod(bits,N)
 
 % INPUTS
 %   bits - the data input bitstream
-%   N - 
+%   N - the number of symbols to make
 
 % OUTPUTS
 %   sym_quad - the quadrature component of the symbol
@@ -70,12 +70,5 @@ for i=1:N
             sym_inp(i) = 1;     
     end 
 end
-
-
-%normalization
-% sym_quad = sym_quad.*(1/sqrt(10));
-% sym_inp = sym_inp.*(1/sqrt(10));
-
-
 end
 

@@ -16,7 +16,5 @@ impulseTrain = zeros(1,length(symbols)*overSampleSize);
 for i=1:N
    impulseTrain((i-1)*overSampleSize+1) = symbols(i);
 end
-
-
 end
 

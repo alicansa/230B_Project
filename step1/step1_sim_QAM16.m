@@ -1,17 +1,19 @@
 close all;
 clear all;
+clc;
+
 overSampleSize = 4;
 rollOffFactor = 1;
 Ts = 1;
 S=10; %average signal power for 16-QAM
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts);
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
-SNR = [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20];
+SNR = 0:20;
 
 EbN0 = SNR2EbN0(SNR,4,B);
 
 %%QAM-16 simulation
-N= 5000;
+N= 10000;
 
 %random bit generation
 bits = random_bit_generator(N);
@@ -43,7 +45,8 @@ for i=1:length(SNR)
     sampled_quad = sampler(matched_output_quad,overSampleSize,Ts);
     sampled_inphase = sampler(matched_output_inphase,overSampleSize,Ts);
 
-   if (SNR(i) == 3) || SNR(i) == 6 || SNR(i) == 10 || ...
+    % make a constellation plot
+    if (SNR(i) == 3) || SNR(i) == 6 || SNR(i) == 10 || ...
             SNR(i) == 15 || SNR(i) == 20
         subplot(2,3,num);
         scatter(sampled_inphase,sampled_quad,'+');
@@ -67,17 +70,19 @@ for i=1:length(SNR)
     a = 10^(EbN0(i)/10);
     ser_theo(i) = 3*qfunc(sqrt((4/5)*a))-(9/4)*qfunc(sqrt((4/5)*a))^2;
 end
+% save the constellation plot
 print(f,'-djpeg','-r300','qam16Const');
 
 
 %plot theoretical/simulation BER vs SNR graph
-
 h=figure;
 semilogy(SNR,ser, 'ko');
 hold on;
-semilogy(SNR,ser_theo, 'r');
-%semilogy(SNR,ser_theo_up, 'g');
+semilogy(SNR,ser_theo, 'b');
+semilogy(EbN0,ser_theo,'g');
 ylabel('Probability of Symbol Error');
 xlabel('SNR(dB)');
-legend('Simulation','Theory');
+legend('Simulation','Theory (function of symbol SNR)',...
+    'Theory (function of Eb/No)','Location','SouthWest');
+% save the BER graph
 print(h,'-djpeg','-r300','qam16SNR');

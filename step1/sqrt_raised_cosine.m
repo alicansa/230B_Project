@@ -10,7 +10,6 @@ function [srrc_normalized_response] = sqrt_raised_cosine(overSampleFactor, rollO
 % OUTPUTS
 % srrc_normalized_response - the data signal after the srrc 
 
-
 t = -limits:1/overSampleFactor:limits;
 response = zeros(1,length(t));
 
@@ -27,6 +26,5 @@ for i=1:length(t)
     %normalize to unit energy
     srrc_normalized_response = response./sqrt(sum(response.^2));
 end
-
 end
 

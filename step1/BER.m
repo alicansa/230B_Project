@@ -4,8 +4,7 @@ function [ber] = BER(input_bits,decoded_bits)
 %       divide by the total number of bits
 
 % NOTE
-% recall Probability_of_symb_error = BER*log2(K) where each symbol takes K
-% bits
+% recall Prob_of_symb_error = BER*log2(K) where each symbol takes K bits
 
 % INPUT
 % input_bits - the input signal
@@ -23,6 +22,5 @@ for i=1:loopSize
 end
 
 ber = err/loopSize;
-
 end
 
