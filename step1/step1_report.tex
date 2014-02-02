@@ -73,13 +73,9 @@ The system is as shown in Figure BLAH.  To simulate the system, code was written
 
 An analysis of performance of the system was determined by comparing a theoretical error rate to experimental bit error rate for various schemes.  The theoretical derivation is shown in Section~\ref{sec:deriv}.  The experimental error rate was found by counting the instances of wrongly decoded bits.  
 
+\newpage
 \section{Mathematical Derivations of Probability of Error}
 \label{sec:deriv}
-As equiprobable bits are generated thou
-
-\subsection{BPSK}
-\label{sec:bpsk}
-
 As equiprobable bits are generated and passed through an AWGN channel in this project we have used ML decision rule which states: \\
 
 $\hat{m} = \argmin_{1\leq m \leq M}{||\underline{r} - \underline{s}_m||}$ 
@@ -87,36 +83,105 @@ $\hat{m} = \argmin_{1\leq m \leq M}{||\underline{r} - \underline{s}_m||}$
 
 Thus in the following subsections the probability of error for each constellation used in the project is derived using the minimum distance rule.
 
+Furthermore the formulas are used to convert the minimum distance to the average bit energy and the average symbol energy to average bit energy in the M-QAM constellations:\\
+
+$d_{min} = \sqrt{\frac{6log_2M}{M-1}E_{bavg}} $\\
+
+$E_{bavg} = \frac{E_{savg}}{log_2M}$
+
+
 
 \subsection{BPSK}
-The exact probability of bit error is as follows (no interseting decision regions):
+\label{sec:bpsk}
+The exact probability of bit error is as follows (no interseting decision regions):\\
 
-$ P_e = Q(\frac{d_{min}/2}{\sqrt{N_o/2}}) $
-$       = Q(\sqrt{\frac{2E_b}{N_o}}) $
+$ P_e = Q(\frac{d_{min}/2}{\sqrt{N_o/2}}) $ \\
+\\
+$ P_e = Q(\sqrt{2\frac{E_b}{N_o}}) $ \\
 
 \subsection{QPSK}
 \label{sec:qpsk}
 
-The exact probability of bit error is as follows (found by subtracting the interseting decision regions from the nearest neighbour approx.):
+The exact probability of bit error is as follows (found by subtracting the interseting decision regions from the nearest neighbour approx.):\\
 
-$ P_e = Q(\frac{d_{min}/2}{\sqrt{N_o/2}}) $
-$       = Q(\sqrt{\frac{2E_s}{N_o}}) $ 
+$ P_e = 2Q(\frac{d_{min}/2}{\sqrt{N_o/2}})-Q(\frac{d_{min}/2}{\sqrt{N_o/2}})^2$ \\
+\\
+$ P_e = 2Q(\sqrt{2\frac{E_{bavg}}{N_o}})-Q(\sqrt{2\frac{E_{bavg}}{N_o}})^2$ \\
 
 \subsection{16-QAM}
 \label{sec:qam16}
 
-The exact probability of bit error is as follows (found by subtracting the interseting decision regions from the nearest neighbour approx.):
+The exact probability of bit error is as follows (found by subtracting the interseting decision regions from the nearest neighbour approx.):\\
 
-$ P_e = Q(\frac{d_{min}/2}{\sqrt{N_o/2}}) $
-$       = 3Q(\sqrt(\frac{4}{5}\frac{E_b}{N_o}))-(9/4)Q(sqrt((4/5)*a))^2$ 
+$ P_e = 3Q(\frac{d_{min}/2}{\sqrt{N_o/2}})-(9/4)Q(\frac{d_{min}/2}{\sqrt{N_o/2}})^2$ \\
+\\
+$ P_e = 3Q(\sqrt{\frac{4}{5}\frac{E_b}{N_o}})-(9/4)Q(\sqrt{\frac{4}{5}\frac{E_{b}}{N_o}})^2$  \\
 
 \subsection{64-QAM}
 \label{sec:qam64}
-The exact probability of bit error is as follows (found by subtracting the interseting decision regions from the nearest neighbour approx.):
+The exact probability of bit error is as follows (found by subtracting the interseting decision regions from the nearest neighbour approx.):\\
 
-$ P_e = Q(\frac{d_{min}/2}{\sqrt{N_o/2}}) $
-$       = Q(\sqrt{\frac{2E_s}{N_o}}) $ 
+$P_e = (7/2)Q(\frac{d_{min}/2}{\sqrt{N_o/2}}) -(49/16)Q(\sqrt{\frac{d_{min}/2}{\sqrt{N_o/2}}})^2$ \\
 
+$P_e = (7/2)Q(\sqrt{\frac{18}{63}\frac{E_b}{N_o}})-(49/16)Q(\sqrt{\frac{18}{63}\frac{E_b}{N_o}})^2$ \\
+
+
+
+\section{Step 1 Results}
+\subsection{Probability of Error vs SNR plots}
+
+\subsubsection{BPSK}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{bpSNR.jpg}
+\caption{}
+\end{figure}
+\subsubsection{QPSK}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{qpSNR.jpg}
+\caption{}
+\end{figure}
+\subsubsection{16-QAM}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{qam16SNR.jpg}
+\caption{}
+\end{figure}
+\subsubsection{64-QAM}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{qam64SNR.jpg}
+\caption{}
+\end{figure}
+\subsection{Constellation Plots}
+
+\subsubsection{BPSK}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{bpConst.jpg}
+\caption{}
+\end{figure}
+\subsubsection{QPSK}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{qpConst.jpg}
+\caption{}
+\end{figure}
+\subsubsection{16-QAM}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{qam16Const.jpg}
+\caption{}
+\end{figure}
+\subsubsection{64-QAM}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{qam64Const.jpg}
+\caption{}
+\end{figure}
+
+\section{Conclusion}
 
 \appendix
 \newpage

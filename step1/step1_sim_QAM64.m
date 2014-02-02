@@ -12,7 +12,7 @@ SNR = [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20];
 EbN0 = SNR2EbN0(SNR,6,B);
 
 %%QPSK simulation
-N=1200;
+N=6000;
 
 %random bit generation
 bits = random_bit_generator(N);
@@ -48,7 +48,7 @@ for i=1:length(SNR)
     if (SNR(i) == 3) || SNR(i) == 6 || SNR(i) == 10 || ...
             SNR(i) == 15 || SNR(i) == 20
         subplot(2,3,num);
-        scatter(sampled_inphase,sampled_quad,'+');
+        scatter(sampled_inphase,sampled_quad,'*');
         xlim = [1.5*min(sampled_inphase) 1.5*max(sampled_inphase)];
         ylim = [1.5*min(sampled_quad) 1.5*max(sampled_quad)];
         line(xlim,[0 0], 'Color', 'k');
@@ -72,7 +72,7 @@ end
 
 print(f,'-djpeg','-r300','qam64Const');
 
-%plot theoretical/simulation BER vs SNR graph
+%plot theoretical/simulation SER vs SNR graph
 
 h=figure;
 semilogy(SNR,ser, 'ko');

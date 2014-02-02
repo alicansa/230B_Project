@@ -1,7 +1,7 @@
 close all;
 clear all;
 overSampleSize = 4;
-rollOffFactor = 0.25;
+rollOffFactor = 1;
 Ts = 1;
 S=1; %average signal power for BPSK
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts);
