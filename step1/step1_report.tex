@@ -4,7 +4,7 @@
 
 \usepackage{graphicx,forloop,caption,subcaption,float,hyperref,arrayjob,listings,color,booktabs,mathtools}
 \usepackage{pdfpages}
-
+\usepackage[margin=1.2in]{geometry}
 \usepackage{amsmath}
 \usepackage{multirow}
 %vhdl code
@@ -69,9 +69,34 @@ Darren Reis 804359840 \\
 
 \section{System Setup}
 \label{sec:setup}
-The system is as shown in Figure BLAH.  To simulate the system, code was written for each block in the diagram.  A random bit generator was used to output a stream of data (Appendix~\ref{app:random_bit_generator}).  The data stream then was passed into a bit-to-symbol mapper, transformed differently based on the modulation scheme (Appendix~\ref{app:bittosym}).  Various schemes were used, including Binary Phase Shift Keying [BPSK], Quadrature Phase Shift Keying [QPSK], and Quadrature Amplitude Modulation [QAM], as shown in Appendices~\ref{app:bpsk_mod}~$-$~\ref{app:qam_64_mod}. To approximate a real system, the system got passed through a square root raised cosine pulse (Appendix~\ref{app:sqrt_raised_cosine}).  This filter was then oversampled by four in order to DO BLAH (Appendix~\ref{app:impulse_train}).  To simulate world noises, it was broadcast over a channel of additive white gaussian noises (Appendix~\ref{app:awgn_channel}).  For different SNR levels, the AWGN channel had different gain and variance.  This channel modeled the transmission of the signal from transmitter to receiver.  The receiver then used a matched filter version of the raised cosine pusle-shape.  After sampling the symbol stream back at the original symbol rate, the message was ready for recovery (Appendix~\ref{app:sampler}).  Finally, the data waveform was sent through a decision block, demodulating according to the appropriate scheme (Appendices~\ref{app:bpsk_demod}~$-$~\ref{app:qam_64_demod}).  
+The system is as shown in Figure BLAH.  To simulate the system, code was written for each block in the diagram.  A random bit generator was used to output a stream of data (Appendix~\ref{app:random_bit_generator}).  The data stream then was passed into a bit-to-symbol mapper, transformed differently based on the modulation scheme (Appendix~\ref{app:bittosym}).  Various schemes were used, including Binary Phase Shift Keying [BPSK], Quadrature Phase Shift Keying [QPSK], and Quadrature Amplitude Modulation [QAM], as shown in Appendices~\ref{app:bpsk_mod}~$-$~\ref{app:qam_64_mod}. To approximate a real system:
 
-An analysis of performance of the system was determined by comparing a theoretical error rate to experimental bit error rate for various schemes.  The theoretical derivation is shown in Section~\ref{sec:deriv}.  The experimental error rate was found by counting the instances of wrongly decoded bits.  
+\begin{itemize}
+\item The system got passed through a square root raised cosine pulse (Appendix~\ref{app:sqrt_raised_cosine}) which has the following impulse response:
+
+ \[
+ h(t) = \begin{dcases*}
+        1-\beta+4\frac{\beta}{\pi} &  $t = 0$\\         
+         \\ 
+        \end{dcases*}
+\]
+
+\item This filter was then oversampled by four in order to DO BLAH (Appendix~\ref{app:impulse_train}).
+\item Furthermore it was broadcast over an Additive White Gaussian Noise (AWGN) channel. (Appendix~\ref{app:awgn_channel}). This channel modeled the transmission of the signal from transmitter to receiver. The variance of this channel is determined by the SNR values picked at the beginning of each simulation. In order to achieve this the following equation is used:
+
+$\sigma^2 = S/(10^{SNR/10})$
+
+where S is the average signal power of the chosen modulation scheme.
+
+\item Then at the receiver a matched filter is used for optimal detection of the transmitted signal. As square root raised cosine pulse is used at the tranmission side (which a real symmetric pulse), the same square root raised cosine pulse shape is used as the matched filter.  
+
+\item After sampling the symbol stream back at the original symbol rate, the message is ready for recovery (Appendix~\ref{app:sampler}).
+
+\item Finally, the data waveform is sent through a decision block, demodulating according to the appropriate scheme (Appendices~\ref{app:bpsk_demod}~$-$~\ref{app:qam_64_demod}).
+
+\end{itemize}
+
+An analysis of performance of the system was determined by comparing a theoretical error rate to experimental bit error rate for various schemes.  The theoretical derivation is shown in Section~\ref{sec:deriv}. On the other hand the experimental error rate was found by counting the instances of wrongly decoded symbols (or bits as in BPSK case) and diving this number by the number of total symbols sent through the channel.  
 
 \newpage
 \section{Mathematical Derivations of Probability of Error}
@@ -128,56 +153,66 @@ $P_e = (7/2)Q(\sqrt{\frac{18}{63}\frac{E_b}{N_o}})-(49/16)Q(\sqrt{\frac{18}{63}\
 
 
 \section{Step 1 Results}
+
+In the following sections the probability of bit error versus the signal to noise ratio and scatter plots for BPSK, QPSK, 16-QAM and 64-QAM constellations .
+
 \subsection{Probability of Error vs SNR plots}
+In the sections given below considering BPSK, QPSK, 16-QAM and 64-QAM constellations the following  are plotted using the matlab functions given in the appendix:
+\begin{itemize}
+\item Theoretical Bit Error Rate/Symbol Error Rate curve as a function of the symbol SNR
+\item The theoretical Bit Error Rate/Symbol Error Rate curve as a function of $E_b/N_o$
+\item The Bit Errote Rate/Symbol Error Rate curve from the simulation as a function of the received signal's SNR
+\end{itemize}
 
 \subsubsection{BPSK}
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{bpSNR.jpg}
+\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{bpSNR.jpg}
 \caption{}
 \end{figure}
 \subsubsection{QPSK}
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{qpSNR.jpg}
+\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qpSNR.jpg}
 \caption{}
 \end{figure}
 \subsubsection{16-QAM}
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{qam16SNR.jpg}
+\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam16SNR.jpg}
 \caption{}
 \end{figure}
 \subsubsection{64-QAM}
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{qam64SNR.jpg}
+\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam64SNR.jpg}
 \caption{}
 \end{figure}
 \subsection{Constellation Plots}
+In the following sections scatter plots of BPSK, QPSK, 16-QAM and 64-QAM constellations are plotted at symbol/input SNRs of 3 dB, 6dB, 10dB and 20dB.
 
 \subsubsection{BPSK}
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{bpConst.jpg}
+\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{bpConst.jpg}
 \caption{}
 \end{figure}
 \subsubsection{QPSK}
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{qpConst.jpg}
+\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qpConst.jpg}
 \caption{}
 \end{figure}
 \subsubsection{16-QAM}
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{qam16Const.jpg}
+\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam16Const.jpg}
 \caption{}
 \end{figure}
 \subsubsection{64-QAM}
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{qam64Const.jpg}
+\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam64Const.jpg}
 \caption{}
 \end{figure}
 
