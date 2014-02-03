@@ -11,7 +11,7 @@ function [EbN0] = SNR2EbN0(SNR,symbolSize,B)
 % OUTPUTS
 % EbN0 - the bit power over noise power
 
-EbN0 = SNR - 10*log10(symbolSize/B);
+EbN0 = SNR - 10*log10(symbolSize);
 
 end
 

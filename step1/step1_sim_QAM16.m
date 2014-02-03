@@ -3,7 +3,7 @@ clear all;
 clc;
 
 overSampleSize = 4;
-rollOffFactor = 1;
+rollOffFactor = 0.25;
 Ts = 1;
 S=10; %average signal power for 16-QAM
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts);
