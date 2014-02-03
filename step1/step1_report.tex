@@ -72,7 +72,11 @@ Darren Reis 804359840 \\
 The system is as shown in Figure below:
 
 
-
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{step1diagram.jpg}
+\caption{Diagram of the setup used in step 1 of the project}
+\end{figure}
 
 To simulate the system, code was written for each block in the diagram.  A random bit generator was used to output a stream of data (Appendix~\ref{app:random_bit_generator}). In order to make sure enough trials are made for the simulation the number of the bits generated is set to 50000. The data stream then was passed into a bit-to-symbol mapper, transformed differently based on the modulation scheme (Appendix~\ref{app:bittosym}).  Various schemes were used, including Binary Phase Shift Keying [BPSK], Quadrature Phase Shift Keying [QPSK], and Quadrature Amplitude Modulation [QAM], as shown in Appendices~\ref{app:bpsk_mod}~$-$~\ref{app:qam_64_mod}. To approximate a real system:
 
@@ -104,7 +108,6 @@ where S is the average signal power of the chosen modulation scheme.
 
 An analysis of performance of the system was determined by comparing a theoretical error rate to experimental bit error rate for various schemes.  The theoretical derivation is shown in Section~\ref{sec:deriv}. On the other hand the experimental error rate was found by counting the instances of wrongly decoded symbols (or bits as in BPSK case) and diving this number by the number of total symbols sent through the channel.  
 
-\newpage
 \section{Mathematical Derivations of Probability of Error}
 \label{sec:deriv}
 As equiprobable bits are generated and passed through an AWGN channel in this project, the have used ML decision rule which states: \\
@@ -256,8 +259,6 @@ The following are deduced from this step of the project:
 \section{Random Bit Sequence Generator}
 \label{app:random_bit_generator}
 \lstinputlisting{random_bit_generator.m}
-\cleardoublepage
-\newpage
 
 \section{Bit to Symbol Mappers}
 \label{app:bittosym}
@@ -273,83 +274,65 @@ The following are deduced from this step of the project:
 %\lgrindfile{testinput.tex}
 
 \lstinputlisting{bpsk_mod.m}
-\cleardoublepage  % force onto odd page
-\newpage
 
 \subsection{QPSK Modulation}
 \label{app:qpsk_mod}
 \lstinputlisting{qpsk_mod.m}
-\cleardoublepage  % force onto odd page
-\newpage
 
 \subsection{16-QAM Modulation}
 \label{app:qam_16_mod}
 
 \lstinputlisting{QAM_16_mod.m}
-\cleardoublepage  % force onto odd page
-\newpage
 
 \subsection{64-QAM Modulation }
 \label{app:qam_64_mod}
 \lstinputlisting{QAM_64_mod.m}
-\cleardoublepage  % force onto odd page
-\newpage
 
+\newpage
 \section{Square Root Raised Cosine Filter}
 \label{app:sqrt_raised_cosine}
 \lstinputlisting{sqrt_raised_cosine.m}
-\cleardoublepage
-\newpage
+
 
 \section{Up Sampler}
 \label{app:impulse_train}
 \lstinputlisting{impulse_train.m}
-\cleardoublepage
-\newpage
 
 \section{Additive Gaussian White Noise Channel}
 \label{app:awgn_channel}
 \lstinputlisting{awgn_channel.m}
-\cleardoublepage
-\newpage
+
 
 \section{Additive Gaussian White Noise Channel}
 \label{app:awgn_channel}
 \lstinputlisting{awgn_channel.m}
-\cleardoublepage
-\newpage
 
+\newpage
 \section{Sampler}
 \label{app:sampler}
 \lstinputlisting{sampler.m}
-\cleardoublepage
-\newpage
+
 
 \section{Decision Blocks}
 \label{app:dblocks}
 \subsection{BPSK Demodulation}
 \label{app:bpsk_demod}
 \lstinputlisting{bpsk_demod.m}
-\cleardoublepage
-\newpage
 
+\newpage
 \subsection{QPSK Demodulation}
 \label{app:qpsk_demod}
 \lstinputlisting{qpsk_demod.m}
-\cleardoublepage
-\newpage
 
 \subsection{16-QAM Demodulation}
 \label{app:qam_16_demod}
 \lstinputlisting{QAM_16_demod.m}
-\cleardoublepage
-\newpage
 
+\newpage
 \subsection{64-QAM Demodulation}
 \label{app:qam_64_demod}
 \lstinputlisting{QAM_64_demod.m}
-\cleardoublepage
-\newpage
+
 
 
 \end{document}
