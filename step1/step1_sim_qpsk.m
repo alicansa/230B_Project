@@ -1,72 +1,48 @@
+%Simulation for the QPSK modulation scheme
 close all;
 clear all;
 clc;
-
+%Start by setting the initial variables
 overSampleSize = 4;
-rollOffFactor = 1;
-Ts = 1;
+rollOffFactor = 0.25;
+Ts = 1; %Symbol period
 S=2; %average signal power for QPSK
-B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts);
+B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
-SNR = 0:20;
-
-
-EbN0 = SNR2EbN0(SNR,2,B);
-
-%%QPSK simulation
-N= 10000;
+SNR = 0:20; %SNR levels where the system will be simulated
+EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
+N= 10000;  %number of bits generated
 k = 2;  % bits per symbol
+bits = random_bit_generator(N);  %random bit generation
+[quadrature, inphase] = qpsk_mod(bits,N/k);  %mapping to symbols
 
-% function checks
-modTester = '00011110';
-expectedI = [-1 -1 1 1];
-expectedQ = [-1 1 1 -1];
-[resultI,resultQ] = qpsk_mod(modTester,length(modTester)/k);
-failedI = sum(expectedI-resultI);
-failedQ = sum(expectedQ-resultQ);
-disp(['Number of failed I modulation symbols:' num2str(failedI)]);
-disp(['Number of failed Q modulation symbols:' num2str(failedQ)]);
-
-demodTesterI = expectedI;
-demodTesterQ = expectedQ;
-expectedBits = bin2dec(modTester);
-resultBits = qpsk_demod(demodTesterI,demodTesterQ);
-failedBits = sum(expectedBits - bin2dec(resultBits));
-disp(['Number of failed demodulated bits:' num2str(failedBits)]);
-
-%random bit generation
-bits = random_bit_generator(N);
-
-%mapping to symbols
-[quadrature, inphase] = qpsk_mod(bits,N/k);
-
-%mapping symbols to signals
-impulse_train_quad = impulse_train(overSampleSize,N/k,quadrature);
+%mapping symbols to signals by generating a impulse train and convolving
+%with the srrc pulseimpulse_train_quad = impulse_train(overSampleSize,N/k,quadrature);
 impulse_train_inphase = impulse_train(overSampleSize,N/k,inphase);
 transmit_quad = conv(impulse_train_quad,srrc,'same');
 transmit_inphase = conv(impulse_train_inphase,srrc,'same');
 
-
-%loop this section for BER vs SNR graphs
-
+%loop this section for the generation of BER vs SNR graphs and
+%constellation plots
 % declare variables
 h = zeros(1,5);
-ber = zeros(1,length(SNR));
 ser = zeros(1,length(SNR));
-ser_theo_low = zeros(1,length(SNR));
+ser_theo = zeros(1,length(SNR));
 ber_EbN0 = zeros(1,length(SNR));
 f = figure;
 num = 1;
 for i=1:length(SNR)
-   %pass through awgn channel
+   %pass the signals to be transmitted through awgn channel
     received_quad = awgn_channel(transmit_quad,SNR(i),S);
     received_inphase = awgn_channel(transmit_inphase,SNR(i),S);
     
-    %matched filter
+    %pass the received signal through the matched filter for optimal
+    %detection
     matched_output_quad = conv(received_quad,srrc,'same');
     matched_output_inphase = conv(received_inphase,srrc,'same');
 
-    %sampler
+    %pass the matched filter output through the sampler to obtain symbols
+    %at each symbol period
     sampled_quad = sampler(matched_output_quad,overSampleSize,Ts);
     sampled_inphase = sampler(matched_output_inphase,overSampleSize,Ts);
 
@@ -86,10 +62,10 @@ for i=1:length(SNR)
         num = num+1;
     end
     
-    %decision
+    %pass the received symbols through ML-decision box 
     output_bits = qpsk_demod(sampled_inphase,sampled_quad);
   
-    %SER calculation   
+    %SER calculation - drop first symbol   
     ser(i) = SER(bits(3:N),output_bits(3:N),k);
     %SER theoretical calculation
     a = 10^(EbN0(i)/10);
@@ -98,7 +74,6 @@ end
 
 % save the constellation plot
 print(f,'-djpeg','-r300','qpConst');
-
 
 %plot theoretical/simulation BER vs SNR graph
 g=figure;

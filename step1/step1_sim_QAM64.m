@@ -1,46 +1,43 @@
+%Simulation for the QAM-64 modulation scheme
 close all;
 clear all;
 overSampleSize = 4;
-rollOffFactor = 1;
-Ts = 1;
+rollOffFactor = 0.25;
+Ts = 1;%Symbol period
 S=42; %average signal power for 64-QAM
-B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts);
+B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
-SNR = 0:20;
+SNR = 0:20;%SNR levels where the system will be simulated
+EbN0 = SNR2EbN0(SNR,6,B);%convert given SNR levels to EbNo
+N=6000;%number of bits generated
+bits = random_bit_generator(N);%random bit generation
+[quadrature, inphase] = QAM_64_mod(bits,N/6);%mapping to symbols
 
-
-EbN0 = SNR2EbN0(SNR,6,B);
-
-%%QPSK simulation
-N=6000;
-
-%random bit generation
-bits = random_bit_generator(N);
-
-%mapping to symbols
-[quadrature, inphase] = QAM_64_mod(bits,N/6);
-
-%mapping symbols to signals
+%mapping symbols to signals by generating a impulse train and convolving
+%with the srrc pulse
 impulse_train_quad = impulse_train(overSampleSize,N/6,quadrature);
 impulse_train_inphase = impulse_train(overSampleSize,N/6,inphase);
 transmit_quad = conv(impulse_train_quad,srrc,'same');
 transmit_inphase = conv(impulse_train_inphase,srrc,'same');
 
-%loop this section for BER vs SNR graphs
+%loop this section for the generation of BER vs SNR graphs and
+%constellation plots
 f = figure;
 num = 1;
 ber = zeros(1,length(SNR));
 ber_theo = zeros(1,length(SNR));
 for i=1:length(SNR)
-   %pass through awgn channel
+   %pass the signals to be transmitted through awgn channel
     received_quad = awgn_channel(transmit_quad,SNR(i),S);
     received_inphase = awgn_channel(transmit_inphase,SNR(i),S);
 
-    %matched filter
+    %pass the received signal through the matched filter for optimal
+    %detection
     matched_output_quad = conv(received_quad,srrc,'same');
     matched_output_inphase = conv(received_inphase,srrc,'same');
     
-    %sampler
+    %pass the matched filter output through the sampler to obtain symbols
+    %at each symbol period
     sampled_quad = sampler(matched_output_quad,overSampleSize,Ts);
     sampled_inphase = sampler(matched_output_inphase,overSampleSize,Ts);
 
@@ -60,10 +57,10 @@ for i=1:length(SNR)
         num = num+1;
     end
     
-    %decision
+    %pass the received symbols through ML-decision box 
     output_bits = QAM_64_demod(sampled_inphase,sampled_quad);
 
-    %SER calculation
+    %SER calculation - drop first symbol
     ser(i) = SER(bits(7:N),output_bits(7:N),6);
     
     %SER theoretical calculation
@@ -74,7 +71,6 @@ end
 print(f,'-djpeg','-r300','qam64Const');
 
 %plot theoretical/simulation SER vs SNR graph
-
 h=figure;
 semilogy(SNR,ser, 'ko');
 hold on;

@@ -1,47 +1,43 @@
+%Simulation for the QAM-16 modulation scheme
 close all;
 clear all;
 clc;
-
+%Start by setting the initial variables
 overSampleSize = 4;
 rollOffFactor = 0.25;
-Ts = 1;
+N= 10000; %number of bits generated
+Ts = 1; %Symbol period
 S=10; %average signal power for 16-QAM
-B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts);
+B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
-SNR = 0:20;
+SNR = 0:20; %SNR levels where the system will be simulated
+EbN0 = SNR2EbN0(SNR,4,B); %convert given SNR levels to EbNo
+bits = random_bit_generator(N);  %random bit generation
+[quadrature, inphase] = QAM_16_mod(bits,N/4); %mapping to symbols
 
-EbN0 = SNR2EbN0(SNR,4,B);
-
-%%QAM-16 simulation
-N= 10000;
-
-%random bit generation
-bits = random_bit_generator(N);
-
-%mapping to symbols
-[quadrature, inphase] = QAM_16_mod(bits,N/4);
-
-%mapping symbols to signals
+%mapping symbols to signals by generating a impulse train and convolving
+%with the srrc pulse
 impulse_train_quad = impulse_train(overSampleSize,N/4,quadrature);
 impulse_train_inphase = impulse_train(overSampleSize,N/4,inphase);
 transmit_quad = conv(impulse_train_quad,srrc,'same');
 transmit_inphase = conv(impulse_train_inphase,srrc,'same');
 
-%loop this section for BER vs SNR graphs
+%loop this section for the generation of BER vs SNR graphs and
+%constellation plots
 num = 1;
 f = figure;
-ber = zeros(1,length(SNR));
-ber_theo = zeros(1,length(SNR));
 for i=1:length(SNR)
-   %pass through awgn channel
+   %pass the signals to be transmitted through awgn channel
     received_quad = awgn_channel(transmit_quad,SNR(i),S);
     received_inphase = awgn_channel(transmit_inphase,SNR(i),S);
     
-    %matched filter
+    %pass the received signal through the matched filter for optimal
+    %detection
     matched_output_quad = conv(received_quad,srrc,'same');
     matched_output_inphase = conv(received_inphase,srrc,'same');
     
-    %sampler
+    %pass the matched filter output through the sampler to obtain symbols
+    %at each symbol period
     sampled_quad = sampler(matched_output_quad,overSampleSize,Ts);
     sampled_inphase = sampler(matched_output_inphase,overSampleSize,Ts);
 
@@ -61,18 +57,17 @@ for i=1:length(SNR)
         num = num+1;
     end
    
-    %decision
+    %pass the received symbols through ML-decision box 
     output_bits = QAM_16_demod(sampled_inphase,sampled_quad);
 
-    %BER/SER calculation
+    %BER/SER calculation - drop the first symbol 
     ser(i) = SER(bits(5:N),output_bits(5:N),4);
-    %SER/BER theoretical calculation (BER=SER due to grey coding)
+    %SER/BER theoretical calculation)
     a = 10^(EbN0(i)/10);
     ser_theo(i) = 3*qfunc(sqrt((4/5)*a))-(9/4)*qfunc(sqrt((4/5)*a))^2;
 end
 % save the constellation plot
 print(f,'-djpeg','-r300','qam16Const');
-
 
 %plot theoretical/simulation BER vs SNR graph
 h=figure;
