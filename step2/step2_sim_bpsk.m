@@ -1,3 +1,4 @@
+%% STEP 2 BPSK
 %Simulation for the BPSK modulation scheme
 close all;
 clear all;

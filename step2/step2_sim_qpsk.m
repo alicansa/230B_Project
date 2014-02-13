@@ -1,3 +1,4 @@
+%% STEP 2 QPSK
 %Simulation for the QPSK modulation scheme
 close all;
 clear all;

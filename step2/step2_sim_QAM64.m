@@ -1,3 +1,4 @@
+%% STEP 2 64-QAM
 %Simulation for the QAM-64 modulation scheme
 close all;
 clear all;
