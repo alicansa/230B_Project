@@ -1,4 +1,4 @@
-function [ output_args ] = SymbolSNR(S,inputSNR,)
+function [ output_args ] = SymbolSNR()
 %SYMBOLSNR Summary of this function goes here
 %   Detailed explanation goes here
 

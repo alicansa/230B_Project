@@ -1,14 +1,20 @@
 function [sym_quad sym_inp] = QAM_64_mod(bits,N)
-%QAM_64_MOD Summary of this function goes here
-%   Detailed explanation goes here
+% FUNCTION - take the binary stream and modulate into QAM64 scheme
 
-sym_quad = zeros(1,N/6);
-sym_inp = zeros(1,N/6);
+% INPUTS
+%   bits - the data input bitstream
+%   N - the number of symbols to make
 
-for i=1:N/6
+% OUTPUTS
+%   sym_quad - the quadrature component of the symbol
+%   sym_inp -  the in-phase component of the symbol
+
+sym_quad = zeros(1,N);
+sym_inp = zeros(1,N);
+
+for i=1:N
    
-    currentWord = bits((i-1)*6+1:i*6);
-    
+    currentWord = bits((i-1)*6+1:i*6); 
     switch currentWord
         
         case '000000'
@@ -206,6 +212,5 @@ for i=1:N/6
     end
     
 end
-
 end
 
