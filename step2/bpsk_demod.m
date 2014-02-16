@@ -12,9 +12,9 @@ bits = '';
 loopSize = length(sig);
 for i=1:loopSize  
     %decision based on regions of constellation
-    if(sig(i) >= 0)
+    if(real(sig(i)) >= 0)
         bits = strcat(bits,'1');     
-    elseif(sig(i) < 0)
+    elseif(real(sig(i)) < 0)
         bits = strcat(bits,'0');
     end      
 end
