@@ -10,8 +10,6 @@ function [ output ] = freq_offset( freq, Ts, input )
 % OUTPUT
 % output - the resulting waveform
 
-% TEST FILE "func_tests.m"
-
 n = length(input); % find signal window size
 time = 0:Ts:Ts*n-Ts;  % create a time vector
 output = exp(1i*freq*time).*input;

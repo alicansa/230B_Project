@@ -11,7 +11,8 @@ function [ channel_output ] = awgn_complex_channel(transmitted_sig,snr,S)
 % channel_output - the sum of input signal and the white noise
 
 variance = S/(10^(snr/10));
-noise = sqrt(variance/2)*randn(size(transmitted_sig)) + j*sqrt(variance/2)*randn(size(transmitted_sig));
+noise = sqrt(variance/2)*randn(size(transmitted_sig))...
+    + j*sqrt(variance/2)*randn(size(transmitted_sig));
 
 channel_output = transmitted_sig + noise;
 end

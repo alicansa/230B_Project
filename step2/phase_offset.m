@@ -7,7 +7,7 @@ function [output] = phase_offset(phase,input)
 % input - the input waveform
 
 % OUTPUT
-
+% output - the corrupted waveform
 
 output = exp(1i*phase)*input;
 end

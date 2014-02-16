@@ -71,109 +71,20 @@ Darren Reis 804359840 \\
 \label{sec:setup}
 The system is as shown in Figure below:
 
-
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{step1diagram.jpg}
-\caption{Diagram of the setup used in step 1 of the project}
+\includegraphics[width=\textwidth]{step2.jpg}
+\caption{Diagram of the setup used in step 2 of the project}
 \end{figure}
 
-To simulate the system, code was written for each block in the diagram.  A random bit generator was used to output a stream of data (Appendix~\ref{app:random_bit_generator}). In order to make sure enough trials are made for the simulation, the number of the bits generated is set to 48000. The data stream was then passed into a bit-to-symbol mapper, transformed differently based on the modulation scheme (Appendix~\ref{app:bittosym}).  Various schemes were used, including Binary Phase Shift Keying [BPSK], Quadrature Phase Shift Keying [QPSK], and Quadrature Amplitude Modulation [QAM], as shown in Appendices~\ref{app:bpsk_mod}~$-$~\ref{app:qam_64_mod}. To approximate a real system:
+In addition to the modeling blocks used previously, non coherent error was included in the model.  The $\delta\phi$ block represents a block that introduces phase or frequency offset on the carrier.  The effect of this is to blur the constellations and the SNR plots [Section~\ref{sec:results}].
 
-\begin{itemize}
-\item The system got passed through a square root raised cosine pulse (Appendix~\ref{app:sqrt_raised_cosine}) which has the following impulse response:
+The new block was modeled by two different functions.  For Phase offset, the signal was subjected to a constant phase bias, as described in Appendix~\ref{app:phase_offset}.  Similarly, the Frequency offsets were handled by introducing a first order phase term.  Recall, phase is related to frequency by $f(t) = \frac{1}{2 \pi} \phi^\prime(t)$.  Appendix~\ref{app:freq_offset} shows how this was implemented in the simulations.
 
- \[
- h(t) = \begin{dcases*}
-        1-\beta+4\frac{\beta}{\pi} &  $t = 0$\\ \\        
-        \frac{\beta}{\sqrt{2}}\left[\left(1+\frac{2}{\pi}\right)\sin\left(\frac{\pi}{4\beta}\right)+\left(1-\frac{2}{\pi}\right)\cos\left(\frac{\pi}{4\beta}\right)\right] & $t=\pm \frac{T_s}{4\beta}$ \\ \\
-        \frac{\sin\left[\pi\frac{t}{Ts}\left(1-\beta\right)\right]+4\beta\frac{t}{Ts}\cos\left[\pi\frac{t}{Ts}\left(1+\beta\right)\right]}{\pi\frac{t}{Ts}\left[1-\left(4\beta\frac{t}{Ts}\right)^2\right]} & $otherwise$ \\
-        \end{dcases*}
-\]
+With the new design worked out, the system was put through a similar set of tests on the four modulation schemes: BPSK, QPSK, 16-QAM, 64-QAM.  Each was subjected to phase offsets from $5\deg$ to $45\deg$ for a range of SNR levels.  Similarly, the modulated signals faced frequency offsets from 10 mHz to 10 Hz.  The system performance was determined by comparing a theoretical error rate to experimental bit error rate.  
 
-\item This filter was then oversampled by four (Appendix~\ref{app:impulse_train}).
-\item Furthermore, it was broadcast over an Additive White Gaussian Noise (AWGN) channel. (Appendix~\ref{app:awgn_channel}). This channel modeled the transmission of the signal from transmitter to receiver. The variance of this channel is determined by the SNR values picked at the beginning of each simulation. In order to achieve this the following equation is used:
-
-$\sigma^2 = S/(10^{SNR/10})$
-
-where S is the average signal power of the chosen modulation scheme.
-
-\item At the receiver, a matched filter is used for optimal detection of the transmitted signal. As square root raised cosine pulse is used at the transmission side (which a real symmetric pulse), the same square root raised cosine pulse shape is used as the matched filter.  
-
-\item After sampling the symbol stream back at the original symbol rate, the message is ready for recovery (Appendix~\ref{app:sampler}).
-
-\item Finally, the data waveform is sent through a decision block, demodulating according to the appropriate scheme (Appendices~\ref{app:bpsk_demod}~$-$~\ref{app:qam_64_demod}).
-
-\end{itemize}
-
-An analysis of performance of the system was determined by comparing a theoretical error rate to experimental bit error rate for various schemes.  The theoretical derivation is shown in Section~\ref{sec:deriv}. On the other hand, the experimental error rate was found by counting the instances of wrongly decoded symbols (or bits as in BPSK case) and dividing this number by the number of total symbols sent through the channel.  
-
-\section{Mathematical Derivations of Probability of Error}
-\label{sec:deriv}
-As equiprobable bits are generated and passed through an AWGN channel in this project, the ML decision rule was used.  It states: \\
-
-$\hat{m} = \argmin_{1\leq m \leq M}{||\underline{r} - \underline{s}_m||}$ 
-\\
-
-Thus, in the following subsections, the probability of error for each constellation used in the project is derived using the minimum distance rule.
-
-Furthermore the formulas are used to convert the minimum distance to the average bit energy and the average symbol energy to average bit energy in the M-QAM constellations:\\
-
-$d_{min} = \sqrt{\frac{6log_2M}{M-1}E_{bavg}} $\\ \\
-
-$E_{bavg} = \frac{E_{savg}}{log_2M}$
-
-
-
-\subsection{BPSK}
-\label{sec:bpsk}
-The exact probability of bit error is as follows (no interesting decision regions):\\
-
-$ P_{be} = Q\left(\frac{d_{min}/2}{\sqrt{N_o/2}}\right) $ \\ \\
-
-$ P_{be} = Q\left(\sqrt{2\frac{E_b}{N_o}}\right) $ \\
-
-\subsection{QPSK}
-\label{sec:qpsk}
-
-The exact probability of symbol error is as follows (found by subtracting the interesting decision regions from the nearest neighbor approx.):\\
-
-$ P_{se} = 2Q\left(\frac{d_{min}/2}{\sqrt{N_o/2}}\right)-Q\left(\frac{d_{min}/2}{\sqrt{N_o/2}}\right)^2$ \\ \\
-
-$ P_{se} = 2Q\left(\sqrt{2\frac{E_{bavg}}{N_o}}\right)-Q\left(\sqrt{2\frac{E_{bavg}}{N_o}}\right)^2$ \\
-
-A good approximation of the theoretical bit error can be by dividing the symbol error rate by the number of bits used for each symbol. Then:\\
-
- $ P_{be} = \frac{1}{2}\left[2Q\left(\sqrt{2\frac{E_{bavg}}{N_o}}\right)-Q\left(\sqrt{2\frac{E_{bavg}}{N_o}}\right)^2\right]$ \\
-
-
-\subsection{16-QAM}
-\label{sec:qam16}
-
-The exact probability of symbol error is as follows (found by subtracting the interesting decision regions from the nearest neighbor approx.):\\
-
-$ P_{se} = 3Q\left(\frac{d_{min}/2}{\sqrt{N_o/2}}\right)-(9/4)Q\left(\frac{d_{min}/2}{\sqrt{N_o/2}}\right)^2$ \\ \\
-
-$ P_{se} = 3Q\left(\sqrt{\frac{4}{5}\frac{E_b}{N_o}}\right)-(9/4)Q\left(\sqrt{\frac{4}{5}\frac{E_{b}}{N_o}}\right)^2$  \\
-
-A good approximation of the theoretical bit error can be by dividing the symbol error rate by the number of bits used for each symbol. Then:\\
-
-$ P_{be} = \frac{1}{4}\left[3Q\left(\sqrt{\frac{4}{5}\frac{E_b}{N_o}}\right)-(9/4)Q\left(\sqrt{\frac{4}{5}\frac{E_{b}}{N_o}}\right)^2\right]$  \\
-
-
-\subsection{64-QAM}
-\label{sec:qam64}
-The exact probability of symbol error is as follows (found by subtracting the interesting decision regions from the nearest neighbor approx.):\\
-
-$P_{se} = (7/2)Q\left(\frac{d_{min}/2}{\sqrt{N_o/2}}\right) -(49/16)Q\left(\sqrt{\frac{d_{min}/2}{\sqrt{N_o/2}}}\right)^2$ \\ \\
-
-$P_{se} = (7/2)Q\left(\sqrt{\frac{18}{63}\frac{E_b}{N_o}}\right)-(49/16)Q\left(\sqrt{\frac{18}{63}\frac{E_b}{N_o}}\right)^2$ \\
-
-A good approximation of the theoretical bit error can be by dividing the symbol error rate by the number of bits used for each symbol. Then:\\
-
-$P_{be} = \frac{1}{6}\left[(7/2)Q\left(\sqrt{\frac{18}{63}\frac{E_b}{N_o}}\right)-(49/16)Q\left(\sqrt{\frac{18}{63}\frac{E_b}{N_o}}\right)^2\right]$ \\
-
-\section{Step 1 Results}
+\section{Step 2 Results}
+\label{sec:results}
 In the following sections, the probability of bit error versus the signal to noise ratio is shown on scatter plots for BPSK, QPSK, 16-QAM and 64-QAM constellations .
 
 \subsection{Probability of Error vs SNR plots}
@@ -314,12 +225,7 @@ The following are deduced from this step of the project:
 
 \section{Additive Gaussian White Noise Channel}
 \label{app:awgn_channel}
-\lstinputlisting{awgn_channel.m}
-
-
-\section{Additive Gaussian White Noise Channel}
-\label{app:awgn_channel}
-\lstinputlisting{awgn_channel.m}
+\lstinputlisting{awgn_complex_channel.m}
 
 \newpage
 \section{Sampler}
