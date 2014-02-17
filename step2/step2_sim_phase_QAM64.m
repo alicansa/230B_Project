@@ -10,7 +10,7 @@ B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,4,Ts);
 SNR = 0:20;%SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,6,B);%convert given SNR levels to EbNo
-N=18000;%number of bits generated
+N=6000;%number of bits generated
 phase_offsets = [5,10,20,45]; %phase offsets for simulation
 bits = random_bit_generator(N);%random bit generation
 [quadrature, inphase] = QAM_64_mod(bits,N/6);%mapping to symbols
@@ -131,7 +131,7 @@ for k=1:length(phase_offsets)
 
          ser_theo(i) = 0.5*(qfunc(sqrt((18/63)*2*a*sin(pi/4 - ...
             pi*phase_offsets(k)/180)^2))+ qfunc(sqrt((18/63)*2*a*sin(pi/4 + ...
-            pi*phase_offsets(k)/180)^2)) + qfunc(sqrt((18/63)*26*a*sin(pi/18 - ...
+            pi*phase_offsets(k)/180)^2))) + (qfunc(sqrt((18/63)*26*a*sin(pi/18 - ...
             pi*phase_offsets(k)/180)^2))+ qfunc(sqrt((18/63)*26*a*sin(pi/18 + ...
             pi*phase_offsets(k)/180)^2)));
         
