@@ -6,13 +6,13 @@ clc;
 %Start by setting the initial variables
 overSampleSize = 4;
 rollOffFactor = 0.25;
-Ts = 2/10^6; %Symbol period (10Mbps)
+Ts = 2/10^6; %Symbol period (1Mbps)
 S=2; %average signal power for QPSK
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
 SNR = 0:20; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
-N= 1000;  %number of bits generated
+N= 20000;  %number of bits generated
 k = 2;  % bits per symbol
 bits = random_bit_generator(N);  %random bit generation
 freq_offsets = [0.01,0.1,1,10]; %frequency offsets for the simulation
@@ -82,19 +82,4 @@ for k=1:length(freq_offsets)
     % save the constellation plot
     print(f,'-djpeg','-r300',strcat('qpConstfo',num2str(k)));
 
-    %plot theoretical/simulation BER vs SNR graph
-    g=figure;
-    semilogy(SNR,ser,'ko');
-    hold on;
-    semilogy(SNR,ber,'bo');
-    semilogy(SNR,ser_theo, 'b');
-    semilogy(SNR,ber_theo,'g');
-    ylabel('Probability of Error');
-    xlabel('Signal To Noise (dB)');
-    title(strcat('SNR Comparison at ', num2str(freq_offsets(k)), ' Hz Offset'));
-    legend('Simulation(Symbol Error)','Simulation(Bit Error)',...
-        'Theory (Symbol Error)',...
-        'Theory (Bit Error)','Location','SouthWest');
-    % save the BER graph
-    print(g,'-djpeg','-r300',strcat('qpSNRfo',num2str(k)));
 end

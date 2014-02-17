@@ -3,10 +3,10 @@
 close all;
 clear all;
 %Start by setting the initial variables
-N= 1000; %number of bits generated
+N= 2000; %number of bits generated
 overSampleSize = 4;
 rollOffFactor = 0.25;
-Ts = 1/10^6; %Symbol period (10Mbps)
+Ts = 1/10^6; %Symbol period (1Mbps)
 phase_offsets = [5,10,20,45]; %phase offsets for simulation
 S=1; %average signal power for BPSK
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
@@ -66,7 +66,7 @@ for k=1:length(phase_offsets)
         ber(i) = BER(bits(2:N),output_bits(2:N));    
         %BER theoretical calculation
         a = 10^(EbN0(i)/10);
-        ber_theo(i) = qfunc(sqrt(2*a));  
+        ber_theo(i) = qfunc(sqrt(2*a*cos(pi*phase_offsets(k)/180)^2));  
     end
     % save the constellation plot
     print(f,'-djpeg','-r300',strcat('bpConstpo',num2str(k)));
@@ -78,7 +78,7 @@ for k=1:length(phase_offsets)
     semilogy(SNR,ber_theo, 'b');
     ylabel('Probability of Error');
     xlabel('SNR (dB)');
-    title(strcat('SNR Comparison at  ', num2str(phase_offsets(k)), ' Degree Offset'));
+    title(strcat('SNR Comparison at ', num2str(phase_offsets(k)), ' Degree Offset'));
     legend('Simulation (Bit Error)','Theory (Bit Error)');
     % save the BER graph
     print(h,'-djpeg','-r300',strcat('bpSNRpo',num2str(k)));

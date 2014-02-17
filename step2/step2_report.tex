@@ -92,16 +92,21 @@ P_b^{\left( QPSK \right)} = \frac{1}{2}\left[Q\left(\sqrt{\frac{4E_b}{N_0}}sin\l
 
 \section{Step 2 Phase Offset Results}
 \label{sec:results_po}
-In the following sections, the probability of bit error versus the signal to noise ratio is shown on scatter plots for BPSK, QPSK, 16-QAM and 64-QAM constellations .
+In the following sections, the probability of bit error versus the signal to noise ratio is shown on scatter plots for BPSK, QPSK, 16-QAM and 64-QAM constellations.  Notice that the constellations show rotation from the phase errors.  
+
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.4\textwidth]{qpskError.png}
+\caption{The rotation of a constellation is based on the phase error}
+\end{figure}
 
 \subsection{Probability of Error vs SNR plots for constellations with Phase Offset}
-In the sections given below considering BPSK, QPSK, 16-QAM and 64-QAM constellations the following  are plotted using the MATLAB functions given in the appendix:
 \begin{itemize}
-\item Theoretical Bit Error Rate/Symbol Error Rate curve as a function of the symbol SNR
-\item The theoretical Bit Error Rate/Symbol Error Rate curve as a function of $E_b/N_o$
-\item The Bit Error Rate/Symbol Error Rate curve from the simulation as a function of the received signal's SNR
+\item Theoretical Symbol Error Rate curve as a function of the symbol SNR
+\item The Symbol Error Rate curve from the simulation as a function of the received signal's SNR
 \end{itemize}
 
+As the phase error builds until $\frac{\pi}{4}$, the constellation becomes more and more shifted.  At some point, the clumps of symbols are far enough out of phase to be random, or equally likely right as wrong.  This happens for phase offsets of 45 degrees.
 \subsubsection{BPSK with Phase Offset}
 \label{sec:bpsk_phase}
 \begin{figure}[H]
@@ -236,124 +241,13 @@ In the following sections scatter plots of  16-QAM constellation are plotted at 
 \hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam16Constpo4.jpg}
 \caption{The 16-QAM constellation plots for different levels of SNR at a phase offset of 45 degrees}
 \end{figure}
-
+\newpage
 \section{Step 2 Frequency Offset Results}
 \label{sec:results_fo}
-In the following sections, the probability of bit error versus the signal to noise ratio is shown on scatter plots for BPSK, QPSK, 16-QAM and 64-QAM constellations .
-
-\subsection{Probability of Error vs SNR plots for Constellations with Frequency Offset}
-In the sections given below, the constellations of BPSK, QPSK, 16-QAM and 64-QAM are plotted using the MATLAB functions given in the appendix:
-\begin{itemize}
-\item Theoretical Bit Error Rate/Symbol Error Rate curve as a function of the symbol SNR
-\item The theoretical Bit Error Rate/Symbol Error Rate curve as a function of $E_b/N_o$
-\item The Bit Error Rate/Symbol Error Rate curve from the simulation as a function of the received signal's SNR
-\end{itemize}
-
-\subsubsection{BPSK with Frequency Offset}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{bpSNRfo1.jpg}
-\caption{BPSK Theoretical and Experimental error rates versus different SNR levels at a frequency offset of 0.01 Hz}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{bpSNRfo2.jpg}
-\caption{BPSK Theoretical and Experimental error rates versus different SNR levels at a frequency offset of 0.1 Hz}
-\end{figure}
-
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{bpSNRfo3.jpg}
-\caption{BPSK Theoretical and Experimental error rates versus different SNR levels at a frequency offset of 1 Hz}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{bpSNRfo4.jpg}
-\caption{BPSK Theoretical and Experimental error rates versus different SNR levels at a frequency offset of 10 Hz}
-\end{figure}
-
-
-\subsubsection{QPSK with Frequency Offset}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qpSNRfo1.jpg}
-\caption{QPSK Theoretical and Experimental error rates versus different SNR levels at a frequency offset of 0.01 Hz}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qpSNRfo2.jpg}
-\caption{QPSK Theoretical and Experimental error rates versus different SNR levels at a frequency offset of 0.1 Hz}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qpSNRfo3.jpg}
-\caption{QPSK Theoretical and Experimental error rates versus different SNR levels at a frequency offset of 1 Hz}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qpSNRfo4.jpg}
-\caption{QPSK Theoretical and Experimental error rates versus different SNR levels at a frequency offset of 10 Hz}
-\end{figure}
-
-
-\subsubsection{16-QAM with Frequency Offset}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam16SNRfo1.jpg}
-\caption{16-QAM Theoretical and Experimental error rates versus different SNR levels at a frequency offset of 0.01 Hz}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam16SNRfo2.jpg}
-\caption{16-QAM Theoretical and Experimental error rates versus different SNR levels at a frequency offset of 0.1 Hz}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam16SNRfo3.jpg}
-\caption{16-QAM Theoretical and Experimental error rates versus different SNR levels at a frequency offset of 1 Hz}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam16SNRfo4.jpg}
-\caption{16-QAM Theoretical and Experimental error rates versus different SNR levels at a frequency offset of 10 Hz}
-\end{figure}
-
-\subsubsection{64-QAM with Frequency Offset}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam64SNRfo1.jpg}
-\caption{64-QAM Theoretical and Experimental error rates versus different SNR levels at a frequency offset of 0.01 Hz}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam64SNRfo2.jpg}
-\caption{64-QAM Theoretical and Experimental error rates versus different SNR levels at a frequency offset of 0.1 Hz}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam64SNRfo3.jpg}
-\caption{64-QAM Theoretical and Experimental error rates versus different SNR levels at a frequency offset of 1 Hz}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam64SNRfo4.jpg}
-\caption{64-QAM Theoretical and Experimental error rates versus different SNR levels at a frequency offset of 10 Hz}
-\end{figure}
-
 \subsection{Constellation Plots for BPSK and QPSK with Frequency Offset}
 In the following sections scatter plots of  BPSK and QPSK constellations are plotted at symbol/input SNRs of 3 dB, 6dB, 10dB and 20dB and frequency offsets of 0.01 Hz, 0.1 Hz, 1 Hz, 10 Hz.
+
+We expect the frequency offset to cause a blurring around the unit circle.  However since our symbol period is small to begin with, the dilation of the blob is hard to see except in the high SNR plots.  For 10 Hz offset, with SNR of 20 dB, there is a clear stretching of the symbols.    
 
 \subsubsection{BPSK with Frequency Offset}
 \label{sec:bpsk_freqConst}
