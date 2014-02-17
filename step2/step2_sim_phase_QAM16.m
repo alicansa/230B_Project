@@ -6,7 +6,7 @@ clc;
 %Start by setting the initial variables
 overSampleSize = 4;
 rollOffFactor = 0.25;
-N= 4000; %number of bits generated
+N= 10000; %number of bits generated
 Ts = 4/10^6; %Symbol period (10Mbps)
 S=10; %average signal power for 16-QAM
 phase_offsets = [5,10,20,45]; %phase offsets for simulation
@@ -87,11 +87,6 @@ for k=1:length(phase_offsets)
          
         ser_theo(i) = 0.25*(Pe4(i)+Pe1(i) + Pe2(i) + Pe3(i));
 
-                
-           
-
-
-
        % ber_theo(i) = (1/4)*(3*qfunc(sqrt((4/5)*a))-(9/4)*qfunc(sqrt((4/5)*a))^2);
     end
     % save the constellation plot
@@ -106,8 +101,9 @@ for k=1:length(phase_offsets)
    % semilogy(SNR,ber_theo,'g');
     ylabel('Probability of Error');
     xlabel('SNR(dB)');
-    legend('Simulation(Symbol Error)','Simulation(Bit Error)','Theory (Symbol Error)',...
-        'Theory (Bit Error)','Location','SouthWest');
+    title(strcat('16-QAM SNR Comparison at ', num2str(phase_offsets(k)), ' Degree Offset'));
+    legend('Simulation(Symbol Error)','Theory (Symbol Error)',...
+       'Location','SouthWest');
     % save the BER graph
     print(h,'-djpeg','-r300',strcat('qam16SNRpo',num2str(k)));
 end
