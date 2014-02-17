@@ -85,9 +85,9 @@ for y=1:length(phase_offsets)
     %plot theoretical/simulation BER vs SNR graph
     g=figure;
     
-    semilogy(SNR,ser,'bo');
+    semilogy(SNR,ser,'ko');
     hold on;
-    semilogy(SNR,ser_theo,'g');
+    semilogy(SNR,ser_theo,'b');
     ylabel('Probability of Error');
     xlabel('Signal To Noise (dB)');
     title(['QPSK SNR Comparison at ',...
