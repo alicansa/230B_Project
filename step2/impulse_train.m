@@ -9,8 +9,6 @@ function [impulseTrain] = impulse_train(overSampleSize,N,symbols)
 
 % OUTPUT
 % impulseTrain - the upsampled waveform
-
-
 impulseTrain = zeros(1,length(symbols)*overSampleSize);
 
 for i=1:N

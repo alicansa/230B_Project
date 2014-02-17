@@ -91,7 +91,9 @@ for k=1:length(freq_offsets)
     semilogy(SNR,ber_theo,'g');
     ylabel('Probability of Error');
     xlabel('Signal To Noise (dB)');
-    legend('Simulation(Symbol Error)','Simulation(Bit Error)','Theory (Symbol Error)',...
+    title(strcat('SNR Comparison at ', num2str(freq_offsets(k)), ' Hz Offset'));
+    legend('Simulation(Symbol Error)','Simulation(Bit Error)',...
+        'Theory (Symbol Error)',...
         'Theory (Bit Error)','Location','SouthWest');
     % save the BER graph
     print(g,'-djpeg','-r300',strcat('qpSNRfo',num2str(k)));

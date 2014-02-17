@@ -1,7 +1,6 @@
 function [output] = sampler(input_signal, overSamplingFactor, Ts)
 % FUNCTION - this takes the cts waveform and samples it 
 %               (with upconversion) at periods of Ts
-
 % INPUTS
 % input_signal - the data stream received
 % overSamplingFactor - the amount to over sample
@@ -9,7 +8,6 @@ function [output] = sampler(input_signal, overSamplingFactor, Ts)
 
 % OUTPUTS
 % output - the sampled data signal
-
 N = length(input_signal);
 output = zeros(1,N/overSamplingFactor);
 for i=1:N/overSamplingFactor

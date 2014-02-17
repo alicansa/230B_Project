@@ -78,6 +78,7 @@ for k=1:length(phase_offsets)
     semilogy(SNR,ber_theo, 'b');
     ylabel('Probability of Error');
     xlabel('SNR (dB)');
+    title(strcat('SNR Comparison at  ', num2str(phase_offsets(k)), ' Degree Offset'));
     legend('Simulation (Bit Error)','Theory (Bit Error)');
     % save the BER graph
     print(h,'-djpeg','-r300',strcat('bpSNRpo',num2str(k)));

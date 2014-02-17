@@ -77,6 +77,7 @@ for k=1:length(freq_offsets)
     semilogy(SNR,ber, 'ko');
     hold on;
     semilogy(SNR,ber_theo, 'b');
+    title(strcat('SNR Comparison at ', num2str(freq_offsets(k)), ' Hz Offset'));
     ylabel('Probability of Error');
     xlabel('SNR (dB)');
     legend('Simulation (Bit Error)','Theory (Bit Error)');
