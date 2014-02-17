@@ -13,7 +13,7 @@
 \definecolor{mauve}{rgb}{0.58,0,0.82}
 
 \DeclareMathOperator*{\argmin}{\arg\!\min}
-
+\newcommand{\rom}[1]{\uppercase\expandafter{\romannumeral#1}}
 
 \lstset{frame=tb,
   language=VHDL,
@@ -84,11 +84,47 @@ The new block was modeled by two different functions.  For Phase offset, the sig
 With the new design worked out, the system was put through a similar set of tests on the four modulation schemes: BPSK, QPSK, 16-QAM, 64-QAM.  Each was subjected to phase offsets from $5\deg$ to $45\deg$ for a range of SNR levels.  Similarly, the modulated signals faced frequency offsets from 10 mHz to 10 Hz.  The system performance was determined by comparing a theoretical error rate to experimental bit error rate.  
 \section{Derivation of Errors}
 \label{sec:errors}
-The following are theoretical formulae for bit error rate under phase error \cite{howald}.
+The following are theoretical formulas for bit error rate under phase error \cite{howald}.  The first is a simple derivation based on a $\phi$ error.  Refer to Figure~\ref{fig:bpskDraw}.
+
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.4\textwidth]{bpskDraw.jpg}
+\caption{The rotation of a BPSK constellation is based on the phase error, $\phi$ \label{fig:bpskDraw}}
+\end{figure}
 
 \begin{equation}
-P_b^{\left( QPSK \right)} = \frac{1}{2}\left[Q\left(\sqrt{\frac{4E_b}{N_0}}sin\left(\frac{\pi}{4}+\theta\right)\right) + Q\left(\sqrt{\frac{4E_b}{N_0}}sin\left(\frac{3\pi}{4}+\theta\right)\right)\right]
+P_e^{\left(BPSK\right)} = Q\left(\frac{2cos\left(\phi\right)^{2}E_b}{N_0}\right)
 \end{equation}
+
+Next, the QPSK constellation error can be shown in Figure~\ref{fig:qpskDraw} to be:
+\begin{equation}
+P_e^{\left(QPSK \right)} = Q\left(\sqrt{\frac{2E_b}{N_0}}\sin\left(\frac{\pi}{4}-\phi\right)\right) + Q\left(\sqrt{\frac{2E_b}{N_0}}\sin\left(\frac{\pi}{4}+\phi\right)\right)
+\end{equation}
+
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.4\textwidth]{qpskDraw.jpg}
+\caption{The rotation of a QPSK constellation is based on the phase error \label{fig:qpskDraw}}
+\end{figure}
+
+The QAM phase error derivations get to be complicated.  As shown in Figure~\ref{fig:qamDraw}, there are multiple region types.  As such, different symbols have different error probabilities.  Equation~\ref{eq:qam16} shows the average error probability for the entire constellation.  This equation turns out to be superfluous since very little phase error all-together ruins the transmission.  Refer to Section~\ref{sec:qam16_phase}.
+\begin{align}
+P_{e,\rom{1}}^{16-QAM} &= Q\left(\sqrt{\frac{4E_b}{5N_0}}3\sqrt{2}\cos\left(\frac{\pi}{4}+\phi)-2\right)\right) + Q\left(\sqrt{\frac{4E_b}{5N_0}}3\sqrt{2}sin\left(\frac{\pi}{4}+\phi)-2\right)\right) \\
+P_{e,\rom{2}}^{16-QAM} &= Q\left(\sqrt{\frac{4E_b}{5N_0}}\left(\sqrt{10}\cos\left(\frac{\pi}{10}+\phi\right)-2\right)\right)  +  Q\left(\sqrt{\frac{4E_b}{5N_0}}\left(2-\sqrt{10}\sin\left(\frac{\pi}{10}+\phi)\right)\right)\right) \nonumber \\
+&\quad {} + Q\left(\sqrt{\frac{8E_b}{N_0}}\left(\cos\left(\frac{\pi}{10}+\phi\right)\right)\right) \\
+P_{e,\rom{3}}^{16-QAM} &= Q\left(\sqrt{\frac{8E_b}{N_0}}\cos\left(\frac{2\pi}{5}+\phi\right)\right)  +  Q\left(\sqrt{\frac{4E_b}{5N_0}}\left(2-\sqrt{10}\cos\left(\frac{2\pi}{5}+\phi \right)\right)\right) \nonumber \\
+&\quad {} + Q\left(\sqrt{\frac{4E_b}{5N_0}}\left(\sqrt{10}\sin\left(\frac{2\pi}{5}+\phi\right)-2\right)\right)\\
+P_{e,\rom{4}}^{16-QAM} &= Q\left(\sqrt{\frac{8E_b}{5N_0}}\cos\left(\frac{\pi}{4}+\phi\right)\right)  +  Q\left(\sqrt{\frac{8E_b}{5N_0}}\left(\sin\left(\frac{\pi}{4}+\phi \right)\right)\right) \nonumber \\
+&\quad {} + Q\left(\sqrt{\frac{4E_b}{5N_0}}\left(2-\sqrt{2}\sin\left(\frac{\pi}{4}+\phi\right)\right)\right) + Q\left(\sqrt{\frac{4E_b}{5N_0}}\left(2-\sqrt{2}\cos\left(\frac{\pi}{4}+\phi\right)\right)\right) \\
+\label{eq:qam16}
+P_{e}^{16-QAM} &= \frac{1}{4}\left( 4P_{e,\rom{1}}^{\text{16-QAM}} + 4P_{e,\rom{2}}^{\text{16-QAM}} + 4P_{e,\rom{3}}^{\text{16-QAM}} + 4P_{e,\rom{4}}^{\text{16-QAM}} \right)
+\end{align}
+
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.4\textwidth]{qamDraw.jpg}
+\caption{The rotation of a 16-QAM constellation is based on the phase error \label{fig:qamDraw}}
+\end{figure}
 
 \section{Step 2 Phase Offset Results}
 \label{sec:results_po}
@@ -163,7 +199,7 @@ As the phase error builds until $\frac{\pi}{4}$, the constellation becomes more 
 
 
 \subsubsection{16-QAM with Phase Offset}
-\label{qam16_phase}
+\label{sec:qam16_phase}
 \begin{figure}[H]
 \centering
 \hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam16SNRpo1.jpg}
@@ -297,14 +333,18 @@ We expect the frequency offset to cause a blurring around the unit circle.  Howe
 \begin{figure}[H]
 \centering
 \hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qpConstfo4.jpg}
-\caption{The QPSK constellation plots for different levels of SNR at a frequency offset of 10 Hz}
+\caption{The QPSK constellation plots for different levels of SNR at a frequency offset of 10 Hz \label{fig:qpsk_freq}}
 \end{figure}
 
 
 \newpage
 \section{Conclusion}
 \label{sec:conc}
-This phase of the project showed effects of carrier phase and frequency offsets.  This occurs in real systems when coherency is not maintained.  The models showed that bit error rates were not rendered unusable by small errors.  As phase got to $\frac{\pi}{4}$ off, the constellations became the same as for proper $\frac{\pi}{4}$-QPSK [Section~\ref{sec:qam16_phaseConst}].  Similarly, the frequency errors did not ruin the transmissions [\ref{sec:results_fo}].  
+This section of the project showed off the effects of carrier phase and frequency offsets.  This occurs in real systems when coherency is not maintained.  Synchronization between transmitter and receiver oscillator is not perfectly maintained.  The models showed that symbol error rates remained functional for small errors in phase and frequency.  As phase got to $\frac{\pi}{4}$ off, the constellations became the same as for proper $\frac{\pi}{4}$-QPSK [Section~\ref{sec:qam16_phaseConst}].  At this extreme, there was significant misclassification of symbols.  \\
+
+The frequency errors did completely not ruin the transmissions [\ref{sec:results_fo}].  Because the symbol period was so brief, the accumulation of error for small frequency deviations was kept small.  As the frequency difference climbed, the effect became more and more evident.  The tell-tale sign of an offset in frequency is shown in plots such as Figure~\ref{fig:qpsk_freq}.  The blur along the unit circle demonstrates the frequency error.  The errors were catastrophic in the case of a 10 Hz frequency offset.  \\
+
+From this project, the sensitivity of modulation schemes was analyzed.  Impercise phase and frequency can ruin a data system.  In subsequent phases of the project, remedies for these issues will be explored.
 
 \appendix
 \newpage

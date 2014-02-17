@@ -90,8 +90,8 @@ for y=1:length(phase_offsets)
     semilogy(SNR,ser_theo,'g');
     ylabel('Probability of Error');
     xlabel('Signal To Noise (dB)');
-    title(strcat('SNR Comparison at ',...
-        num2str(phase_offsets(y)), ' Degree Offset'));
+    title(['QPSK SNR Comparison at ',...
+        num2str(phase_offsets(y)), ' Degree Offset']);
     legend('Simulation(Symbol Error)',...
         'Theory (Symbol Error)','Location','SouthWest');
     % save the BER graph

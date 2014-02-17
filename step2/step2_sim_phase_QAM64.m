@@ -10,7 +10,7 @@ B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,4,Ts);
 SNR = 0:20;%SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,6,B);%convert given SNR levels to EbNo
-N=1800;%number of bits generated
+N=18000;%number of bits generated
 phase_offsets = [5,10,20,45]; %phase offsets for simulation
 bits = random_bit_generator(N);%random bit generation
 [quadrature, inphase] = QAM_64_mod(bits,N/6);%mapping to symbols
@@ -143,7 +143,10 @@ for k=1:length(phase_offsets)
    % semilogy(SNR,ber_theo, 'g');
     ylabel('Probability of Error');
     xlabel('SNR(dB)');
-    legend('Simulation(Symbol Error)','Simulation(Bit Error)','Theory(Symbol Error)', 'Theory(Bit Error)','Location','SouthWest');
+    title(['64-QAM SNR Comparison at ',...
+        num2str(phase_offsets(k)), ' Degree Offset']);
+    legend('Simulation(Symbol Error)','Theory(Symbol Error)',...
+        'Location','SouthWest');
     % save the BER graph
     print(h,'-djpeg','-r300',strcat('qam64SNRpo',num2str(k)));
 end
