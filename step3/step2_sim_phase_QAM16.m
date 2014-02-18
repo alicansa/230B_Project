@@ -6,7 +6,7 @@ clc;
 %Start by setting the initial variables
 overSampleSize = 4;
 rollOffFactor = 0.25;
-N= 4000; %number of bits generated
+N= 10000; %number of bits generated
 Ts = 4/10^6; %Symbol period (10Mbps)
 S=10; %average signal power for 16-QAM
 phase_offsets = [5,10,20,45]; %phase offsets for simulation
@@ -72,31 +72,30 @@ for k=1:length(phase_offsets)
         %SER/BER theoretical calculation)
         a = 10^(EbN0(i)/10);
         
-%         Pe1(i) = qfunc(sqrt((4/5)*a)*(3*sqrt(2)*cos(pi/4+pi*phase_offsets(k)/180)-2)) + ...
-%             qfunc(sqrt((4/5)*a)*(3*sqrt(2)*sin(pi/4+pi*phase_offsets(k)/180)-2));
-%         Pe2(i) = qfunc(sqrt((4/5)*a)*(sqrt(10)*cos(pi/10+pi*phase_offsets(k)/180)-2)) + ...
-%             qfunc(sqrt((4/5)*a)*(2-sqrt(10)*sin(pi/10+pi*phase_offsets(k)/180))) + ...
-%             qfunc((sqrt(10*(4/5)*a)*cos(pi/10+pi*phase_offsets(k)/180)));
-%         Pe3(i) = qfunc((sqrt(10*(4/5)*a)*cos(pi/2.5+pi*phase_offsets(k)/180))) + ...
-%             qfunc(sqrt((4/5)*a)*(2-sqrt(10)*cos(pi/2.5+pi*phase_offsets(k)/180))) + ...
-%             qfunc(sqrt((4/5)*a)*(sqrt(10)*sin(pi/2.5+pi*phase_offsets(k)/180)-2));
-%         Pe4(i) =  qfunc((sqrt(2*(4/5)*a)*cos(pi/4+pi*phase_offsets(k)/180))) + ...
-%              qfunc((sqrt(2*(4/5)*a)*cos(pi/4+pi*phase_offsets(k)/180))) + ...
-%              qfunc(sqrt((4/5)*a)*(2-sqrt(2)*cos(pi/4+pi*phase_offsets(k)/180))) + ...
-%              qfunc(sqrt((4/5)*a)*(2-sqrt(2)*sin(pi/4+pi*phase_offsets(k)/180)));
-%          
-%         ser_theo(i) = 0.25*(Pe4(i)+Pe1(i) + Pe2(i) + Pe3(i));
+        
+         Pe1(i) = qfunc(sqrt((4/5)*a)*(3*sqrt(2)*cos(pi/4+pi*phase_offsets(k)/180)-2)) + ...
+            qfunc(sqrt((4/5)*a)*(3*sqrt(2)*sin(pi/4+pi*phase_offsets(k)/180)-2));
+        Pe2(i) = qfunc(sqrt((4/5)*a)*(sqrt(10)*cos(pi/10+pi*phase_offsets(k)/180)-2)) + ...
+            qfunc(sqrt((4/5)*a)*(2-sqrt(10)*sin(pi/10+pi*phase_offsets(k)/180))) + ...
+            qfunc((sqrt(10*(4/5)*a)*cos(pi/10+pi*phase_offsets(k)/180)));
+        Pe3(i) = qfunc((sqrt(10*(4/5)*a)*cos(pi/2.5+pi*phase_offsets(k)/180))) + ...
+            qfunc(sqrt((4/5)*a)*(2-sqrt(10)*cos(pi/2.5+pi*phase_offsets(k)/180))) + ...
+            qfunc(sqrt((4/5)*a)*(sqrt(10)*sin(pi/2.5+pi*phase_offsets(k)/180)-2));
+        Pe4(i) =  qfunc((sqrt(2*(4/5)*a)*cos(pi/4+pi*phase_offsets(k)/180))) + ...
+             qfunc((sqrt(2*(4/5)*a)*sin(pi/4+pi*phase_offsets(k)/180))) + ...
+             qfunc(sqrt((4/5)*a)*(2-sqrt(2)*cos(pi/4+pi*phase_offsets(k)/180))) + ...
+             qfunc(sqrt((4/5)*a)*(2-sqrt(2)*sin(pi/4+pi*phase_offsets(k)/180)));
+        
+        if (phase_offsets(k) < 30)
+            ser_theo(i) = 0.25*(Pe4(i)+Pe1(i) + Pe2(i) + Pe3(i));
+            ber_theo(i) = (1/4)*(ser_theo(i));
+            
+        else
+             ser_theo(i) = 0.25*(Pe4(i)+Pe1(i) + Pe2(i) + Pe3(i) -1);
+             ber_theo(i) = (1/4)*(0.25*(Pe4(i)+Pe1(i) + Pe2(i) + Pe3(i)+1));
+        end
 
-                
-           
-        ser_theo(i) = qfunc(sqrt(4*a*sin(pi/4 - ...
-            pi*phase_offsets(y)/180)^2))+ qfunc(sqrt(4*a*sin(pi/4 + ...
-            pi*phase_offsets(y)/180)^2)) + qfunc(sqrt(4*a*sin(pi/4 - ...
-            pi*phase_offsets(y)/180)^2))+ qfunc(sqrt(4*a*sin(pi/4 + ...
-            pi*phase_offsets(y)/180)^2));
-
-
-       % ber_theo(i) = (1/4)*(3*qfunc(sqrt((4/5)*a))-(9/4)*qfunc(sqrt((4/5)*a))^2);
+        
     end
     % save the constellation plot
     print(f,'-djpeg','-r300',strcat('qam16Constpo',num2str(k)));
@@ -105,13 +104,14 @@ for k=1:length(phase_offsets)
     h=figure;
     semilogy(SNR,ser, 'ko');
     hold on;
-   % semilogy(SNR,ber, 'bo');
+    semilogy(SNR,ber, 'bo');
     semilogy(SNR,ser_theo, 'b');
-   % semilogy(SNR,ber_theo,'g');
+    semilogy(SNR,ber_theo,'g');
     ylabel('Probability of Error');
     xlabel('SNR(dB)');
+    title(strcat('16-QAM SNR Comparison at ', num2str(phase_offsets(k)), ' Degree Offset'));
     legend('Simulation(Symbol Error)','Simulation(Bit Error)','Theory (Symbol Error)',...
-        'Theory (Bit Error)','Location','SouthWest');
+       'Theory (Bit Error)','Location','SouthWest');
     % save the BER graph
     print(h,'-djpeg','-r300',strcat('qam16SNRpo',num2str(k)));
 end

@@ -66,20 +66,18 @@ for k=1:length(phase_offsets)
 
         %SER calculation - drop first symbol
         ser(i) = SER(bits(7:N),output_bits(7:N),6);
-       % ber(i) = BER(bits(7:N),output_bits(7:N));
+        ber(i) = BER(bits(7:N),output_bits(7:N));
         %SER theoretical calculation
         a = 10^(EbN0(i)/10);
         
 
-        
-
-         ser_theo(i) = 0.33*(qfunc(sqrt((18/63)*2*a*sin(pi/4 - ...
+         ser_theo(i) = (4/16)*(qfunc(sqrt((18/63)*2*a*sin(pi/4 - ...
             pi*phase_offsets(k)/180)^2))+ qfunc(sqrt((18/63)*2*a*sin(pi/4 + ...
-            pi*phase_offsets(k)/180)^2))) + 0.66*(qfunc(sqrt((18/63)*26*a*sin(pi/18 - ...
+            pi*phase_offsets(k)/180)^2))) + 0.5*(qfunc(sqrt((18/63)*26*a*sin(pi/18 - ...
             pi*phase_offsets(k)/180)^2))+ qfunc(sqrt((18/63)*26*a*sin(pi/18 + ...
             pi*phase_offsets(k)/180)^2)));
         
-      %  ber_theo(i) = (1/6)*(1-(1-(14/8)*qfunc(sqrt((18/63)*a)))^2);
+        ber_theo(i) = (1/6)*(ser_theo(i));
     end
     % print the constellation plot
     print(f,'-djpeg','-r300',strcat('qam64Const',num2str(k)));
@@ -88,15 +86,15 @@ for k=1:length(phase_offsets)
     h=figure;
     semilogy(SNR,ser, 'ko');
     hold on;
-   % semilogy(SNR,ber, 'bo');
+    semilogy(SNR,ber, 'bo');
     semilogy(SNR,ser_theo, 'r');
-   % semilogy(SNR,ber_theo, 'g');
+    semilogy(SNR,ber_theo, 'g');
     ylabel('Probability of Error');
     xlabel('SNR(dB)');
     title(['64-QAM SNR Comparison at ',...
         num2str(phase_offsets(k)), ' Degree Offset']);
-    legend('Simulation(Symbol Error)','Theory(Symbol Error)',...
-        'Location','SouthWest');
+    legend('Simulation(Symbol Error)','Simulation(Bit Error)','Theory(Symbol Error)',...
+        'Theory(Bit Error)','Location','SouthWest');
     % save the BER graph
     print(h,'-djpeg','-r300',strcat('qam64SNRpo',num2str(k)));
 end

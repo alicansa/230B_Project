@@ -6,16 +6,16 @@ clc;
 %Start by setting the initial variables
 overSampleSize = 4;
 rollOffFactor = 0.25;
-Ts = 2/10^6; %Symbol period (10Mbps)
+Ts = 2/10^6; %Symbol period (1Mbps)
 S=2; %average signal power for QPSK
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
-srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,4,Ts);
+srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
 SNR = 0:20; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
-N= 4000;  %number of bits generated
+N= 20000;  %number of bits generated
 k = 2;  % bits per symbol
-phase_offsets = [5,10,20,45]; %phase offsets for simulation
 bits = random_bit_generator(N);  %random bit generation
+freq_offsets = [0.01,0.1,1,10]; %frequency offsets for the simulation
 [quadrature, inphase] = qpsk_mod(bits,N/k);  %mapping to symbols
 
 %mapping symbols to signals by generating a impulse train and convolving
@@ -25,9 +25,10 @@ impulse_train_inphase = impulse_train(overSampleSize,N/k,inphase);
 transmit_quad = conv(impulse_train_quad,srrc,'same');
 transmit_inphase = conv(impulse_train_inphase,srrc,'same');
 
-for y=1:length(phase_offsets)
+for k=1:length(freq_offsets)
     %pass the signals through phase offset block
-    transmit_phase_offset = phase_offset(pi*phase_offsets(y)/180,transmit_inphase+j*transmit_quad);
+    transmit_freq_offset = freq_offset(freq_offsets(k),Ts,transmit_inphase+j*transmit_quad);
+
 
     %loop this section for the generation of BER vs SNR graphs and
     %constellation plots
@@ -41,7 +42,7 @@ for y=1:length(phase_offsets)
     for i=1:length(SNR)
        %pass the signals to be transmitted through awgn channel
 
-        received = awgn_complex_channel(transmit_phase_offset,SNR(i),S);
+        received = awgn_complex_channel(transmit_freq_offset,SNR(i),S);
 
         %pass the received signal through the matched filter for optimal
         %detection
@@ -74,30 +75,11 @@ for y=1:length(phase_offsets)
         ber(i) = BER(bits(3:N),output_bits(3:N));
         %SER theoretical calculation
         a = 10^(EbN0(i)/10);
-        ser_theo(i) = qfunc(sqrt(4*a*sin(pi/4 - ...
-            pi*phase_offsets(y)/180)^2))+ qfunc(sqrt(4*a*sin(pi/4 + ...
-            pi*phase_offsets(y)/180)^2));
-        
-        ber_theo(i) = (1/2)*ser_theo(i);
+        ser_theo(i) = 2*qfunc(sqrt(2*a))-qfunc(sqrt(2*a))^2;
+        ber_theo(i) = (1/2)*(2*qfunc(sqrt(2*a))-qfunc(sqrt(2*a))^2);
     end
 
     % save the constellation plot
-    print(f,'-djpeg','-r300',strcat('qpConstpo',num2str(y)));
+    print(f,'-djpeg','-r300',strcat('qpConstfo',num2str(k)));
 
-    %plot theoretical/simulation BER vs SNR graph
-    g=figure;
-    
-    semilogy(SNR,ser,'ko');
-    hold on;
-    semilogy(SNR,ber,'ro');
-    semilogy(SNR,ber_theo,'g');
-    semilogy(SNR,ser_theo,'b');
-    ylabel('Probability of Error');
-    xlabel('Signal To Noise (dB)');
-    title(['QPSK SNR Comparison at ',...
-        num2str(phase_offsets(y)), ' Degree Offset']);
-    legend('Simulation(Symbol Error)',...
-        'Simulation(Bit Error)','Theory (Bit Error)','Theory (Symbol Error)','Location','SouthWest');
-    % save the BER graph
-    print(g,'-djpeg','-r300',strcat('qpSNRpo',num2str(y)));
 end

@@ -6,16 +6,16 @@ clc;
 %Start by setting the initial variables
 overSampleSize = 4;
 rollOffFactor = 0.25;
-N= 10000; %number of bits generated
+N= 1000; %number of bits generated
 Ts = 4/10^6; %Symbol period (10Mbps)
 S=10; %average signal power for 16-QAM
-phase_offsets = [5,10,20,45]; %phase offsets for simulation
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,4,Ts);
 SNR = 0:20; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,4,B); %convert given SNR levels to EbNo
 bits = random_bit_generator(N);  %random bit generation
 [quadrature, inphase] = QAM_16_mod(bits,N/4); %mapping to symbols
+freq_offsets = [0.01,0.1,1,10]; %frequency offsets for the simulation
 
 %mapping symbols to signals by generating a impulse train and convolving
 %with the srrc pulse
@@ -25,10 +25,9 @@ transmit_quad = conv(impulse_train_quad,srrc,'same');
 transmit_inphase = conv(impulse_train_inphase,srrc,'same');
 
 
-for k=1:length(phase_offsets)
-
+for k=1:length(freq_offsets)
     %pass the signals through phase offset block
-    transmit_phase_offset = phase_offset(pi*phase_offsets(k)/180,transmit_inphase+j*transmit_quad);
+    transmit_feq_offset = freq_offset(freq_offsets(k),Ts,transmit_inphase + j*transmit_quad);
 
     %loop this section for the generation of BER vs SNR graphs and
     %constellation plots
@@ -37,7 +36,7 @@ for k=1:length(phase_offsets)
     for i=1:length(SNR)
 
        %pass the signals to be transmitted through awgn channel
-        received = awgn_complex_channel(transmit_phase_offset,SNR(i),S);
+        received = awgn_complex_channel(transmit_feq_offset,SNR(i),S);
 
         %pass the received signal through the matched filter for optimal
         %detection
@@ -59,7 +58,7 @@ for k=1:length(phase_offsets)
             xlabel('In-Phase'),ylabel('Quadrature-Phase');
             tit = strcat('SNR=',num2str(SNR(i)),' dB');
             title(tit);
-             axis([xlim, ylim]);
+            axis([xlim, ylim]);
             num = num+1;
         end
 
@@ -71,34 +70,11 @@ for k=1:length(phase_offsets)
         ber(i) = BER(bits(5:N),output_bits(5:N));
         %SER/BER theoretical calculation)
         a = 10^(EbN0(i)/10);
-        
-        
-         Pe1(i) = qfunc(sqrt((4/5)*a)*(3*sqrt(2)*cos(pi/4+pi*phase_offsets(k)/180)-2)) + ...
-            qfunc(sqrt((4/5)*a)*(3*sqrt(2)*sin(pi/4+pi*phase_offsets(k)/180)-2));
-        Pe2(i) = qfunc(sqrt((4/5)*a)*(sqrt(10)*cos(pi/10+pi*phase_offsets(k)/180)-2)) + ...
-            qfunc(sqrt((4/5)*a)*(2-sqrt(10)*sin(pi/10+pi*phase_offsets(k)/180))) + ...
-            qfunc((sqrt(10*(4/5)*a)*cos(pi/10+pi*phase_offsets(k)/180)));
-        Pe3(i) = qfunc((sqrt(10*(4/5)*a)*cos(pi/2.5+pi*phase_offsets(k)/180))) + ...
-            qfunc(sqrt((4/5)*a)*(2-sqrt(10)*cos(pi/2.5+pi*phase_offsets(k)/180))) + ...
-            qfunc(sqrt((4/5)*a)*(sqrt(10)*sin(pi/2.5+pi*phase_offsets(k)/180)-2));
-        Pe4(i) =  qfunc((sqrt(2*(4/5)*a)*cos(pi/4+pi*phase_offsets(k)/180))) + ...
-             qfunc((sqrt(2*(4/5)*a)*sin(pi/4+pi*phase_offsets(k)/180))) + ...
-             qfunc(sqrt((4/5)*a)*(2-sqrt(2)*cos(pi/4+pi*phase_offsets(k)/180))) + ...
-             qfunc(sqrt((4/5)*a)*(2-sqrt(2)*sin(pi/4+pi*phase_offsets(k)/180)));
-        
-        if (phase_offsets(k) < 30)
-            ser_theo(i) = 0.25*(Pe4(i)+Pe1(i) + Pe2(i) + Pe3(i));
-            ber_theo(i) = (1/4)*(ser_theo(i));
-            
-        else
-             ser_theo(i) = 0.25*(Pe4(i)+Pe1(i) + Pe2(i) + Pe3(i) -1);
-             ber_theo(i) = (1/4)*(0.25*(Pe4(i)+Pe1(i) + Pe2(i) + Pe3(i)+1));
-        end
-
-        
+        ser_theo(i) = 3*qfunc(sqrt((4/5)*a))-(9/4)*qfunc(sqrt((4/5)*a))^2;
+        ber_theo(i) = (1/4)*(3*qfunc(sqrt((4/5)*a))-(9/4)*qfunc(sqrt((4/5)*a))^2);
     end
     % save the constellation plot
-    print(f,'-djpeg','-r300',strcat('qam16Constpo',num2str(k)));
+    print(f,'-djpeg','-r300',strcat('qam16Constfo',num2str(k)));
 
     %plot theoretical/simulation BER vs SNR graph
     h=figure;
@@ -108,10 +84,10 @@ for k=1:length(phase_offsets)
     semilogy(SNR,ser_theo, 'b');
     semilogy(SNR,ber_theo,'g');
     ylabel('Probability of Error');
+    title(strcat('SNR Comparison at ', num2str(freq_offsets(k)), ' Hz Offset'));
     xlabel('SNR(dB)');
-    title(strcat('16-QAM SNR Comparison at ', num2str(phase_offsets(k)), ' Degree Offset'));
     legend('Simulation(Symbol Error)','Simulation(Bit Error)','Theory (Symbol Error)',...
-       'Theory (Bit Error)','Location','SouthWest');
+        'Theory (Bit Error)','Location','SouthWest');
     % save the BER graph
-    print(h,'-djpeg','-r300',strcat('qam16SNRpo',num2str(k)));
+    print(h,'-djpeg','-r300',strcat('qam16SNRfo',num2str(k)));
 end

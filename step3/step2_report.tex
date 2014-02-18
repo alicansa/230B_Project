@@ -107,7 +107,7 @@ P_e^{\left(QPSK \right)} = Q\left(\sqrt{\frac{2E_b}{N_0}}\sin\left(\frac{\pi}{4}
 \caption{The rotation of a QPSK constellation is based on the phase error \label{fig:qpskDraw}}
 \end{figure}
 
-The QAM phase error derivations get to be quite complicated.  As shown in Figure~\ref{fig:qamDraw}, there are multiple region types.  As such, different symbols have different error probabilities.  Equation~\ref{eq:qam16} shows the average error probability for the entire constellation.  This equation turns out to be superfluous since very little phase error effectively ruins the transmission.  Refer to Section~\ref{sec:qam16_phase}.
+The QAM phase error derivations get to be complicated.  As shown in Figure~\ref{fig:qamDraw}, there are multiple region types.  As such, different symbols have different error probabilities.  Equation~\ref{eq:qam16} shows the average error probability for the entire constellation.  This equation turns out to be superfluous since very little phase error all-together ruins the transmission.  Refer to Section~\ref{sec:qam16_phase}.
 \begin{align}
 P_{e,\rom{1}}^{16-QAM} &= Q\left(\sqrt{\frac{4E_b}{5N_0}}3\sqrt{2}\cos\left(\frac{\pi}{4}+\phi)-2\right)\right) + Q\left(\sqrt{\frac{4E_b}{5N_0}}3\sqrt{2}sin\left(\frac{\pi}{4}+\phi)-2\right)\right) \\
 P_{e,\rom{2}}^{16-QAM} &= Q\left(\sqrt{\frac{4E_b}{5N_0}}\left(\sqrt{10}\cos\left(\frac{\pi}{10}+\phi\right)-2\right)\right)  +  Q\left(\sqrt{\frac{4E_b}{5N_0}}\left(2-\sqrt{10}\sin\left(\frac{\pi}{10}+\phi)\right)\right)\right) \nonumber \\
@@ -297,9 +297,9 @@ In the following sections scatter plots of  16-QAM constellation are plotted at 
 \section{Step 2 Frequency Offset Results}
 \label{sec:results_fo}
 \subsection{Constellation Plots for BPSK and QPSK with Frequency Offset}
-In the following sections,  BPSK and QPSK constellations are scatter-plotted at symbol/input SNRs of 3 dB, 6dB, 10dB and 20dB and frequency offsets of 0.01 Hz, 0.1 Hz, 1 Hz, 10 Hz.
+In the following sections scatter plots of  BPSK and QPSK constellations are plotted at symbol/input SNRs of 3 dB, 6dB, 10dB and 20dB and frequency offsets of 0.01 Hz, 0.1 Hz, 1 Hz, 10 Hz.
 
-We expected the frequency offset to cause a blurring around the unit circle.  However, we realized the dilation of the blob is dependent on the symbol period.  The effect is hard to see except in the high SNR plots.  For 10 Hz offset, with an SNR of 20 dB, there is a clear stretching of the symbols [See Figure~\ref{fig:qpsk_freq}].    
+We expect the frequency offset to cause a blurring around the unit circle.  The dilation of the blob is dependent on the symbol period.  The effect is hard to see except in the high SNR plots.  For 10 Hz offset, with SNR of 20 dB, there is a clear stretching of the symbols.    
 
 \subsubsection{BPSK with Frequency Offset}
 \label{sec:bpsk_freqConst}
