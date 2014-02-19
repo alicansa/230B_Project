@@ -118,7 +118,14 @@ for y=1:length(phase_offsets)
         %SER calculation - drop first symbol   
         ser(i) = SER(bits(3:N),output_bits(3:N),2);
         ber(i) = BER(bits(3:N),output_bits(3:N));
-
+        %SER theoretical calculation
+        a = 10^(EbN0(i)/10);
+        ser_theo(i) = qfunc(sqrt(4*a*sin(pi/4 - ...
+            pi*phase_offsets(y)/180)^2))+ qfunc(sqrt(4*a*sin(pi/4 + ...
+            pi*phase_offsets(y)/180)^2));
+        
+        ber_theo(i) = (1/2)*ser_theo(i);
+        
     end
 
     % save the constellation plot
