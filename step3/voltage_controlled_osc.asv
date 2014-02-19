@@ -1,6 +1,0 @@
-function [output] = voltage_controlled_osc(input,delayed_input)
-
-output = mod(moving_a
-
-end
-

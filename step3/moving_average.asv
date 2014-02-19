@@ -1,9 +1,0 @@
-function [output] = moving_average(N,input)
-
-%assume the initial values are equal to the first input value of the filter
-delayed_values[1:N-1] = input;
-
-
-
-end
-
