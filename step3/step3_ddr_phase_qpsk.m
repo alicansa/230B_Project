@@ -1,4 +1,4 @@
-%% STEP 2 QPSK
+%% STEP 3 QPSK
 %Simulation for the QPSK modulation scheme
 close all;
 clear all;
@@ -10,11 +10,11 @@ Ts = 2/10^6; %Symbol period (10Mbps)
 S=2; %average signal power for QPSK
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,4,Ts);
-SNR = 0:20; %SNR levels where the system will be simulated
+SNR = [6,30]; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
 N= 4000;  %number of bits generated
 k = 2;  % bits per symbol
-phase_offsets = [5,10,20,45]; %phase offsets for simulation
+phase_offsets = [30]; %phase offsets for simulation
 bits = random_bit_generator(N);  %random bit generation
 [quadrature, inphase] = qpsk_mod(bits,N/k);  %mapping to symbols
 
@@ -51,8 +51,7 @@ for y=1:length(phase_offsets)
         %at each symbol period
         sampled = sampler(matched_output,overSampleSize,Ts);
         %constellation plot
-        if (SNR(i) == 3) || SNR(i) == 6 || SNR(i) == 10 || ...
-                SNR(i) == 15 || SNR(i) == 20
+        
             subplot(2,3,num);
             scatter(real(sampled),imag(sampled),'*');
             xlim = [1.5*min(real(sampled)) 1.5*max(real(sampled))];
@@ -64,11 +63,14 @@ for y=1:length(phase_offsets)
             title(tit);
             axis([xlim, ylim]);
             num = num+1;
-        end
 
         %pass the received symbols through ML-decision box 
         output_bits = qpsk_demod(real(sampled),imag(sampled));
 
+        
+        
+        
+        
         %SER calculation - drop first symbol   
         ser(i) = SER(bits(3:N),output_bits(3:N),k);
         ber(i) = BER(bits(3:N),output_bits(3:N));
