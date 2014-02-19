@@ -47,7 +47,7 @@ for k=1:length(freq_offsets)
            axis([xlim, ylim]);
     end
     % save the constellation plot
-    print(f,'-djpeg','-r300',strcat('bpConstfo',num2str(k)));
+%     print(f,'-djpeg','-r300',strcat('bpConstfo',num2str(k)));
     
     %plot theoretical/simulation BER vs SNR graph
     h=figure;
@@ -60,6 +60,6 @@ for k=1:length(freq_offsets)
     xlabel('SNR (dB)');
     legend('Simulation (Bit Error)','Theory (Bit Error)');
     % save the BER graph
-    print(h,'-djpeg','-r300',strcat('bpSNRfo',num2str(k)));
+%     print(h,'-djpeg','-r300',strcat('bpSNRfo',num2str(k)));
     
 end
