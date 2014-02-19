@@ -4,7 +4,7 @@ close all;
 clear all;
 clc;
 
-filename = 'bpsk_freq';
+filename = 'step3_sim_freq_bpsk';
 
 
 %Start by setting the initial variables
@@ -41,7 +41,6 @@ for k=1:length(freq_offsets)
     %loop this section for the generation of BER vs SNR graphs and
     %constellation plots
     num = 1;
-    f = figure;
     for i=1:length(SNR)
 
         %pass the signals to be transmitted through awgn channel
@@ -54,24 +53,12 @@ for k=1:length(freq_offsets)
         %pass the matched filter output through the sampler to obtain symbols
         %at each symbol period
         sampled = sampler(matched_output,overSampleSize,Ts);
-        
 
         % constellation
         if (SNR(i) == 3) || SNR(i) == 6 || SNR(i) == 10 || ...
                 SNR(i) == 15 || SNR(i) == 20
            samples{k,num} = sampled; 
-%            
-%            subplot(2,3,num);
-%            scatter(real(sampled),imag(sampled),'*');
-%            xlim = [1.5*min(real(sampled)) 1.5*max(real(sampled))];
-%            ylim = [1.5*min(imag(sampled)) 1.5*max(imag(sampled))];
-%              line(xlim,[0 0], 'Color', 'k');
-%            line([0 0],ylim,'Color', 'k');
-%            xlabel('In-Phase'),ylabel('Quadrature-Phase');
-%             tit = strcat('SNR=',num2str(SNR(i)),' dB');
-%             title(tit);
-%            axis([xlim, ylim]);
-%            num = num+1;
+           num = num+1;
         end
 
         %pass the received symbols through ML-decision box
@@ -83,22 +70,8 @@ for k=1:length(freq_offsets)
         a = 10^(EbN0(i)/10);
         ber_theo{k,i} = qfunc(sqrt(2*a));  
     end
-    % save the constellation plot
-    %print(f,'-djpeg','-r300',strcat('bpConstfo',num2str(k)));
-
-    %plot theoretical/simulation BER vs SNR graph
-    h=figure;
-    semilogy(SNR,ber{k,i}, 'ko');
-    hold on;
-    semilogy(SNR,ber_theo{k,i}, 'b');
-    title(strcat('SNR Comparison at ', num2str(freq_offsets(k)), ' Hz Offset'));
-    ylabel('Probability of Error');
-    xlabel('SNR (dB)');
-    legend('Simulation (Bit Error)','Theory (Bit Error)');
-    % save the BER graph
-    print(h,'-djpeg','-r300',strcat('bpSNRfo',num2str(k)));
 end
 
-fields = ['freq_offsets','SNR','ber','ber_theo','samples'];
-structs = struct('freq_offsets',freq_offsets,'SNR',SNR,'ber',ber,'ber_theo',ber_theo,'samples',samples);
-save(filename,-struct,structs,fields);
+fields = {'freq_offsets','SNR','ber','ber_theo','samples'};
+% structs = struct('freq_offsets',freq_offsets,'SNR',SNR,'ber',ber,'ber_theo',ber_theo,'samples',cell2mat(samples));
+save(filename,fields{:});
