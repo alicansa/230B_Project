@@ -1,0 +1,8 @@
+function [output delayed_] = loop_filter(input,input_delayed)
+
+
+output = 0.5*input + 0.5*input_delayed;
+
+
+end
+
