@@ -15,12 +15,8 @@ SNR = [6,30]; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
 N= 20000;  %number of bits generated
 k = 2;  % bits per symbol
-<<<<<<< HEAD
-freq_offsets = [0.5 15]; %freq offsets for simulation. 
-                         %1ppm and 30 ppm respectively. 
-=======
+
 freq_offsets = [0.5 150]; %freq offsets for simulation. 1ppm and 30 ppm respectively. 
->>>>>>> 705290c8d862cf44accbd1e38b6f23aff2ee2e8b
                          %Fs = 10^6/2 for 1Mbps 
 bits = random_bit_generator(N);  %random bit generation
 [quadrature, inphase] = qpsk_mod(bits,N/k);  %mapping to symbols
@@ -102,15 +98,7 @@ for y=1:length(freq_offsets)
             % received signal with -sin(theta) and
             %cos(theta). Then pass through loop filter
             moving_av_input = phase_estimate;
-<<<<<<< HEAD
-            moving_av_output = moving_average(moving_av_input,...
-                delayed_moving_av_input);
-            
-            %pass through VCO
-            vco_output = voltage_controlled_osc(moving_av_output,...
-                delayed_vco_output);
-             
-=======
+
             [moving_av_output delayed_moving_av_input] = loop_filter(moving_av_input,delayed_moving_av_input);
             
             loop_filter_output(k) = moving_av_output;
@@ -120,7 +108,6 @@ for y=1:length(freq_offsets)
             [vco_output phase_acc_output] = voltage_controlled_osc(moving_av_output,delayed_phase_acc_output);             
            
             
->>>>>>> 705290c8d862cf44accbd1e38b6f23aff2ee2e8b
             %merge bits
             output_bits = strcat(output_bits,output_bit);
         end
