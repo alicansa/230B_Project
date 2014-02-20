@@ -66,7 +66,7 @@ for y=1:length(freq_offsets)
             delayed_im_corr_received = im_corr_received;
             delayed_re_corr_received = re_corr_received;
             delayed_moving_av_input = moving_av_input;
-             delayed_phase_acc_output = phase_acc_output;
+            delayed_phase_acc_output = phase_acc_output;
             
             %do correction
             corr_received = exp(-j*vco_output).*...
@@ -99,13 +99,14 @@ for y=1:length(freq_offsets)
             %cos(theta). Then pass through loop filter
             moving_av_input = phase_estimate;
 
-            [moving_av_output delayed_moving_av_input] = loop_filter(moving_av_input,delayed_moving_av_input);
+            [moving_av_output, delayed_moving_av_input] = ...
+                moving_avg_filter(moving_av_input,delayed_moving_av_input);
             
             loop_filter_output(k) = moving_av_output;
             
             
             %pass through VCO
-            [vco_output phase_acc_output] = voltage_controlled_osc(moving_av_output,delayed_phase_acc_output);             
+            [vco_output, phase_acc_output] = voltage_controlled_osc(moving_av_output,delayed_phase_acc_output);             
            
             
             %merge bits
