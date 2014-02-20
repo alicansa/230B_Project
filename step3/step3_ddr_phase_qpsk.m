@@ -36,8 +36,6 @@ for y=1:length(phase_offsets)
     %constellation plots
     % declare variables
     h = zeros(1,5);
-    ser = zeros(1,length(SNR));
-    ser_theo = zeros(1,length(SNR));
     ber_EbN0 = zeros(1,length(SNR));
     f = figure;
     num = 1;
@@ -94,6 +92,8 @@ for y=1:length(phase_offsets)
             moving_av_input = phase_estimate;
             moving_av_output = moving_average(moving_av_input,delayed_moving_av_input);
             
+            loop_filter_output(k) = moving_av_output;
+            
             %pass through VCO
             vco_output = voltage_controlled_osc(moving_av_output,delayed_vco_output);
              
@@ -116,28 +116,32 @@ for y=1:length(phase_offsets)
             num = num+1;
         
         %SER calculation - drop first symbol   
-        ser(i) = SER(bits(3:N),output_bits(3:N),2);
-        ber(i) = BER(bits(3:N),output_bits(3:N));
+        ser(y,i) = SER(bits(3:N),output_bits(3:N),2);
+        ber(y,i) = BER(bits(3:N),output_bits(3:N));
 
     end
 
     % save the constellation plot
     print(f,'-djpeg','-r300',strcat('qpConstpo',num2str(y)));
-
-    %plot theoretical/simulation BER vs SNR graph
-    g=figure;
     
-    semilogy(SNR,ser,'ko');
-    hold on;
-    semilogy(SNR,ber,'ro');
-    semilogy(SNR,ber_theo,'g');
-    semilogy(SNR,ser_theo,'b');
-    ylabel('Probability of Error');
-    xlabel('Signal To Noise (dB)');
-    title(['QPSK SNR Comparison at ',...
-        num2str(phase_offsets(y)), ' Degree Offset']);
-    legend('Simulation(Symbol Error)',...
-        'Simulation(Bit Error)','Theory (Bit Error)','Theory (Symbol Error)','Location','SouthWest');
-    % save the BER graph
-    print(g,'-djpeg','-r300',strcat('qpSNRpo',num2str(y)));
+    
+    figure
+    plot(loop_filter_output);
+    
+    %plot theoretical/simulation BER vs SNR graph
+%     g=figure;
+%     
+%     semilogy(SNR,ser,'ko');
+%     hold on;
+%     semilogy(SNR,ber,'ro');
+%     semilogy(SNR,ber_theo,'g');
+%     semilogy(SNR,ser_theo,'b');
+%     ylabel('Probability of Error');
+%     xlabel('Signal To Noise (dB)');
+%     title(['QPSK SNR Comparison at ',...
+%         num2str(phase_offsets(y)), ' Degree Offset']);
+%     legend('Simulation(Symbol Error)',...
+%         'Simulation(Bit Error)','Theory (Bit Error)','Theory (Symbol Error)','Location','SouthWest');
+%     % save the BER graph
+%     print(g,'-djpeg','-r300',strcat('qpSNRpo',num2str(y)));
 end

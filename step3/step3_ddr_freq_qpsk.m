@@ -13,9 +13,9 @@ B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,4,Ts);
 SNR = [6,30]; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
-N= 20000;  %number of bits generated
+N= 1000;  %number of bits generated
 k = 2;  % bits per symbol
-freq_offsets = [0.5 15]; %freq offsets for simulation. 1ppm and 30 ppm respectively. 
+freq_offsets = [0.5 150]; %freq offsets for simulation. 1ppm and 30 ppm respectively. 
                          %Fs = 10^6/2 for 1Mbps 
 bits = random_bit_generator(N);  %random bit generation
 [quadrature, inphase] = qpsk_mod(bits,N/k);  %mapping to symbols
@@ -93,9 +93,14 @@ for y=1:length(freq_offsets)
             moving_av_input = phase_estimate;
             moving_av_output = moving_average(moving_av_input,delayed_moving_av_input);
             
+             loop_filter_output(k) = moving_av_output;
+            
+            
             %pass through VCO
             vco_output = voltage_controlled_osc(moving_av_output,delayed_vco_output);
              
+           
+            
             %merge bits
             output_bits = strcat(output_bits,output_bit);
         end
@@ -122,7 +127,12 @@ for y=1:length(freq_offsets)
 
     % save the constellation plot
     print(f,'-djpeg','-r300',strcat('qpConstpo',num2str(y)));
-
+    
+    
+    %plot S-curve of freq-detector 
+    figure
+    plot(loop_filter_output);
+    
     %plot theoretical/simulation BER vs SNR graph
 %     g=figure;
 %     
