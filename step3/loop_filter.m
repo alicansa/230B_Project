@@ -1,5 +1,5 @@
-function [output, delayed_sum] = moving_avg_filter(input,delayed_sum_input)
-%FUNCTION - 
+function [output, delayed_sum] = loop_filter(input,delayed_sum_input)
+%FUNCTION - this is a moving average filter
 
 % INPUTS 
 % input - the signal value presently

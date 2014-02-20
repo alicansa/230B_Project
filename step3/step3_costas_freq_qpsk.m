@@ -88,7 +88,7 @@ for y=1:length(freq_offsets)
             phase_estimate = im_received.*re_sign ...
                                 + re_received.*im_sign;
                             
-            pi_output = piFilter(phase_estimate,phase_delayed);
+            pi_output = loop_filter(phase_estimate,phase_delayed);
             
             %pass through VCO
             vco_output = voltage_controlled_osc(pi_output,...
