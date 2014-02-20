@@ -15,7 +15,7 @@ Ts = 2/10^6; %Symbol period (1Mbps)
 S=2; %average signal power for QPSK
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,4,Ts);
-SNR = [6,30]; %SNR levels where the system will be simulated
+SNR = [30]; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
 N= 20000;  %number of bits generated
 k = 2;  % bits per symbol
@@ -39,6 +39,7 @@ ser = zeros(length(freq_offsets),length(SNR));
 % ber_theo = zeros(length(freq_offsets),length(SNR));
 
 for y=1:length(freq_offsets)
+    num=1;
     %pass the signals through phase offset block
     transmit_freq_offset = freq_offset(freq_offsets(y),...
         Ts,transmit_inphase+1i*transmit_quad);
@@ -55,12 +56,23 @@ for y=1:length(freq_offsets)
         phase_delayed = 0;
         delayed_vco_output = 0 ;
 
+        delayed_moving_av_input = 0;
+        delayed_phase_acc_output = 0 ;
+        moving_av_input = 0;
+        phase_acc_output = 0;
+        delayed_moving_av_output = 0;
+         
         %pass symbol-by-symbol in order to simulate the feedback loop
         for k=1:length(received)/overSampleSize
-                               
+                
+            
+            delayed_moving_av_input = delayed_moving_av_output;
+            delayed_phase_acc_output = phase_acc_output;
+            
             %do correction
-            corr_received = exp(-1i*vco_output).*...
-                received((k-1)*overSampleSize+1:k*overSampleSize);
+            corr_received = exp(-j*vco_output)*received((k-1)*overSampleSize+1:k*overSampleSize);
+            
+            delayed_vco_output = vco_output;
             
             %pass the received signal through the matched filter for optimal
             %detection
@@ -68,45 +80,56 @@ for y=1:length(freq_offsets)
     
             %pass the matched filter output through the
             % sampler to obtain symbols at each symbol period
-            sample_present = sampler(matched_output_symbol,overSampleSize,Ts); 
+            sampled(k) = sampler(matched_output_symbol,overSampleSize,Ts); 
             % save it for later
-            samples{y,i}(k) = sample_present;
+            samples{y,i}(k) = sampled(k);
             
             %seperate to real and imagenary parts
-            im_received = real(sample_present);
-            re_received = imag(sample_present);
+            im_received = real(sampled(k));
+            re_received = imag(sampled(k));
             
             %pass the received symbols through ML-decision box 
-            [output_bit,output_symbol] = qpsk_demod(re_received,...
-                im_received);
+            [output_bit,output_symbol] = qpsk_demod(im_received,...
+                re_received);
             
             % gather the signs
-            im_sign = sign(im_received);
-            re_sign = sign(re_received);
+            im_sign = tanh(im_received);
+            re_sign = tanh(re_received);
             
             % come up with metric for phase error
-            phase_estimate = im_received.*re_sign ...
-                                + re_received.*im_sign;
-                            
-            pi_output = loop_filter(phase_estimate,phase_delayed);
-            
+            phase_estimate = -im_received*re_sign + re_received*im_sign;
+            moving_av_input = phase_estimate;              
+            [moving_av_output delayed_moving_av_output] = loop_filter(moving_av_input,delayed_moving_av_input);
+            loop_filter_output(k) = moving_av_output;
             %pass through VCO
-            vco_output = voltage_controlled_osc(pi_output,...
-                delayed_vco_output);
+            [vco_output phase_acc_output] = voltage_controlled_osc(moving_av_output,...
+                delayed_phase_acc_output);
              
             %merge bits
             output_bits = strcat(output_bits,output_bit);
-            
-            % set up new delayed values
-            phase_delayed = phase_estimate;
-            delayed_vco_output = vco_output;
         end
         
+     %constellation plot
+        
+            subplot(2,3,num);
+            scatter(real(sampled),imag(sampled),'*');
+            xlim = [1.5*min(real(sampled)) 1.5*max(real(sampled))];
+            ylim = [1.5*min(imag(sampled)) 1.5*max(imag(sampled))];
+            line(xlim,[0 0], 'Color', 'k');
+            line([0 0],ylim,'Color', 'k');
+            xlabel('In-Phase'),ylabel('Quadrature-Phase');
+            tit = strcat('SNR=',num2str(SNR(i)),' dB');
+            title(tit);
+            axis([xlim, ylim]);
+            num = num+1;
+            
         %SER calculation - drop first symbol   
         ser(y,i) = SER(bits(3:N),output_bits(3:N),2);
         ber(y,i) = BER(bits(3:N),output_bits(3:N));
 
     end
+    figure
+    plot(loop_filter_output);
 
 end
 

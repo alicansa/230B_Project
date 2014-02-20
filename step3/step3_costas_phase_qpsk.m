@@ -1,58 +1,116 @@
-%% STEP 2 QPSK
+%% STEP 3 QPSK
 %Simulation for the QPSK modulation scheme
 close all;
 clear all;
 clc;
+
+
+file = 'step3_costas_phase_qpsk';
+
 %Start by setting the initial variables
+output_bits = '';
 overSampleSize = 4;
 rollOffFactor = 0.25;
-Ts = 2/10^6; %Symbol period (10Mbps)
+Ts = 2/10^6; %Symbol period (1Mbps)
 S=2; %average signal power for QPSK
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,4,Ts);
-SNR = 0:20; %SNR levels where the system will be simulated
+SNR = [6,30]; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
-N= 4000;  %number of bits generated
+N= 20000;  %number of bits generated
 k = 2;  % bits per symbol
-phase_offsets = [5,10,20,45]; %phase offsets for simulation
+phase_offsets = [45]; %freq offsets for simulation. 
+                         %1ppm and 30 ppm respectively. 
+                         %Fs = 10^6/2 for 1Mbps 
 bits = random_bit_generator(N);  %random bit generation
 [quadrature, inphase] = qpsk_mod(bits,N/k);  %mapping to symbols
 
-%mapping symbols to signals by generating a impulse train and convolving
+%mapping symbols to signals by generating an impulse train and convolving
 %with the srrc pulse
 impulse_train_quad = impulse_train(overSampleSize,N/k,quadrature);
 impulse_train_inphase = impulse_train(overSampleSize,N/k,inphase);
 transmit_quad = conv(impulse_train_quad,srrc,'same');
 transmit_inphase = conv(impulse_train_inphase,srrc,'same');
 
-for y=1:length(phase_offsets)
-    %pass the signals through phase offset block
-    transmit_phase_offset = phase_offset(pi*phase_offsets(y)/180,transmit_inphase+j*transmit_quad);
+% data saving arrays;
+samples = cell(length(phase_offsets),length(SNR));
+ber = zeros(length(phase_offsets),length(SNR));
+ser = zeros(length(phase_offsets),length(SNR));
+% ber_theo = zeros(length(freq_offsets),length(SNR));
 
-    %loop this section for the generation of BER vs SNR graphs and
-    %constellation plots
-    % declare variables
-    h = zeros(1,5);
-    ser = zeros(1,length(SNR));
-    ser_theo = zeros(1,length(SNR));
-    ber_EbN0 = zeros(1,length(SNR));
-    f = figure;
-    num = 1;
+for y=1:length(phase_offsets)
+    num=1;
+    %pass the signals through phase offset block
+    transmit_phase_offset = phase_offset(phase_offsets(y),...
+        transmit_inphase+1i*transmit_quad);
+
     for i=1:length(SNR)
        %pass the signals to be transmitted through awgn channel
 
         received = awgn_complex_channel(transmit_phase_offset,SNR(i),S);
+        output_bits = '';
+        
+        %initialize feedback parameters
+        vco_output = 0;
+        phase_estimate = 0;
+        phase_delayed = 0;
+        delayed_vco_output = 0 ;
 
-        %pass the received signal through the matched filter for optimal
-        %detection
-        matched_output = conv(received,srrc,'same');
-
-        %pass the matched filter output through the sampler to obtain symbols
-        %at each symbol period
-        sampled = sampler(matched_output,overSampleSize,Ts);
-        %constellation plot
-        if (SNR(i) == 3) || SNR(i) == 6 || SNR(i) == 10 || ...
-                SNR(i) == 15 || SNR(i) == 20
+        delayed_moving_av_input = 0;
+        delayed_phase_acc_output = 0 ;
+        moving_av_input = 0;
+        phase_acc_output = 0;
+        delayed_moving_av_output = 0;
+         
+        %pass symbol-by-symbol in order to simulate the feedback loop
+        for k=1:length(received)/overSampleSize
+                
+            
+            delayed_moving_av_input = delayed_moving_av_output;
+            delayed_phase_acc_output = phase_acc_output;
+            
+            %do correction
+            corr_received = exp(-j*vco_output)*received((k-1)*overSampleSize+1:k*overSampleSize);
+            
+            delayed_vco_output = vco_output;
+            
+            %pass the received signal through the matched filter for optimal
+            %detection
+            matched_output_symbol = conv(corr_received,srrc,'same');
+    
+            %pass the matched filter output through the
+            % sampler to obtain symbols at each symbol period
+            sampled(k) = sampler(matched_output_symbol,overSampleSize,Ts); 
+            % save it for later
+            samples{y,i}(k) = sampled(k);
+            
+            %seperate to real and imagenary parts
+            re_received = real(sampled(k));
+            im_received = imag(sampled(k));
+            
+            %pass the received symbols through ML-decision box 
+            [output_bit,output_symbol] = qpsk_demod(re_received,...
+                im_received);
+            
+            % gather the signs
+            re_sign = tanh(re_received);
+            im_sign = tanh(im_received);
+            
+            % come up with metric for phase error
+            phase_estimate = -re_received*im_sign + im_received*re_sign;
+            moving_av_input = phase_estimate;              
+            [moving_av_output delayed_moving_av_output] = loop_filter(moving_av_input,delayed_moving_av_input);
+            loop_filter_output(k) = moving_av_output;
+            %pass through VCO
+            [vco_output phase_acc_output] = voltage_controlled_osc(moving_av_output,...
+                delayed_phase_acc_output);
+             
+            %merge bits
+            output_bits = strcat(output_bits,output_bit);
+        end
+        
+     %constellation plot
+        
             subplot(2,3,num);
             scatter(real(sampled),imag(sampled),'*');
             xlim = [1.5*min(real(sampled)) 1.5*max(real(sampled))];
@@ -64,36 +122,16 @@ for y=1:length(phase_offsets)
             title(tit);
             axis([xlim, ylim]);
             num = num+1;
-        end
-
-        %pass the received symbols through ML-decision box 
-        output_bits = qpsk_demod(real(sampled),imag(sampled));
-
+            
         %SER calculation - drop first symbol   
-        ser(i) = SER(bits(3:N),output_bits(3:N),k);
-        %SER theoretical calculation
-        a = 10^(EbN0(i)/10);
-        ser_theo(i) = qfunc(sqrt(4*a*sin(pi/4 - ...
-            pi*phase_offsets(y)/180)^2))+ qfunc(sqrt(4*a*sin(pi/4 + ...
-            pi*phase_offsets(y)/180)^2));
-        
+        ser(y,i) = SER(bits(3:N),output_bits(3:N),2);
+        ber(y,i) = BER(bits(3:N),output_bits(3:N));
+
     end
+    figure
+    plot(loop_filter_output);
 
-    % save the constellation plot
-    print(f,'-djpeg','-r300',strcat('qpConstpo',num2str(y)));
-
-    %plot theoretical/simulation BER vs SNR graph
-    g=figure;
-    
-    semilogy(SNR,ser,'ko');
-    hold on;
-    semilogy(SNR,ser_theo,'b');
-    ylabel('Probability of Error');
-    xlabel('Signal To Noise (dB)');
-    title(['QPSK SNR Comparison at ',...
-        num2str(phase_offsets(y)), ' Degree Offset']);
-    legend('Simulation(Symbol Error)',...
-        'Theory (Symbol Error)','Location','SouthWest');
-    % save the BER graph
-    print(g,'-djpeg','-r300',strcat('qpSNRpo',num2str(y)));
 end
+
+fields = {'freq_offsets','SNR','ber','ser','samples'};
+save(file,fields{:});

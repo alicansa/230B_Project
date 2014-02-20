@@ -47,22 +47,17 @@ for y=1:length(phase_offsets)
         
         %initialize feedback parameters
         vco_output = 0;
-        delayed_im_corr_received = 0;
-        delayed_re_corr_received = 0;
-        im_corr_received = [1 1 1 1];
-        re_corr_received = [1 1 1 1];
         phase_estimate = 0;
         delayed_moving_av_input = 0;
         delayed_phase_acc_output = 0 ;
+        delayed_moving_av_output = 0;
         moving_av_input = 0;
         phase_acc_output = 0;
         
         %pass symbol-by-symbol in order to simulate the feedback loop
         for k=1:length(received)/overSampleSize
             
-            delayed_im_corr_received = im_corr_received;
-            delayed_re_corr_received = re_corr_received;
-            delayed_moving_av_input = moving_av_input;
+            delayed_moving_av_input = delayed_moving_av_output;
             delayed_phase_acc_output = phase_acc_output;
             
             %do correction
@@ -86,12 +81,11 @@ for y=1:length(phase_offsets)
             
             %estimate the phase
             %phase_estimate = atan(imag(sampled(k))/real(sampled(k)));
-            phase_estimate = asin(imag(sampled(k)*conj(output_symbol))/(abs(sampled(k))*abs(conj(output_symbol))));
+            phase_estimate = asin(imag(sampled(k)*conj(output_symbol))/(abs(sampled(k))*abs(output_symbol)));
             
-            %multiply the imaginary and real parts of the delayed received signal with -sin(theta) and
-            %cos(theta). Then pass through loop filter
+            % Then pass through loop filter
             moving_av_input = phase_estimate;
-            [moving_av_output delayed_moving_av_input] = loop_filter(moving_av_input,delayed_moving_av_input);
+            [moving_av_output delayed_moving_av_output] = loop_filter(moving_av_input,delayed_moving_av_input);
             
             
             loop_filter_output(k) = moving_av_output;

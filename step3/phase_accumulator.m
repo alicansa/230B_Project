@@ -8,7 +8,6 @@ function [output] = phase_accumulator(input,delayed_input_sum)
 % OUTPUTS
 % output - new sum
 
-
 output = delayed_input_sum + input;
 
 end
