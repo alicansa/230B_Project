@@ -15,12 +15,17 @@ SNR = [6,30]; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
 N= 20000;  %number of bits generated
 k = 2;  % bits per symbol
-freq_offsets = [0.5 15]; %freq offsets for simulation. 1ppm and 30 ppm respectively. 
+<<<<<<< HEAD
+freq_offsets = [0.5 15]; %freq offsets for simulation. 
+                         %1ppm and 30 ppm respectively. 
+=======
+freq_offsets = [0.5 150]; %freq offsets for simulation. 1ppm and 30 ppm respectively. 
+>>>>>>> 705290c8d862cf44accbd1e38b6f23aff2ee2e8b
                          %Fs = 10^6/2 for 1Mbps 
 bits = random_bit_generator(N);  %random bit generation
 [quadrature, inphase] = qpsk_mod(bits,N/k);  %mapping to symbols
 
-%mapping symbols to signals by generating a impulse train and convolving
+%mapping symbols to signals by generating an impulse train and convolving
 %with the srrc pulse
 impulse_train_quad = impulse_train(overSampleSize,N/k,quadrature);
 impulse_train_inphase = impulse_train(overSampleSize,N/k,inphase);
@@ -31,7 +36,8 @@ transmit_inphase = conv(impulse_train_inphase,srrc,'same');
 
 for y=1:length(freq_offsets)
     %pass the signals through phase offset block
-    transmit_freq_offset = freq_offset(freq_offsets(y),Ts,transmit_inphase+j*transmit_quad);
+    transmit_freq_offset = freq_offset(freq_offsets(y),...
+        Ts,transmit_inphase+j*transmit_quad);
 
     %loop this section for the generation of BER vs SNR graphs and
     %constellation plots
@@ -56,6 +62,7 @@ for y=1:length(freq_offsets)
         delayed_moving_av_input = 0;
         delayed_vco_output = 0 ;
         moving_av_input = 0;
+          phase_acc_output = 0;
         
         %pass symbol-by-symbol in order to simulate the feedback loop
         for k=1:length(received)/overSampleSize
@@ -63,10 +70,11 @@ for y=1:length(freq_offsets)
             delayed_im_corr_received = im_corr_received;
             delayed_re_corr_received = re_corr_received;
             delayed_moving_av_input = moving_av_input;
-            delayed_vco_output = vco_output;
+             delayed_phase_acc_output = phase_acc_output;
             
             %do correction
-            corr_received = exp(-j*vco_output).*received((k-1)*overSampleSize+1:k*overSampleSize);
+            corr_received = exp(-j*vco_output).*...
+                received((k-1)*overSampleSize+1:k*overSampleSize);
             
             %seperate to real and imagenary parts
             im_corr_received = real(corr_received);
@@ -77,25 +85,42 @@ for y=1:length(freq_offsets)
             matched_output_symbol = conv(corr_received,srrc,'same');
     
             
-            %pass the matched filter output through the sampler to obtain symbols
-            %at each symbol period
+            %pass the matched filter output through the
+            % sampler to obtain symbols at each symbol period
             sampled(k) = sampler(matched_output_symbol,overSampleSize,Ts); 
             
             %pass the received symbols through ML-decision box 
-            [output_bit,output_symbol] = qpsk_demod(real(sampled(k)),imag(sampled(k)));
+            [output_bit,output_symbol] = qpsk_demod(real(sampled(k)),...
+                imag(sampled(k)));
             
             %estimate the phase
             %phase_estimate = atan(imag(sampled(k))/real(sampled(k)));
-            phase_estimate = asin(imag(sampled(k)*conj(output_symbol))/(abs(sampled(k))*abs(conj(output_symbol))));
+            phase_estimate = asin(imag(sampled(k)*conj(output_symbol))...
+                /(abs(sampled(k))*abs(conj(output_symbol))));
             
-            %multiply the imaginary and real parts of the delayed received signal with -sin(theta) and
+            %multiply the imaginary and real parts of the delayed 
+            % received signal with -sin(theta) and
             %cos(theta). Then pass through loop filter
             moving_av_input = phase_estimate;
-            moving_av_output = moving_average(moving_av_input,delayed_moving_av_input);
+<<<<<<< HEAD
+            moving_av_output = moving_average(moving_av_input,...
+                delayed_moving_av_input);
             
             %pass through VCO
-            vco_output = voltage_controlled_osc(moving_av_output,delayed_vco_output);
+            vco_output = voltage_controlled_osc(moving_av_output,...
+                delayed_vco_output);
              
+=======
+            [moving_av_output delayed_moving_av_input] = loop_filter(moving_av_input,delayed_moving_av_input);
+            
+            loop_filter_output(k) = moving_av_output;
+            
+            
+            %pass through VCO
+            [vco_output phase_acc_output] = voltage_controlled_osc(moving_av_output,delayed_phase_acc_output);             
+           
+            
+>>>>>>> 705290c8d862cf44accbd1e38b6f23aff2ee2e8b
             %merge bits
             output_bits = strcat(output_bits,output_bit);
         end
@@ -122,7 +147,12 @@ for y=1:length(freq_offsets)
 
     % save the constellation plot
     print(f,'-djpeg','-r300',strcat('qpConstpo',num2str(y)));
-
+    
+    
+    %plot S-curve of freq-detector 
+    figure
+    plot(loop_filter_output);
+    
     %plot theoretical/simulation BER vs SNR graph
 %     g=figure;
 %     
