@@ -2,60 +2,58 @@ clear all
 close all
 clc;
 
-filename = 'step3_sim_freq_bpsk';
+filename = 'step3_costas_freq_qpsk';
 load(filename);
+%filename = 'step3_costas_phase_qpsk';
+%load(filename);
 
 
 
-ber = cell2mat(ber);
-ber_theo = cell2mat(ber_theo);
 
 % loaded items
 
 % SNR - the array of SNR levels 
 % freq_offsets - the array of offset levels
 
-% samples{k,5}(time)  - CELL ARRAY -  the sampled data for constellation plots
+% samples{y,i}(time)  - CELL ARRAY -  the sampled data for constellation plots
 %     - rows of each frequency offset
-%     - columns of the 5 important SNR levels
+%     - columns of the SNR levels
 %     - index is the sample index
 %     
-% ber(k,21) - the ber for simulated trials
+% ber(y,i) - the ber for simulated trials
 %     - rows of each frequency offset
-%     - columns of 21 SNR levels
+%     - columns of 2 SNR levels
 %     
-% ber_theo(k,21)  - the theoretical ber of the mod scheme
+% ber_theo(y,i)  - the theoretical ber of the mod scheme
 %     - rows are each of the freq offsets
-%     - columns are each of the 21 SNR levels
+%     - columns are each of the 2 SNR levels
 
 
-
-for k=1:length(freq_offsets)
-    
-    
+for y=1:length(freq_offsets) % freq offset
     f = figure;
-    for i = 1:5
-        subplot(2,3,i);
-           scatter(real(samples{k,i}),imag(samples{k,i}),'*');
-           xlim = [1.5*min(real(samples{k,i})) 1.5*max(real(samples{k,i}))];
-           ylim = [1.5*min(imag(samples{k,i})) 1.5*max(imag(samples{k,i}))];
+    for i = 1:2  % SNR level
+        subplot(2,1,i);
+           scatter(real(samples{y,i}),imag(samples{y,i}),'*');
+           xlim = [1.5*min(real(samples{y,i})) 1.5*max(real(samples{y,i}))];
+           ylim = [1.5*min(imag(samples{y,i})) 1.5*max(imag(samples{y,i}))];
            line(xlim,[0 0], 'Color', 'k');
            line([0 0],ylim,'Color', 'k');
            xlabel('In-Phase'),ylabel('Quadrature-Phase');
            tit = ['SNR = ',num2str(SNR(i)),' dB'];
            title(tit);
            axis([xlim, ylim]);
+           
     end
     % save the constellation plot
 %     print(f,'-djpeg','-r300',strcat('bpConstfo',num2str(k)));
     
     %plot theoretical/simulation BER vs SNR graph
     h=figure;
-    semilogy(SNR,ber(k,:), 'ko');
+    semilogy(SNR,ber(y,:), 'ko');
     hold on;
-    semilogy(SNR,ber_theo(k,:), 'b');
+    semilogy(SNR,ber_theo(y,:), 'b');
     title(['BPSK SNR Comparison at ', ...
-        num2str(freq_offsets(k)), ' Hz Offset']);
+        num2str(freq_offsets(y)), ' Hz Offset']);
     ylabel('Probability of Error');
     xlabel('SNR (dB)');
     legend('Simulation (Bit Error)','Theory (Bit Error)');

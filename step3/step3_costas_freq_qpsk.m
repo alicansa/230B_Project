@@ -1,16 +1,12 @@
-%% STEP 3 BPSK
-%Simulation for the BPSK modulation scheme
-close all;
-clear all;
-clc;
-
-filename = 'step3_costas_freq_qpsk';
-
 %% STEP 3 QPSK
 %Simulation for the QPSK modulation scheme
 close all;
 clear all;
 clc;
+
+
+file = 'step3_costas_freq_qpsk';
+
 %Start by setting the initial variables
 output_bits = '';
 overSampleSize = 4;
@@ -36,20 +32,16 @@ impulse_train_inphase = impulse_train(overSampleSize,N/k,inphase);
 transmit_quad = conv(impulse_train_quad,srrc,'same');
 transmit_inphase = conv(impulse_train_inphase,srrc,'same');
 
-
-% data saving cells;
-samples = cell(length(freq_offsets),5);
-ber = cell(length(freq_offsets),length(SNR));
-ber_theo = cell(length(freq_offsets),length(SNR));
+% data saving arrays;
+samples = cell(length(freq_offsets),length(SNR));
+ber = zeros(length(freq_offsets),length(SNR));
+ser = zeros(length(freq_offsets),length(SNR));
+% ber_theo = zeros(length(freq_offsets),length(SNR));
 
 for y=1:length(freq_offsets)
     %pass the signals through phase offset block
     transmit_freq_offset = freq_offset(freq_offsets(y),...
-        Ts,transmit_inphase+j*transmit_quad);
-
-    %loop this section for the generation of BER vs SNR graphs and
-    %constellation plots
-    % declare variables
+        Ts,transmit_inphase+1i*transmit_quad);
 
     for i=1:length(SNR)
        %pass the signals to be transmitted through awgn channel
@@ -58,35 +50,16 @@ for y=1:length(freq_offsets)
         output_bits = '';
         
         %initialize feedback parameters
-%         vco_output = 0;
-%         delayed_im_corr_received = 0;
-%         delayed_re_corr_received = 0;
-%         im_corr_received = [1 1 1 1];
-%         re_corr_received = [1 1 1 1];
-%         phase_estimate = 0;
-%         delayed_moving_av_input = 0;
-%         delayed_vco_output = 0 ;
-%         moving_av_input = 0;
-        
+        vco_output = 0;
+        phase_estimate = 0;
+        phase_delayed = 0;
+        delayed_vco_output = 0 ;
+
         %pass symbol-by-symbol in order to simulate the feedback loop
         for k=1:length(received)/overSampleSize
-            
-%             delayed_im_corr_received = im_corr_received;
-%             delayed_re_corr_received = re_corr_received;
-%             delayed_moving_av_input = moving_av_input;
-%             delayed_vco_output = vco_output;
-            
+                               
             %do correction
-            corr_received = exp(-j*vco_output)*...
-                received(((k-1)*overSampleSize+1):k*overSampleSize);
-            
-            delayed_im_corr_received = im_corr_received;
-            delayed_re_corr_received = re_corr_received;
-            delayed_moving_av_input = moving_av_input;
-            delayed_phase_acc_output = phase_acc_output;
-            
-            %do correction
-            corr_received = exp(-j*vco_output).*...
+            corr_received = exp(-1i*vco_output).*...
                 received((k-1)*overSampleSize+1:k*overSampleSize);
             
             %pass the received signal through the matched filter for optimal
@@ -95,60 +68,47 @@ for y=1:length(freq_offsets)
     
             %pass the matched filter output through the
             % sampler to obtain symbols at each symbol period
-            sampled(k) = sampler(matched_output_symbol,overSampleSize,Ts); 
+            sample_present = sampler(matched_output_symbol,overSampleSize,Ts); 
+            % save it for later
+            samples{y,i}(k) = sample_present;
+            
+            %seperate to real and imagenary parts
+            im_received = real(sample_present);
+            re_received = imag(sample_present);
             
             %pass the received symbols through ML-decision box 
-            [output_bit,output_symbol] = qpsk_demod(real(sampled(k)),...
-                imag(sampled(k)));
+            [output_bit,output_symbol] = qpsk_demod(re_received,...
+                im_received);
             
-            %estimate the phase
-            %seperate to real and imagenary parts
-            im_corr_received = real(corr_received);
-            re_corr_received = imag(corr_received);
-            
-            im_sign = sign(im_corr_received);
-            re_sign = sign(re_corr_received);
+            % gather the signs
+            im_sign = sign(im_received);
+            re_sign = sign(re_received);
             
             % come up with metric for phase error
-            phase_estimate = im_corr_recieved*re_sign ...
-                                + re_corr_received*im_sign;
+            phase_estimate = im_received.*re_sign ...
+                                + re_received.*im_sign;
                             
-            
+            pi_output = piFilter(phase_estimate,phase_delayed);
             
             %pass through VCO
-            vco_output = voltage_controlled_osc(moving_av_output,...
+            vco_output = voltage_controlled_osc(pi_output,...
                 delayed_vco_output);
              
             %merge bits
             output_bits = strcat(output_bits,output_bit);
-        end
             
-        %constellation plot
-        
-            subplot(2,3,num);
-            scatter(real(sampled),imag(sampled),'*');
-            xlim = [1.5*min(real(sampled)) 1.5*max(real(sampled))];
-            ylim = [1.5*min(imag(sampled)) 1.5*max(imag(sampled))];
-            line(xlim,[0 0], 'Color', 'k');
-            line([0 0],ylim,'Color', 'k');
-            xlabel('In-Phase'),ylabel('Quadrature-Phase');
-            tit = ['SNR = ',num2str(SNR(i)),' dB'];
-            title(tit);
-            axis([xlim, ylim]);
-            num = num+1;
+            % set up new delayed values
+            phase_delayed = phase_estimate;
+            delayed_vco_output = vco_output;
+        end
         
         %SER calculation - drop first symbol   
-        ser{y,i} = SER(bits(3:N),output_bits(3:N),2);
-        ber{y,i} = BER(bits(3:N),output_bits(3:N));
+        ser(y,i) = SER(bits(3:N),output_bits(3:N),2);
+        ber(y,i) = BER(bits(3:N),output_bits(3:N));
 
     end
 
-    % save the constellation plot
-    % print(f,'-djpeg','-r300',strcat('qpConstpo',num2str(y)));
-
-
 end
 
-fields = {'freq_offsets','SNR','ber','ber_theo','samples'};
-% structs = struct('freq_offsets',freq_offsets,'SNR',SNR,'ber',ber,'ber_theo',ber_theo,'samples',cell2mat(samples));
-save(filename,fields{:});
+fields = {'freq_offsets','SNR','ber','ser','samples'};
+save(file,fields{:});

@@ -50,10 +50,10 @@ for y=1:length(freq_offsets)
         
         %initialize feedback parameters
         vco_output = 0;
-        delayed_im_corr_received = 0;
-        delayed_re_corr_received = 0;
-        im_corr_received = [1 1 1 1];
-        re_corr_received = [1 1 1 1];
+%         delayed_im_corr_received = 0;
+%         delayed_re_corr_received = 0;
+%         im_corr_received = [1 1 1 1];
+%         re_corr_received = [1 1 1 1];
         phase_estimate = 0;
         delayed_moving_av_input = 0;
         delayed_vco_output = 0 ;
@@ -63,8 +63,8 @@ for y=1:length(freq_offsets)
         %pass symbol-by-symbol in order to simulate the feedback loop
         for k=1:length(received)/overSampleSize
             
-            delayed_im_corr_received = im_corr_received;
-            delayed_re_corr_received = re_corr_received;
+%             delayed_im_corr_received = im_corr_received;
+%             delayed_re_corr_received = re_corr_received;
             delayed_moving_av_input = moving_av_input;
             delayed_phase_acc_output = phase_acc_output;
             
@@ -72,9 +72,9 @@ for y=1:length(freq_offsets)
             corr_received = exp(-j*vco_output).*...
                 received((k-1)*overSampleSize+1:k*overSampleSize);
             
-            %seperate to real and imagenary parts
-            im_corr_received = real(corr_received);
-            re_corr_received = imag(corr_received);
+%             seperate to real and imagenary parts
+%             im_corr_received = real(corr_received);
+%             re_corr_received = imag(corr_received);
             
             %pass the received signal through the matched filter for optimal
             %detection
