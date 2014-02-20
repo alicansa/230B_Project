@@ -53,8 +53,9 @@ for y=1:length(phase_offsets)
         re_corr_received = [1 1 1 1];
         phase_estimate = 0;
         delayed_moving_av_input = 0;
-        delayed_vco_output = 0 ;
+        delayed_phase_acc_output = 0 ;
         moving_av_input = 0;
+        phase_acc_output = 0;
         
         %pass symbol-by-symbol in order to simulate the feedback loop
         for k=1:length(received)/overSampleSize
@@ -62,7 +63,7 @@ for y=1:length(phase_offsets)
             delayed_im_corr_received = im_corr_received;
             delayed_re_corr_received = re_corr_received;
             delayed_moving_av_input = moving_av_input;
-            delayed_vco_output = vco_output;
+            delayed_phase_acc_output = phase_acc_output;
             
             %do correction
             corr_received = exp(-j*vco_output).*received((k-1)*overSampleSize+1:k*overSampleSize);
@@ -90,12 +91,13 @@ for y=1:length(phase_offsets)
             %multiply the imaginary and real parts of the delayed received signal with -sin(theta) and
             %cos(theta). Then pass through loop filter
             moving_av_input = phase_estimate;
-            moving_av_output = moving_average(moving_av_input,delayed_moving_av_input);
+            [moving_av_output delayed_moving_av_input] = loop_filter(moving_av_input,delayed_moving_av_input);
+            
             
             loop_filter_output(k) = moving_av_output;
             
             %pass through VCO
-            vco_output = voltage_controlled_osc(moving_av_output,delayed_vco_output);
+            [vco_output phase_acc_output] = voltage_controlled_osc(moving_av_output,delayed_phase_acc_output);
              
             %merge bits
             output_bits = strcat(output_bits,output_bit);

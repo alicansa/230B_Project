@@ -91,14 +91,13 @@ for y=1:length(freq_offsets)
             %multiply the imaginary and real parts of the delayed received signal with -sin(theta) and
             %cos(theta). Then pass through loop filter
             moving_av_input = phase_estimate;
-            moving_av_output = moving_average(moving_av_input,delayed_moving_av_input);
+            [moving_av_output delayed_moving_av_input] = loop_filter(moving_av_input,delayed_moving_av_input);
             
             loop_filter_output(k) = moving_av_output;
             
             
             %pass through VCO
-            vco_output = voltage_controlled_osc(moving_av_output,delayed_vco_output);
-             
+            [vco_output phase_acc_output] = voltage_controlled_osc(moving_av_output,delayed_phase_acc_output);             
            
             
             %merge bits
