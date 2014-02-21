@@ -73,7 +73,7 @@ The system is as shown in Figure below:
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{step3.png}
+\includegraphics[width=\textwidth]{costas.png}
 \caption{Diagram of the Costas loop used to handle error\label{fig:costas}}
 \end{figure}
 
@@ -98,7 +98,7 @@ In control theory, the plant is the open loop system.  When there is steady stat
 \phi_{\text{out}} &= \int \! k_{VCO}V_{in} \mathrm{d}t
 \end{align}
 A VCO is a device with output oscillation which is varied by the voltage level of the input.  The transfer function, relating the input to the output, for this block is shown in Equation~\ref{eq:vco}. The integral action can eliminate phase error, as we see in Figure~\ref{fig:BLAH}.  To implement a VCO in simulation, a phase accumulator does the integration   action and then, to keep the result in the correct domain, the result is put through a modulo $2\pi$ block.   
-When the plant is of higher Type than 0, as with a frequency offset, the steady state error can grow unbounded.  To deal with this scenario, another block is inserted in the feedback line.  An additional integrator increases the order of the closed loop system to allow bounding of higher type systems.  Notice in Figure~\ref{fig:costas}, the loop filter is Proportional-Integral.  With two integrators in the feedback path, Type 1 systems, or those with ramp inputs, can be bounded to a constant steady state error level.  Because frequency can be thought of as first order phase [\ref{eq:phaseFreq}], we track out the frequency error in Section~\ref
+When the plant is of higher Type than 0, as with a frequency offset, the steady state error can grow unbounded.  To deal with this scenario, another block is inserted in the feedback line.  An additional integrator increases the order of the closed loop system to allow bounding of higher type systems.  Notice in Figure~\ref{fig:costas}, the loop filter is Proportional-Integral.  With two integrators in the feedback path, Type 1 systems, or those with ramp inputs, can be bounded to a constant steady state error level.  Because frequency can be thought of as first order phase [\ref{eq:phaseFreq}], we track out the frequency error in Section
 
 \begin{align}
 \label{eq:phaseFreq}
@@ -113,19 +113,19 @@ To analyze the estimation, `S' curves graphically show how the estimation aligns
 
 \subsubsection{QPSK with Phase Offset}
 \label{sec:s_phase}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.4\textwidth]{scurvePhase.jpg}
-\caption{This plots the estimation versus actual phase error.  It is called an `S' curve because of its resemblance to the letter \label{fig:scurvePhase}
-\end{figure}
+%\begin{figure}[H]
+%\centering
+%\hspace*{-2cm}\includegraphics[width=0.4\textwidth]{scurvePhase.jpg}
+%\caption{This plots the estimation versus actual phase error.  It is called an `S' curve because of its resemblance to the letter \label{fig:scurvePhase}
+%\end{figure}
 
 \subsubsection{QPSK with Frequency Offset}
 \label{sec:s_freq}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.4\textwidth]{scurveFreq.jpg}
-\caption{This plots the estimation frequency versus actual frequency error.  It is called an `S' curve because of its resemblance to the letter \label{fig:scurvePhase}
-\end{figure}
+%\begin{figure}[H]
+%\centering
+%\hspace*{-2cm}\includegraphics[width=0.4\textwidth]{scurveFreq.jpg}
+%\caption{This plots the estimation frequency versus actual frequency error.  It is called an `S' curve because of its resemblance to the letter \label{fig:scurvePhase}
+%\end{figure}
 
 
 \newpage
