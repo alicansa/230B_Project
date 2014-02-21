@@ -2,20 +2,25 @@ clear all
 close all
 clc
 
-%phase offset costas
+%COSTAS LOOP
+%phase offset
 phase_offsets = -2*pi:0.001:2*pi;
 input = exp(j*phase_offsets);
 
-% gather the signs
-im_sign = tanh(20*imag(input));
-re_sign = tanh(20*real(input));
+im_sign = tanh(imag(input));
+re_sign = tanh(real(input));
             
-% come up with metric for phase error
+%phase error estimation
 phase_estimate_costas = imag(input).*re_sign - real(input).*im_sign;
-figure
+%plot s-curve
+f=figure;
 plot(phase_offsets,phase_estimate_costas);
+xlabel('phase offset (rad)');
+ylabel('Expected Value of Phase Detector Output');
+print(f,'-djpeg','-r300','qpScurvepo_costas');
 
-%phase offset decision directed
+%DECISION DIRECTED
+%phase offset
 phase_offsets = -2*pi:0.001:2*pi;
 input = exp(j*phase_offsets);
 
@@ -26,10 +31,15 @@ for i=1:length(phase_offsets)
 end
 % come up with metric for phase error
 phase_estimate_ddr = asin(imag(input.*conj(symbols))./(abs(input).*abs(symbols)));
-figure
-plot(phase_offsets,phase_estimate_ddr);
 
-%freq offset both
+%plot s-curve
+f=figure;
+plot(phase_offsets,phase_estimate_ddr);
+xlabel('phase offset (rad)');
+ylabel('Expected Value of Phase Detector Output');
+print(f,'-djpeg','-r300','qpScurvepo_ddr');
+
+%BOTH LOOPS
 n=1
 for t=1:0.1:10
    freq_offsets(n) = 10*t;
@@ -41,5 +51,10 @@ input = exp(j*freq_offsets);
 % come up with metric for freq error
 a = atan(imag(input)./real(input));
 freq_estimate = diff(a)/0.1;
-figure
+
+%plot s-curve
+f=figure;
 plot(freq_offsets(1:length(freq_offsets)-1),freq_estimate);
+xlabel('carrier offset (Hz)');
+ylabel('Expected Value of Frequency Detector Output');
+print(f,'-djpeg','-r300','qpScurvefo');

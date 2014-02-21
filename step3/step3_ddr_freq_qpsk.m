@@ -91,7 +91,7 @@ for y=1:length(freq_offsets)
             moving_av_input = phase_estimate;
 
             [moving_av_output, delayed_moving_av_output] = ...
-                loop_filter(moving_av_input,delayed_moving_av_input);
+                loop_filter(moving_av_input,delayed_moving_av_input,0.05,0.001);
             
             
             if (SNR(i) == 6)
@@ -154,9 +154,9 @@ for y=1:length(freq_offsets)
        'Measure starting from 500th bit','Measure starting from 1000th bit' );
 
     % save the constellation plot
-    print(f,'-djpeg','-r300',strcat('qpConstfo',num2str(y)));
-    print(f2,'-djpeg','-r300',strcat('qpLoopFilter',num2str(y)));
-    print(f3,'-djpeg','-r300',strcat('qpBER',num2str(y)));
+    print(f,'-djpeg','-r300',strcat('qpConstfo_ddr',num2str(y)));
+    print(f2,'-djpeg','-r300',strcat('qpLoopFilterfo_ddr',num2str(y)));
+    print(f3,'-djpeg','-r300',strcat('qpBERfo_ddr',num2str(y)));
 
     hold off
 end

@@ -4,22 +4,20 @@ close all;
 clear all;
 clc;
 
-
-file = 'step3_costas_freq_qpsk';
-
 %Start by setting the initial variables
 output_bits = '';
-overSampleSize = 40;
+overSampleSize = 100; %use higher oversampling rate to see the transient 
+                        %phase of the loop filter output
 rollOffFactor = 0.25;
 Ts = 2/10^6; %Symbol period (1Mbps)
 S=2; %average signal power for QPSK
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,4,Ts);
-SNR = [6,30]; %SNR levels where the system will be simulated
+SNR = [1,2,3,4,5,6,7,8,9,10,15,20,30]; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
-N= 2000;  %number of bits generated
+N= 15000;  %number of bits generated
 k = 2;  % bits per symbol
-freq_offsets = [0.5 150]; %freq offsets for simulation. 
+freq_offsets = [0.5 15]; %freq offsets for simulation. 
                          %1ppm and 30 ppm respectively. 
                          %Fs = 10^6/2 for 1Mbps 
 bits = random_bit_generator(N);  %random bit generation
@@ -32,14 +30,11 @@ impulse_train_inphase = impulse_train(overSampleSize,N/k,inphase);
 transmit_quad = conv(impulse_train_quad,srrc,'same');
 transmit_inphase = conv(impulse_train_inphase,srrc,'same');
 
-% data saving arrays;
-samples = cell(length(freq_offsets),length(SNR));
-ber = zeros(length(freq_offsets),length(SNR));
-ser = zeros(length(freq_offsets),length(SNR));
-% ber_theo = zeros(length(freq_offsets),length(SNR));
-
 for y=1:length(freq_offsets)
-    num=1;
+    f = figure(1);
+    f2 = figure(2);
+    num = 1;
+    num2=1;
     %pass the signals through phase offset block
     transmit_freq_offset = freq_offset(freq_offsets(y),...
         Ts,transmit_inphase+1i*transmit_quad);
@@ -81,8 +76,6 @@ for y=1:length(freq_offsets)
             %pass the matched filter output through the
             % sampler to obtain symbols at each symbol period
             sampled(k) = sampler(matched_output_symbol,overSampleSize,Ts); 
-            % save it for later
-            samples{y,i}(k) = sampled(k);
             
             %seperate to real and imagenary parts
             im_received = real(sampled(k));
@@ -99,8 +92,15 @@ for y=1:length(freq_offsets)
             % come up with metric for phase error
             phase_estimate = -im_received*re_sign + re_received*im_sign;
             moving_av_input = phase_estimate;              
-            [moving_av_output delayed_moving_av_output] = loop_filter(moving_av_input,delayed_moving_av_input);
-            loop_filter_output(k) = moving_av_output;
+            [moving_av_output delayed_moving_av_output] = loop_filter(moving_av_input,delayed_moving_av_input,0.05,0.001);
+            
+            if (SNR(i) == 6)
+                loop_filter_output(k) = moving_av_output;
+            
+            elseif (SNR(i) == 30)
+                loop_filter_output(k) = moving_av_output;
+            end
+            
             %pass through VCO
             [vco_output phase_acc_output] = voltage_controlled_osc(moving_av_output,...
                 delayed_phase_acc_output);
@@ -109,9 +109,10 @@ for y=1:length(freq_offsets)
             output_bits = strcat(output_bits,output_bit);
         end
         
-     %constellation plot
-        
-            subplot(2,3,num);
+        if (SNR(i) == 6 || SNR(i) == 30)
+            %constellation plot
+            figure(1);
+            subplot(2,1,num);
             scatter(real(sampled),imag(sampled),'*');
             xlim = [1.5*min(real(sampled)) 1.5*max(real(sampled))];
             ylim = [1.5*min(imag(sampled)) 1.5*max(imag(sampled))];
@@ -123,15 +124,40 @@ for y=1:length(freq_offsets)
             axis([xlim, ylim]);
             num = num+1;
             
-        %SER calculation - drop first symbol   
-        ser(y,i) = SER(bits(3:N),output_bits(3:N),2);
-        ber(y,i) = BER(bits(3:N),output_bits(3:N));
-
+            %plot loop filter output
+            figure(2);
+            subplot(2,1,num2);
+            plot(loop_filter_output);
+            xlabel('Samples'),ylabel('Phase Error Estimate');
+            tit = strcat('SNR=',num2str(SNR(i)),' dB');
+            title(tit);
+            num2=num2+1;
+            
+        end
+        
+        %BER calculation   
+        ber(i) = BER(bits(3:N),output_bits(3:N));
+        ber200(i) = BER(bits(200:N),output_bits(200:N));
+        ber500(i) = BER(bits(500:N),output_bits(500:N));
+        ber1000(i) = BER(bits(1000:N),output_bits(1000:N));
     end
-    figure
-    plot(loop_filter_output);
+    
+    f3=figure(4);
+    semilogy(SNR,ber,'b');
+    hold on;
+    semilogy(SNR,ber200,'-ko');
+    semilogy(SNR,ber500,'r*');
+    semilogy(SNR,ber1000,'g--');
+    xlabel('SNR (dB)');
+    ylabel('BER');
+    legend('Measure starting from beginning','Measure starting from 200th bit', ...
+       'Measure starting from 500th bit','Measure starting from 1000th bit' );
+    
+    % save the constellation plot
+    print(f,'-djpeg','-r300',strcat('qpConstfo_costas',num2str(y)));
+    print(f2,'-djpeg','-r300',strcat('qpLoopFilterfo_costas',num2str(y)));
+    print(f3,'-djpeg','-r300',strcat('qpBERfo_costas',num2str(y)));
+
+    hold off
 
 end
-
-fields = {'freq_offsets','SNR','ber','ser','samples'};
-save(file,fields{:});

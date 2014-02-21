@@ -11,11 +11,11 @@ Ts = 2/10^6; %Symbol period (10Mbps)
 S=2; %average signal power for QPSK
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,4,Ts);
-SNR = [6,30]; %SNR levels where the system will be simulated
+SNR = [1,2,3,4,5,6,7,8,9,10,15,20,30]; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
-N= 2000;  %number of bits generated
+N= 15000;  %number of bits generated
 k = 2;  % bits per symbol
-phase_offsets = [45]; %phase offsets for simulation
+phase_offsets = [30]; %phase offsets for simulation
 bits = random_bit_generator(N);  %random bit generation
 [quadrature, inphase] = qpsk_mod(bits,N/k);  %mapping to symbols
 
@@ -35,10 +35,11 @@ for y=1:length(phase_offsets)
     %loop this section for the generation of BER vs SNR graphs and
     %constellation plots
     % declare variables
-    h = zeros(1,5);
     ber_EbN0 = zeros(1,length(SNR));
-    f = figure;
+    f = figure(1);
+    f2 = figure(2);
     num = 1;
+    num2=1;
     for i=1:length(SNR)
        %pass the signals to be transmitted through awgn channel
 
@@ -85,9 +86,14 @@ for y=1:length(phase_offsets)
             
             % Then pass through loop filter
             moving_av_input = phase_estimate;
-            [moving_av_output delayed_moving_av_output] = loop_filter(moving_av_input,delayed_moving_av_input);
+            [moving_av_output delayed_moving_av_output] = loop_filter(moving_av_input,delayed_moving_av_input,0.05,0.001);
             
-            loop_filter_output(k) = moving_av_output;
+            if (SNR(i) == 6)
+                loop_filter_output(k) = moving_av_output;
+            
+            elseif (SNR(i) == 30)
+                loop_filter_output(k) = moving_av_output;
+            end
             
             %pass through VCO
             [vco_output phase_acc_output] = voltage_controlled_osc(moving_av_output,delayed_phase_acc_output);
@@ -96,9 +102,10 @@ for y=1:length(phase_offsets)
             output_bits = strcat(output_bits,output_bit);
         end
             
-        %constellation plot
-        
-            subplot(2,3,num);
+        if (SNR(i) == 6 || SNR(i) == 30)
+            %constellation plot
+            figure(1);
+            subplot(2,1,num);
             scatter(real(sampled),imag(sampled),'*');
             xlim = [1.5*min(real(sampled)) 1.5*max(real(sampled))];
             ylim = [1.5*min(imag(sampled)) 1.5*max(imag(sampled))];
@@ -109,34 +116,40 @@ for y=1:length(phase_offsets)
             title(tit);
             axis([xlim, ylim]);
             num = num+1;
+            
+            %plot loop filter output
+            figure(2);
+            subplot(2,1,num2);
+            plot(loop_filter_output);
+            xlabel('Samples'),ylabel('Phase Error Estimate');
+            tit = strcat('SNR=',num2str(SNR(i)),' dB');
+            title(tit);
+            num2=num2+1;
+            
+        end
         
-        %SER calculation - drop first symbol   
-        ser(y,i) = SER(bits(3:N),output_bits(3:N),2);
-        ber(y,i) = BER(bits(3:N),output_bits(3:N));
-
+        %BER calculation   
+        ber(i) = BER(bits(3:N),output_bits(3:N));
+        ber200(i) = BER(bits(200:N),output_bits(200:N));
+        ber500(i) = BER(bits(500:N),output_bits(500:N));
+        ber1000(i) = BER(bits(1000:N),output_bits(1000:N));
     end
+    
+    f3=figure(3);
+    semilogy(SNR,ber,'b');
+    hold on;
+    semilogy(SNR,ber200,'-ko');
+    semilogy(SNR,ber500,'r*');
+    semilogy(SNR,ber1000,'g--');
+    xlabel('SNR (dB)');
+    ylabel('BER');
+    legend('Measure starting from beginning','Measure starting from 200th bit', ...
+       'Measure starting from 500th bit','Measure starting from 1000th bit' );
 
     % save the constellation plot
-    print(f,'-djpeg','-r300',strcat('qpConstpo',num2str(y)));
-    
-    
-    figure
-    plot(loop_filter_output);
-    
-    %plot theoretical/simulation BER vs SNR graph
-%     g=figure;
-%     
-%     semilogy(SNR,ser,'ko');
-%     hold on;
-%     semilogy(SNR,ber,'ro');
-%     semilogy(SNR,ber_theo,'g');
-%     semilogy(SNR,ser_theo,'b');
-%     ylabel('Probability of Error');
-%     xlabel('Signal To Noise (dB)');
-%     title(['QPSK SNR Comparison at ',...
-%         num2str(phase_offsets(y)), ' Degree Offset']);
-%     legend('Simulation(Symbol Error)',...
-%         'Simulation(Bit Error)','Theory (Bit Error)','Theory (Symbol Error)','Location','SouthWest');
-%     % save the BER graph
-%     print(g,'-djpeg','-r300',strcat('qpSNRpo',num2str(y)));
+    print(f,'-djpeg','-r300',strcat('qpConstpo_ddr',num2str(y)));
+    print(f2,'-djpeg','-r300',strcat('qpLoopFilterpo_ddr',num2str(y)));
+    print(f3,'-djpeg','-r300',strcat('qpBERpo_ddr',num2str(y)));
+
+    hold off
 end
