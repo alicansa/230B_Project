@@ -1,0 +1,33 @@
+clear all
+close all
+clc
+
+%phase offset
+phase_offsets = -2*pi:0.001:2*pi;
+input = exp(j*phase_offsets);
+
+% gather the signs
+im_sign = tanh(imag(input));
+re_sign = tanh(real(input));
+            
+% come up with metric for phase error
+phase_estimate = -imag(input).*re_sign + real(input).*im_sign;
+figure
+plot(phase_offsets,phase_estimate);
+
+%freq offset
+t = ;
+freq_offsets = (-2*pi:0.001*t:2*pi);
+
+
+for t=0:0.01:1
+   freq_offsets(t) =  = (-2*pi:0.001*t:2*pi); 
+end
+
+input = exp(j*freq_offsets);
+
+% come up with metric for freq error
+a = atan(imag(input)./real(input));
+freq_estimate = diff(a);
+figure
+plot(freq_offsets(1:length(freq_offsets)-1),freq_estimate);

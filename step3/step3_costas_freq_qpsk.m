@@ -9,17 +9,17 @@ file = 'step3_costas_freq_qpsk';
 
 %Start by setting the initial variables
 output_bits = '';
-overSampleSize = 4;
+overSampleSize = 40;
 rollOffFactor = 0.25;
 Ts = 2/10^6; %Symbol period (1Mbps)
 S=2; %average signal power for QPSK
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,4,Ts);
-SNR = [30]; %SNR levels where the system will be simulated
+SNR = [6,30]; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
-N= 20000;  %number of bits generated
+N= 2000;  %number of bits generated
 k = 2;  % bits per symbol
-freq_offsets = [0.5 15]; %freq offsets for simulation. 
+freq_offsets = [0.5 150]; %freq offsets for simulation. 
                          %1ppm and 30 ppm respectively. 
                          %Fs = 10^6/2 for 1Mbps 
 bits = random_bit_generator(N);  %random bit generation

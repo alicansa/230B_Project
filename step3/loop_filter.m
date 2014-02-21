@@ -9,8 +9,9 @@ function [output, delayed_sum] = loop_filter(input,delayed_sum_input)
 % output - the result (through the filter) output
 % delayed sum - the new delayed sum
 
-a = 1;  % the input tuning factors
-b = 1;  % the tap factor
+a = 0.005;  % the input tuning factors
+b = 0.001;  % the tap factor
+
 
 delayed_sum = delayed_sum_input + b*input;
 output = a*input + delayed_sum;

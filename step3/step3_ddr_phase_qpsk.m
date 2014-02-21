@@ -13,7 +13,7 @@ B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,4,Ts);
 SNR = [6,30]; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
-N= 20000;  %number of bits generated
+N= 2000;  %number of bits generated
 k = 2;  % bits per symbol
 phase_offsets = [45]; %phase offsets for simulation
 bits = random_bit_generator(N);  %random bit generation
@@ -86,7 +86,6 @@ for y=1:length(phase_offsets)
             % Then pass through loop filter
             moving_av_input = phase_estimate;
             [moving_av_output delayed_moving_av_output] = loop_filter(moving_av_input,delayed_moving_av_input);
-            
             
             loop_filter_output(k) = moving_av_output;
             
