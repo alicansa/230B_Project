@@ -77,7 +77,14 @@ The system is as shown in Figure below:
 \caption{Diagram of the Costas loop used to handle error\label{fig:costas}}
 \end{figure}
 
-To handle the noncoherent error introduced into the system, feedback loops were installed.  As from before, the $\delta\phi$ block represents a block that introduces phase or frequency offset on the carrier.  To combat this, the error is estimated and then fed into a feedback PI loop to track it out.  This is accomplished first via a Costas loop, as in Figure~\ref{fig:costas}.  Note that unlike in previous simulations of the system, this analysis required sample-wise operations instead of signal-wise operations.  That is, to maintain causality, the samples were analyzed one by one so that future samples could not influence present values.
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{ddr_diagram.jpg}
+\caption{Diagram of the Decision Directed Recovery loop used to handle error}
+\end{figure}
+
+
+To handle the noncoherent error introduced into the system, feedback loops were installed.  As from before, the $\delta\phi$ block represents a block that introduces phase or frequency offset on the carrier.  To combat this, the error is estimated and then fed into a feedback loop filter to track it out.  This is accomplished first via a Costas loop, as in Figure~\ref{fig:costas}.  Note that unlike in previous simulations of the system, this analysis required sample-wise operations instead of signal-wise operations.  That is, to maintain causality, the samples were analyzed one by one so that future samples could not influence present values.
 \section{Costas Loop Theory}
 \label{sec:costas}
 The phase and frequency offset error, under QPSK, can be handled by a Costas loop.  The technique first creates an estimate of the phase error by creating a metric for it.  The error is then sent through a closed feedback loop.  This structure can track out the zero order and first order phase errors. 
@@ -104,6 +111,129 @@ When the plant is of higher Type than 0, as with a frequency offset, the steady 
 \label{eq:phaseFreq}
 \phi &= \int \! 2\pi f \mathrm{d}t 
 \end{align}
+
+
+\newpage
+\section{Step 3 Results}
+\subsection{QPSK with Costas Loop}
+
+\subsubsection{S-Curve of Phase Detector}
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpScurvepo_costas.jpg}
+\caption{}
+\end{figure}
+\subsubsection{S-Curve of Carrier Detector}
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpScurvefo.jpg}
+\caption{}
+\end{figure}
+\subsubsection{Transience of Phase Recovery}
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpLoopFilterpo_costas1.jpg}
+\caption{}
+\end{figure}
+
+\subsubsection{Transience of Carrier Recovery}
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpLoopFilterfo_costas1.jpg}
+\caption{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpLoopFilterfo_costas2.jpg}
+\caption{}
+\end{figure}
+\subsubsection{Constellation Plots  for Phase Recovery}
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpConstpo_costas1.jpg}
+\caption{}
+\end{figure}
+
+\subsubsection{BER Plots for Carrier Recovery}
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpBERfo_costas1.jpg}
+\caption{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpBERfo_costas2.jpg}
+\caption{}
+\end{figure}
+
+\subsubsection{BER Plots for Phase Recovery}
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpBERpo_costas1.jpg}
+\caption{}
+\end{figure}
+
+\subsection{QPSK with Decision Directed Recovery}
+
+\subsubsection{S-Curve of Phase Detector}
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpScurvepo_ddr.jpg}
+\caption{}
+\end{figure}
+\subsubsection{S-Curve of Carrier Detector}
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpScurvefo.jpg}
+\caption{}
+\end{figure}
+\subsubsection{Transience of Phase Recovery}
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpLoopFilterpo_ddr1.jpg}
+\caption{}
+\end{figure}
+
+\subsubsection{Transience of Carrier Recovery}
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpLoopFilterfo_ddr1.jpg}
+\caption{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpLoopFilterfo_ddr2.jpg}
+\caption{}
+\end{figure}
+\subsubsection{Constellation Plots  for Phase Recovery}
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpConstpo_ddr1.jpg}
+\caption{}
+\end{figure}
+
+\subsubsection{BER Plots for Carrier Recovery}
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpBERfo_ddr1.jpg}
+\caption{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpBERfo_ddr2.jpg}
+\caption{}
+\end{figure}
+
+\subsubsection{BER Plots for Phase Recovery}
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpBERpo_ddr1.jpg}
+\caption{}
+\end{figure}
 
 \newpage
 \section{Step 3 `S' Curves}
