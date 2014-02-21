@@ -115,16 +115,25 @@ Now with an error metric, we have the following input
 
 to run into a loop filter and then the VCO. Finally the output of the VCO is used to correct the received signal's phase error as seen in the system setup in Figure~\ref{fig:costas}
 
-
+\newpage
 \subsection{System with Decision Directed Recovery Loop}
 Another approach to recover the phase and carrier offset is using the Decision Directed Recovery Loop. The setup is as shown in the figure below:
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{ddr_diagram.jpg}
-\caption{Diagram of the Decision Directed Recovery loop used to handle error}
+\caption{Diagram of the Decision Directed Recovery loop used to handle error\label{fig:ddr}}
 \end{figure}
 
 Again this system can handle both phase and frequency offset errors (under QPSK). Similar to the Costas Loop, the phase error is estimated and sent through a closed feedback loop, thus tracking and recovering the error. The system containes two integrators, thus as mention before, zero order (phase offset) and first order (carrier offset) phase errors can be tracked out. 
+
+In the Decision Directed Recovery Loop, differently from the Costas Loop, the output of the decision block is used to obtain an error metric. The sampled received signal and the output of the decision block is passed through a phase detector which has the following function:\\
+
+$\hat{\phi} = sin^{-1}\left(\frac{y(t)\hat{x}^*}{|y(t)||\hat{x(t)}}\right)  $\\
+
+Now that the system has an error metric, it is passed through a loop filter and then a VCO which is then multiplied with the received signal in order to correct the phase/frequency offset as shown in the Figure~\ref{fig:ddr}
+
+
+
 
 \newpage
 \section{Step 3 Results}
@@ -299,6 +308,25 @@ Again this system can handle both phase and frequency offset errors (under QPSK)
 %\cleardoublepage
 %\newpage
 
+\section{Costas Loop}
+\subsection{Costas Loop Simulation for Phase Recovery}
+\lstinputlisting{step3_costas_phase_qpsk.m}
+
+\subsection{Costas Loop Simulation for Carrier Recovery}
+\lstinputlisting{step3_costas_freq_qpsk.m}
+
+\section{Decision Directed Recovery Loop}
+\subsection{Decision Directed Recovery Loop Simulation for Phase Recovery}
+\lstinputlisting{step3_ddr_phase_qpsk.m}
+
+\subsection{Decision Directed Recovery Loop Simulation for Carrier Recovery}
+\lstinputlisting{step3_ddr_freq_qpsk.m}
+
+\section{VCO}
+\lstinputlisting{voltage_controlled_osc.m}
+
+\section{Loop Filter}
+\lstinputlisting{loop_filter.m}
 
 \section{Random Bit Sequence Generator}
 \label{app:random_bit_generator}
@@ -333,14 +361,12 @@ Again this system can handle both phase and frequency offset errors (under QPSK)
 \label{app:qpsk_demod}
 \lstinputlisting{qpsk_demod.m}
 
-\newpage
 \section{Offsets}
 \label{app:offsets}
 \subsection{Carrier Phase Offset}
 \label{app:phase_offset}
 \lstinputlisting{phase_offset.m}
 
-\newpage
 \subsection{Carrier Frequency Offset}
 \label{app:freq_offset}
 \lstinputlisting{freq_offset.m}
