@@ -69,7 +69,30 @@ Darren Reis 804359840 \\
 
 \section{System Setup}
 \label{sec:setup}
-The system is as shown in Figure below:
+To handle the noncoherent error introduced into the system, feedback loops(costas and decision directed) were installed.  As from before, the $\delta\phi$ block represents a block that introduces phase or frequency offset on the carrier.  To combat this, the error is estimated and then fed into a feedback loop filter to track it out. \\
+
+Both of these setups are based on the same control theory fundamentals and thus have similar feedback loop components. In control theory when there is steady state error in the open loop system, feedback, or `closing the loop' can track out the error.  From the plots in Step 2, we realize our situation is just this case of steady state error.  Depending on the order of the system, this error can become unbounded and damning.  Feedback can track or bound this error by `closing the loop' if the open loop system Type is 0.  \footnote{Recall, a system is of Type N when there N poles at the s-plane origin.}  Here, the steady state error can be held to a certain level by introducing integration in the feedback line of the loop.  For us, this is true when we talk about phase error: we can send a step input phase error into a Voltage Controlled Oscillator and watch the error converge to a constant level. 
+\begin{align}
+\label{eq:vco}
+\phi_{\text{out}} &= \int \! k_{VCO}V_{in} \mathrm{d}t
+\end{align}
+A VCO is a device with output oscillation which is varied by the voltage level of the input.  The transfer function, relating the input to the output, for this block is shown in Equation~\ref{eq:vco}. The integral action can eliminate phase error, as we see in Figure~\ref{fig:BLAH}.  To implement a VCO in simulation, a phase accumulator does the integration   action and then, to keep the result in the correct domain, the result is put through a modulo $2\pi$ block.   
+When the plant is of higher Type than 0, as with a frequency offset, the steady state error can grow unbounded.  To deal with this scenario, another block is inserted in the feedback line.  An additional integrator increases the order of the closed loop system to allow bounding of higher type systems.  Notice in Figure~\ref{fig:costas}, the loop filter is Proportional-Integral.  With two integrators in the feedback path, Type 1 systems, or those with ramp inputs, can be bounded to a constant steady state error level.  Because frequency can be thought of as first order phase [\ref{eq:phaseFreq}], we track out the frequency error.\\
+\begin{align}
+\label{eq:phaseFreq}
+\phi &= \int \! 2\pi f \mathrm{d}t 
+\end{align}
+
+
+Furthermore as it can be seen in the simultion files, a different approach of coding is taken compared to the previous simulations. Note that unlike in previous simulations of the system, this analysis required sample-wise operations instead of signal-wise operations. That is, to maintain causality, the samples were analyzed one by one so that future samples could not influence present values.\\
+
+In the following sections the two setups for error recovery is given and their error metrics are examined.
+
+
+\newpage
+
+\subsection{System with Costas Loop}
+This error recovery is accomplished first via a Costas loop, as in Figure~\ref{fig:costas}. 
 
 \begin{figure}[H]
 \centering
@@ -77,41 +100,31 @@ The system is as shown in Figure below:
 \caption{Diagram of the Costas loop used to handle error\label{fig:costas}}
 \end{figure}
 
+The phase and frequency offset error, under QPSK, can be handled by the Costas loop given above. The technique first creates an estimate of the phase error by creating a metric for it.  The error is then sent through a closed feedback loop.  This structure can track out the zero order (phase offset) and first order (carrier offset) phase errors as it containes two integrators. 
+
+In a Costas loop, the I and Q component of the received signal are both sent through a $\tanh\left(\cdot\right)$ block in order to discern their sign.  This works because for $k>>1$, $\text{sign}\left(x\right) \approx \tanh \left(x\right)$.  These $\pm1$ are multiplied by the opposite component signal.  The I component is then subtracted from the Q component, creating a phase error metric [\ref{eq:costas}].  This is labeled in Figure~\ref{fig:costas} as \rom{1}. 
+
+Now with an error metric, we have the following input 
+
+\begin{align}
+  \label{eq:costas}
+  S_{\mathcal{l}} &= \left[I\left(t\right)\sin\left(\phi_e\right)+Q\left(t\right)\cos\left(\phi_e\right)\right]\text{sign}\left(I\left(t\right)\cos\left(\phi_e\right)- Q\left(t\right)\sin\left(\phi_e\right)\right)\nonumber \\
+  &\qquad {} - \left[I\left(t\right)\cos\left(\phi_e\right)-Q\left(t\right)\sin\left(\phi_e\right)\right]\text{sign}\left(I\left(t\right)\sin\left(\phi_e\right)+Q\left(t\right)\cos\left(\phi_e\right)\right)
+  \end{align}
+
+
+to run into a loop filter and then the VCO. Finally the output of the VCO is used to correct the received signal's phase error as seen in the system setup in Figure~\ref{fig:costas}
+
+
+\subsection{System with Decision Directed Recovery Loop}
+Another approach to recover the phase and carrier offset is using the Decision Directed Recovery Loop. The setup is as shown in the figure below:
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{ddr_diagram.jpg}
 \caption{Diagram of the Decision Directed Recovery loop used to handle error}
 \end{figure}
 
-
-To handle the noncoherent error introduced into the system, feedback loops were installed.  As from before, the $\delta\phi$ block represents a block that introduces phase or frequency offset on the carrier.  To combat this, the error is estimated and then fed into a feedback loop filter to track it out.  This is accomplished first via a Costas loop, as in Figure~\ref{fig:costas}.  Note that unlike in previous simulations of the system, this analysis required sample-wise operations instead of signal-wise operations.  That is, to maintain causality, the samples were analyzed one by one so that future samples could not influence present values.
-\section{Costas Loop Theory}
-\label{sec:costas}
-The phase and frequency offset error, under QPSK, can be handled by a Costas loop.  The technique first creates an estimate of the phase error by creating a metric for it.  The error is then sent through a closed feedback loop.  This structure can track out the zero order and first order phase errors. 
-\subsection{Phase Metric}
-\label{sec:phaseMetric} 
-In a Costas loop, the I and Q component of the received signal are both sent through a $\tanh\left(\cdot\right)$ block in order to discern their sign.  This works because for $k>>1$, $\text{sign}\left(x\right) \approx \tanh \left(x\right)$.  These $\pm1$ are multiplied by the opposite component signal.  The I component is then subtracted from the Q component, creating a phase error metric [\ref{eq:costas}].  This is labeled in Figure~\ref{fig:costas} as \rom{1}.  Section~\ref{sec:scurves} discusses how this estimate changes with different phase error.  Now with an error metric, we have an input to run into a loop filter. 
-
-  \begin{align}
-  \label{eq:costas}
-  S_{\mathcal{l}} &= \left[I\left(t\right)\sin\left(\phi_e\right)+Q\left(t\right)\cos\left(\phi_e\right)\right]\text{sign}\left(I\left(t\right)\cos\left(\phi_e\right)- Q\left(t\right)\sin\left(\phi_e\right)\right)\nonumber \\
-  &\qquad {} - \left[I\left(t\right)\cos\left(\phi_e\right)-Q\left(t\right)\sin\left(\phi_e\right)\right]\text{sign}\left(I\left(t\right)\sin\left(\phi_e\right)+Q\left(t\right)\cos\left(\phi_e\right)\right)
-  \end{align}
-  
-\subsection{Feedback}
-In control theory, the plant is the open loop system.  When there is steady state error in the open loop system, feedback, or `closing the loop' can track out the error.  From the plots in Step 2, we realize our situation is just this case of steady state error.  Depending on the order of the system, this error can become unbounded and damning.  Feedback can track or bound this error by `closing the loop' if the open loop system Type is 0.  \footnote{Recall, a system is of Type N when there N poles at the s-plane origin.}  Here, the steady state error can be held to a certain level by introducing integration in the feedback line of the loop.  For us, this is true when we talk about phase error: we can send a step input phase error into a Voltage Controlled Oscillator and watch the error converge to a constant level.  This is done in Section~\ref{sec:BLAH}. 
-\begin{align}
-\label{eq:vco}
-\phi_{\text{out}} &= \int \! k_{VCO}V_{in} \mathrm{d}t
-\end{align}
-A VCO is a device with output oscillation which is varied by the voltage level of the input.  The transfer function, relating the input to the output, for this block is shown in Equation~\ref{eq:vco}. The integral action can eliminate phase error, as we see in Figure~\ref{fig:BLAH}.  To implement a VCO in simulation, a phase accumulator does the integration   action and then, to keep the result in the correct domain, the result is put through a modulo $2\pi$ block.   
-When the plant is of higher Type than 0, as with a frequency offset, the steady state error can grow unbounded.  To deal with this scenario, another block is inserted in the feedback line.  An additional integrator increases the order of the closed loop system to allow bounding of higher type systems.  Notice in Figure~\ref{fig:costas}, the loop filter is Proportional-Integral.  With two integrators in the feedback path, Type 1 systems, or those with ramp inputs, can be bounded to a constant steady state error level.  Because frequency can be thought of as first order phase [\ref{eq:phaseFreq}], we track out the frequency error in Section
-
-\begin{align}
-\label{eq:phaseFreq}
-\phi &= \int \! 2\pi f \mathrm{d}t 
-\end{align}
-
+Again this system can handle both phase and frequency offset errors (under QPSK). Similar to the Costas Loop, the phase error is estimated and sent through a closed feedback loop, thus tracking and recovering the error. The system containes two integrators, thus as mention before, zero order (phase offset) and first order (carrier offset) phase errors can be tracked out. 
 
 \newpage
 \section{Step 3 Results}
@@ -120,59 +133,76 @@ When the plant is of higher Type than 0, as with a frequency offset, the steady 
 \subsubsection{S-Curve of Phase Detector}
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpScurvepo_costas.jpg}
-\caption{}
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpScurvepo_costas.jpg}
+\caption{S-curve of the phase detector used in Costas Loop}
 \end{figure}
 \subsubsection{S-Curve of Carrier Detector}
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpScurvefo.jpg}
-\caption{}
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpScurvefo.jpg}
+\caption{S-curve of the carrier detector used in Costas Loop}
 \end{figure}
 \subsubsection{Transience of Phase Recovery}
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpLoopFilterpo_costas1.jpg}
-\caption{}
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpLoopFilterpo_costas1.jpg}
+\caption{The loop filter output of the Costas Loop for an input signal with 30 degrees phase offset}
 \end{figure}
 
 \subsubsection{Transience of Carrier Recovery}
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpLoopFilterfo_costas1.jpg}
-\caption{}
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpLoopFilterfo_costas1.jpg}
+\caption{The loop filter output of the Costas Loop for an input signal with 1ppm frequency offset}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpLoopFilterfo_costas2.jpg}
-\caption{}
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpLoopFilterfo_costas2.jpg}
+\caption{The loop filter output of the Costas Loop for an input signal with 30ppm frequency offset}
 \end{figure}
 \subsubsection{Constellation Plots  for Phase Recovery}
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpConstpo_costas1.jpg}
-\caption{}
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpConstpo_costas1.jpg}
+\caption{The resulting constellation plot of the output of the system with Costas Loop for an input with 30 degrees phase offset at 6dB and 30dB SNR }
 \end{figure}
+
+
+\subsubsection{Constellation Plots  for Frequency Recovery}
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpConstfo_costas1.jpg}
+\caption{The resulting constellation plot of the output of the system with Costas Loop for an input with 1ppm frequency offset at 6dB and 30dB SNR }
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpConstfo_costas2.jpg}
+\caption{The resulting constellation plot of the output of the system with Costas Loop for an input with 30 ppm frequency offset at 6dB and 30dB SNR }
+\end{figure}
+
 
 \subsubsection{BER Plots for Carrier Recovery}
+
+
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpBERfo_costas1.jpg}
-\caption{}
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpBERfo_costas1.jpg}
+\caption{BER plots of the system with Costas Loop for an input with 1ppm frequency offset (using output bits starting from different indices)}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpBERfo_costas2.jpg}
-\caption{}
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpBERfo_costas2.jpg}
+\caption{BER plots of the system with Costas Loop for an input with 30ppm frequency offset (using output bits starting from different indices)}
 \end{figure}
 
 \subsubsection{BER Plots for Phase Recovery}
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpBERpo_costas1.jpg}
-\caption{}
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpBERpo_costas1.jpg}
+\caption{BER plots of the system with Costas Loop for an input with 30 degrees phase offset (using output bits starting from different indices)}
 \end{figure}
 
 \subsection{QPSK with Decision Directed Recovery}
@@ -180,82 +210,77 @@ When the plant is of higher Type than 0, as with a frequency offset, the steady 
 \subsubsection{S-Curve of Phase Detector}
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpScurvepo_ddr.jpg}
-\caption{}
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpScurvepo_ddr.jpg}
+\caption{S-curve of the phase detector used in Decision Directed Recovery Loop}
 \end{figure}
 \subsubsection{S-Curve of Carrier Detector}
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpScurvefo.jpg}
-\caption{}
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpScurvefo.jpg}
+\caption{S-curve of the frequency detector used in Decision Directed Recovery Loop}
 \end{figure}
+
 \subsubsection{Transience of Phase Recovery}
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpLoopFilterpo_ddr1.jpg}
-\caption{}
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpLoopFilterpo_ddr1.jpg}
+\caption{The loop filter output of the Decision Directed Recovery Loop for an input signal with 30 degrees phase offset}
 \end{figure}
 
 \subsubsection{Transience of Carrier Recovery}
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpLoopFilterfo_ddr1.jpg}
-\caption{}
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpLoopFilterfo_ddr1.jpg}
+\caption{The loop filter output of the Decision Directed Recovery Loop for an input signal with 1ppm frequency offset}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpLoopFilterfo_ddr2.jpg}
-\caption{}
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpLoopFilterfo_ddr2.jpg}
+\caption{The loop filter output of the Decision Directed Recovery Loop for an input signal with 30ppm frequency offset}
 \end{figure}
+
 \subsubsection{Constellation Plots  for Phase Recovery}
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpConstpo_ddr1.jpg}
-\caption{}
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpConstpo_ddr1.jpg}
+\caption{The resulting constellation plot of the output of the system with Decision Directed Recovery Loop for an input with 30 degrees phase offset at 6dB and 30dB SNR }
 \end{figure}
+
+\subsubsection{Constellation Plots  for Frequency Recovery}
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpConstfo_ddr1.jpg}
+\caption{The resulting constellation plot of the output of the system with Decision Directed Recovery Loop for an input with 1ppm frequency offset at 6dB and 30dB SNR }
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpConstfo_ddr2.jpg}
+\caption{The resulting constellation plot of the output of the system with Decision Directed Recovery Loop for an input with 30 ppm frequency offset at 6dB and 30dB SNR }
+\end{figure}
+
 
 \subsubsection{BER Plots for Carrier Recovery}
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpBERfo_ddr1.jpg}
-\caption{}
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpBERfo_ddr1.jpg}
+\caption{BER plots of the system with Decision Directed Recovery Loop for an input with 1ppm frequency offset (using output bits starting from different indices)}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpBERfo_ddr2.jpg}
-\caption{}
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpBERfo_ddr2.jpg}
+\caption{BER plots of the system with Decision Directed Recovery Loop for an input with 30ppm frequency offset (using output bits starting from different indices)}
 \end{figure}
 
 \subsubsection{BER Plots for Phase Recovery}
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qpBERpo_ddr1.jpg}
-\caption{}
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpBERpo_ddr1.jpg}
+\caption{BER plots of the system with Decision Directed Recovery Loop for an input with 30 degrees phase offset (using output bits starting from different indices)}
 \end{figure}
 
-\newpage
-\section{Step 3 `S' Curves}
-\label{sec:scurves}
-To analyze the estimation, `S' curves graphically show how the estimation aligns with the actual error.  Figure~\ref{fig:scurvePhase} shows the phase estimate vs. phase for QPSK.   
-
-
-\subsubsection{QPSK with Phase Offset}
-\label{sec:s_phase}
-%\begin{figure}[H]
-%\centering
-%\hspace*{-2cm}\includegraphics[width=0.4\textwidth]{scurvePhase.jpg}
-%\caption{This plots the estimation versus actual phase error.  It is called an `S' curve because of its resemblance to the letter \label{fig:scurvePhase}
-%\end{figure}
-
-\subsubsection{QPSK with Frequency Offset}
-\label{sec:s_freq}
-%\begin{figure}[H]
-%\centering
-%\hspace*{-2cm}\includegraphics[width=0.4\textwidth]{scurveFreq.jpg}
-%\caption{This plots the estimation frequency versus actual frequency error.  It is called an `S' curve because of its resemblance to the letter \label{fig:scurvePhase}
-%\end{figure}
 
 
 \newpage
@@ -279,39 +304,16 @@ To analyze the estimation, `S' curves graphically show how the estimation aligns
 \label{app:random_bit_generator}
 \lstinputlisting{random_bit_generator.m}
 
-\section{Bit to Symbol Mappers}
+\section{Bit to Symbol Mapper}
 \label{app:bittosym}
-\subsection{BPSK Modulation }
-\label{app:bpsk_mod}
-% To convert program (e.g. C++ Fortran, Matlab, LaTeX) listings to a
-% form easily includable in a LaTeX document
-%
-% type lgrind -s to see options
-% lgrind -llatex -i sample-paper.tex > sampleinputtex
-% creates a file sampleinput.tex which can then be included into this
-% document simply by uncommenting the next line
-%\lgrindfile{testinput.tex}
-
-\lstinputlisting{bpsk_mod.m}
 
 \subsection{QPSK Modulation}
 \label{app:qpsk_mod}
 \lstinputlisting{qpsk_mod.m}
 
-\subsection{16-QAM Modulation}
-\label{app:qam_16_mod}
-
-\lstinputlisting{QAM_16_mod.m}
-
-\subsection{64-QAM Modulation }
-\label{app:qam_64_mod}
-\lstinputlisting{QAM_64_mod.m}
-
-\newpage
 \section{Square Root Raised Cosine Filter}
 \label{app:sqrt_raised_cosine}
 \lstinputlisting{sqrt_raised_cosine.m}
-
 
 \section{Up Sampler}
 \label{app:impulse_train}
@@ -321,31 +323,15 @@ To analyze the estimation, `S' curves graphically show how the estimation aligns
 \label{app:awgn_channel}
 \lstinputlisting{awgn_complex_channel.m}
 
-\newpage
 \section{Sampler}
 \label{app:sampler}
 \lstinputlisting{sampler.m}
 
-
-\section{Decision Blocks}
+\section{Decision Block}
 \label{app:dblocks}
-\subsection{BPSK Demodulation}
-\label{app:bpsk_demod}
-\lstinputlisting{bpsk_demod.m}
-
-\newpage
 \subsection{QPSK Demodulation}
 \label{app:qpsk_demod}
 \lstinputlisting{qpsk_demod.m}
-
-\subsection{16-QAM Demodulation}
-\label{app:qam_16_demod}
-\lstinputlisting{QAM_16_demod.m}
-
-\newpage
-\subsection{64-QAM Demodulation}
-\label{app:qam_64_demod}
-\lstinputlisting{QAM_64_demod.m}
 
 \newpage
 \section{Offsets}
@@ -358,6 +344,7 @@ To analyze the estimation, `S' curves graphically show how the estimation aligns
 \subsection{Carrier Frequency Offset}
 \label{app:freq_offset}
 \lstinputlisting{freq_offset.m}
+
 
 
 \end{document}
