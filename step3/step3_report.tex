@@ -73,278 +73,69 @@ The system is as shown in Figure below:
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{step2.jpg}
-\caption{Diagram of the setup used in step 2 of the project}
+\includegraphics[width=\textwidth]{step3.png}
+\caption{Diagram of the Costas loop used to handle error\label{fig:costas}}
 \end{figure}
 
-In addition to the modeling blocks used previously, non coherent error was included in the model.  The $\delta\phi$ block represents a block that introduces phase or frequency offset on the carrier.  The effect of this is to rotate and blur the constellations and the SNR plots [Section~\ref{sec:qam16_phaseConst}].
-
-The new block was modeled by two different functions.  For Phase offset, the signal was subjected to a constant phase bias, as described in Appendix~\ref{app:phase_offset}.  Similarly, the Frequency offsets were handled by introducing a first order phase term.  Recall, phase is related to frequency by $f(t) = \frac{1}{2 \pi} \phi^\prime(t)$.  Appendix~\ref{app:freq_offset} shows how this was implemented in the simulations.
-
-With the new design worked out, the system was put through a similar set of tests on the four modulation schemes: BPSK, QPSK, 16-QAM, 64-QAM.  Each was subjected to phase offsets from $5\deg$ to $45\deg$ for a range of SNR levels.  Similarly, the modulated signals faced frequency offsets from 10 mHz to 10 Hz.  The system performance was determined by comparing a theoretical error rate to experimental bit error rate.  
-\section{Derivation of Errors}
-\label{sec:errors}
-The following are theoretical formulas for bit error rate under phase error.  The first is a simple derivation based on a $\phi$ error.  Refer to Figure~\ref{fig:bpskDraw}.
-\section{Costas Loop}
+To handle the noncoherent error introduced into the system, feedback loops were installed.  As from before, the $\delta\phi$ block represents a block that introduces phase or frequency offset on the carrier.  To combat this, the error is estimated and then fed into a feedback PI loop to track it out.  This is accomplished first via a Costas loop, as in Figure~\ref{fig:costas}.  Note that unlike in previous simulations of the system, this analysis required sample-wise operations instead of signal-wise operations.  That is, to maintain causality, the samples were analyzed one by one so that future samples could not influence present values.
+\section{Costas Loop Theory}
 \label{sec:costas}
+The phase and frequency offset error, under QPSK, can be handled by a Costas loop.  The technique first creates an estimate of the phase error by creating a metric for it.  The error is then sent through a closed feedback loop.  This structure can track out the zero order and first order phase errors. 
+\subsection{Phase Metric}
+\label{sec:phaseMetric} 
+In a Costas loop, the I and Q component of the received signal are both sent through a $\tanh\left(\cdot\right)$ block in order to discern their sign.  This works because for $k>>1$, $\text{sign}\left(x\right) \approx \tanh \left(x\right)$.  These $\pm1$ are multiplied by the opposite component signal.  The I component is then subtracted from the Q component, creating a phase error metric [\ref{eq:costas}].  This is labeled in Figure~\ref{fig:costas} as \rom{1}.  Section~\ref{sec:scurves} discusses how this estimate changes with different phase error.  Now with an error metric, we have an input to run into a loop filter. 
 
-  \begin{equation}  
-  S = I\left(t\right)\cos\left(2\pi\mathcal{f}_{c}t+\phi\right)- Q\left(t\right)\sin\left(2\pi\mathcal{f}_{c}t+\phi\right)
-  \end{equation}
   \begin{align}
+  \label{eq:costas}
   S_{\mathcal{l}} &= \left[I\left(t\right)\sin\left(\phi_e\right)+Q\left(t\right)\cos\left(\phi_e\right)\right]\text{sign}\left(I\left(t\right)\cos\left(\phi_e\right)- Q\left(t\right)\sin\left(\phi_e\right)\right)\nonumber \\
   &\qquad {} - \left[I\left(t\right)\cos\left(\phi_e\right)-Q\left(t\right)\sin\left(\phi_e\right)\right]\text{sign}\left(I\left(t\right)\sin\left(\phi_e\right)+Q\left(t\right)\cos\left(\phi_e\right)\right)
   \end{align}
   
-
-
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{qamDraw.jpg}
-\caption{The rotation of a 16-QAM constellation is based on the phase error \label{fig:qamDraw}}
-\end{figure}
-
-\newpage
-
-The theoretical equation for 64-QAM is approximated as shown below. Due to the amount of calculations needed for the exact (or some what closer approximation) a very low bound (gradually gets worse as the phase is increased) is calculated using four QPSK constellations with different radii.  Furthermore if the amount of these constellations can be increased to get a closer approximation however for the sake of simplicity the following theoretical probability of error rate is used as a lower bound for 64-QAM constellation with phase offset: 
+\subsection{Feedback}
+In control theory, the plant is the open loop system.  When there is steady state error in the open loop system, feedback, or `closing the loop' can track out the error.  From the plots in Step 2, we realize our situation is just this case of steady state error.  Depending on the order of the system, this error can become unbounded and damning.  Feedback can track or bound this error by `closing the loop' if the open loop system Type is 0.  \footnote{Recall, a system is of Type N when there N poles at the s-plane origin.}  Here, the steady state error can be held to a certain level by introducing integration in the feedback line of the loop.  For us, this is true when we talk about phase error: we can send a step input phase error into a Voltage Controlled Oscillator and watch the error converge to a constant level.  This is done in Section~\ref{sec:BLAH}. 
+\begin{align}
+\label{eq:vco}
+\phi_{\text{out}} &= \int \! k_{VCO}V_{in} \mathrm{d}t
+\end{align}
+A VCO is a device with output oscillation which is varied by the voltage level of the input.  The transfer function, relating the input to the output, for this block is shown in Equation~\ref{eq:vco}. The integral action can eliminate phase error, as we see in Figure~\ref{fig:BLAH}.  To implement a VCO in simulation, a phase accumulator does the integration   action and then, to keep the result in the correct domain, the result is put through a modulo $2\pi$ block.   
+When the plant is of higher Type than 0, as with a frequency offset, the steady state error can grow unbounded.  To deal with this scenario, another block is inserted in the feedback line.  An additional integrator increases the order of the closed loop system to allow bounding of higher type systems.  Notice in Figure~\ref{fig:costas}, the loop filter is Proportional-Integral.  With two integrators in the feedback path, Type 1 systems, or those with ramp inputs, can be bounded to a constant steady state error level.  Because frequency can be thought of as first order phase [\ref{eq:phaseFreq}], we track out the frequency error in Section~\ref
 
 \begin{align}
-P_{e}^{64-QAM} &= \frac{1}{4}\left(Q\left(\sqrt{\frac{18}{63}\frac{2E_b}{N_0}\sin^2\left(\frac{\pi}{4}-phi\right)}\right) + Q\left(\sqrt{\frac{18}{63}\frac{2E_b}{N_0}\sin^2\left(\frac{\pi}{4}+phi\right)}\right) \right. \nonumber \\
-& \qquad \left. {} + 2\left(Q\left(\sqrt{\frac{18}{63}\frac{2E_b}{N_0}\sin^2\left(\frac{\pi}{18}-phi\right)}\right) + Q\left(\sqrt{\frac{18}{63}\frac{2E_b}{N_0}\sin^2\left(\frac{\pi}{18}+phi\right)}\right) \right) \right)
+\label{eq:phaseFreq}
+\phi &= \int \! 2\pi f \mathrm{d}t 
 \end{align}
 
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.5\textwidth]{64qamDraw.jpg}
-\caption{The rotation of the approximated 64-QAM constellation is based on the phase error, $\phi$ \label{fig:64QamDraw}}
-\end{figure}
-
 \newpage
-\section{Step 2 Phase Offset Results}
-\label{sec:results_po}
-In the following sections, the probability of bit error versus the signal to noise ratio is shown on scatter plots for BPSK, QPSK, 16-QAM and 64-QAM constellations.  Notice that the constellations show rotation from the phase errors.  
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.4\textwidth]{qpskError.png}
-\caption{The rotation of a constellation is based on the phase error}
-\end{figure}
-
-\subsection{Probability of Error vs SNR plots for constellations with Phase Offset}
-\begin{itemize}
-\item Theoretical Symbol/Bit Error Rate curve as a function of the symbol SNR
-\item The Symbol/Bit Error Rate curve from the simulation as a function of the received signal's SNR
-\end{itemize}
-
-As the phase error builds until $\frac{\pi}{4}$, the constellation becomes more and more shifted.  At some point, the clumps of symbols are far enough out of phase to be random, or equally likely right as wrong.  This happens for phase offsets of 45 degrees.
-\subsubsection{BPSK with Phase Offset}
-\label{sec:bpsk_phase}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{bpSNRpo1.jpg}
-\caption{BPSK Theoretical and Experimental error rates versus different SNR levels at a phase offset of 5 degrees }
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{bpSNRpo2.jpg}
-\caption{BPSK Theoretical and Experimental error rates versus different SNR levels at a phase offset of 10 degrees }
-\end{figure}
-
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{bpSNRpo3.jpg}
-\caption{BPSK Theoretical and Experimental error rates versus different SNR levels at a phase offset of 20 degrees }
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{bpSNRpo4.jpg}
-\caption{BPSK Theoretical and Experimental error rates versus different SNR levels at a phase offset of 45 degrees }
-\end{figure}
+\section{Step 3 `S' Curves}
+\label{sec:scurves}
+To analyze the estimation, `S' curves graphically show how the estimation aligns with the actual error.  Figure~\ref{fig:scurvePhase} shows the phase estimate vs. phase for QPSK.   
 
 
 \subsubsection{QPSK with Phase Offset}
-\label{sec:qpsk_phase}
+\label{sec:s_phase}
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qpSNRpo1.jpg}
-\caption{QPSK Theoretical and Experimental error rates versus different SNR levels at a phase offset of 5 degrees }
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qpSNRpo2.jpg}
-\caption{QPSK Theoretical and Experimental error rates versus different SNR levels at a phase offset of 10 degrees }
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qpSNRpo3.jpg}
-\caption{QPSK Theoretical and Experimental error rates versus different SNR levels at a phase offset of 20 degrees }
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qpSNRpo4.jpg}
-\caption{QPSK Theoretical and Experimental error rates versus different SNR levels at a phase offset of 45 degrees }
-\end{figure}
-
-
-\subsubsection{16-QAM with Phase Offset}
-\label{sec:qam16_phase}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam16SNRpo1.jpg}
-\caption{16-QAM Theoretical and Experimental error rates versus different SNR levels at a phase offset of 5 degrees }
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam16SNRpo2.jpg}
-\caption{16-QAM Theoretical and Experimental error rates versus different SNR levels at a phase offset of 10 degrees }
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam16SNRpo3.jpg}
-\caption{16-QAM Theoretical and Experimental error rates versus different SNR levels at a phase offset of 20 degrees }
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam16SNRpo4.jpg}
-\caption{16-QAM Theoretical and Experimental error rates versus different SNR levels at a phase offset of 45 degrees }
-\end{figure}
-
-\subsubsection{64-QAM with Phase Offset}
-\label{qam64_phase}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam64SNRpo1.jpg}
-\caption{64-QAM Theoretical and Experimental error rates versus different SNR levels at a phase offset of 5 degrees }
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam64SNRpo2.jpg}
-\caption{64-QAM Theoretical and Experimental error rates versus different SNR levels at a phase offset of 10 degrees }
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam64SNRpo3.jpg}
-\caption{64-QAM Theoretical and Experimental error rates versus different SNR levels at a phase offset of 5 degrees }
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam64SNRpo4.jpg}
-\caption{64-QAM Theoretical and Experimental error rates versus different SNR levels at a phase offset of 10 degrees }
-\end{figure}
-
-\subsection{Constellation Plots for 16-QAM with Phase Offset}
-\label{sec:qam16_phaseConst}
-In the following sections scatter plots of  16-QAM constellation are plotted at symbol/input SNRs of 3 dB, 6dB, 10dB, 20dB and a phase offsets of 5 degree, 10 degree, 20 degree, 45 degree .
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam16Constpo1.jpg}
-\caption{The 16-QAM constellation plots for different levels of SNR at a phase offset of 5 degrees}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam16Constpo2.jpg}
-\caption{The 16-QAM constellation plots for different levels of SNR at a phase offset of 10 degrees}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam16Constpo3.jpg}
-\caption{The 16-QAM constellation plots for different levels of SNR at a phase offset of 20 degrees}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qam16Constpo4.jpg}
-\caption{The 16-QAM constellation plots for different levels of SNR at a phase offset of 45 degrees}
-\end{figure}
-\newpage
-\section{Step 2 Frequency Offset Results}
-\label{sec:results_fo}
-\subsection{Constellation Plots for BPSK and QPSK with Frequency Offset}
-In the following sections,  BPSK and QPSK constellations are scatter-plotted at symbol/input SNRs of 3 dB, 6dB, 10dB and 20dB and frequency offsets of 0.01 Hz, 0.1 Hz, 1 Hz, 10 Hz.
-
-We expected the frequency offset to cause a blurring around the unit circle.  However, we realized the dilation of the blob is dependent on the symbol period.  The effect is hard to see except in the high SNR plots.  For 10 Hz offset, with an SNR of 20 dB, there is a clear stretching of the symbols [See Figure~\ref{fig:qpsk_freq}].    
-
-\subsubsection{BPSK with Frequency Offset}
-\label{sec:bpsk_freqConst}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{bpConstfo1.jpg}
-\caption{The BPSK constellation plots for different levels of SNR at a frequency offset of 0.01 Hz}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{bpConstfo2.jpg}
-\caption{The BPSK constellation plots for different levels of SNR at a frequency offset of 0.1 Hz}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{bpConstfo3.jpg}
-\caption{The BPSK constellation plots for different levels of SNR at a frequency offset of 1 Hz}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{bpConstfo4.jpg}
-\caption{The BPSK constellation plots for different levels of SNR at a frequency offset of 10 Hz}
+\hspace*{-2cm}\includegraphics[width=0.4\textwidth]{scurvePhase.jpg}
+\caption{This plots the estimation versus actual phase error.  It is called an `S' curve because of its resemblance to the letter \label{fig:scurvePhase}
 \end{figure}
 
 \subsubsection{QPSK with Frequency Offset}
+\label{sec:s_freq}
 \begin{figure}[H]
 \centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qpConstfo1.jpg}
-\caption{The QPSK constellation plots for different levels of SNR at a frequency offset of 0.01 Hz}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qpConstfo2.jpg}
-\caption{The QPSK constellation plots for different levels of SNR at a frequency offset of 0.1 Hz}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qpConstfo3.jpg}
-\caption{The QPSK constellation plots for different levels of SNR at a frequency offset of 1 Hz}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=1.3\textwidth]{qpConstfo4.jpg}
-\caption{The QPSK constellation plots for different levels of SNR at a frequency offset of 10 Hz \label{fig:qpsk_freq}}
+\hspace*{-2cm}\includegraphics[width=0.4\textwidth]{scurveFreq.jpg}
+\caption{This plots the estimation frequency versus actual frequency error.  It is called an `S' curve because of its resemblance to the letter \label{fig:scurvePhase}
 \end{figure}
 
 
 \newpage
 \section{Conclusion}
 \label{sec:conc}
-This section of the project showed off the effects of carrier phase and frequency offsets.  This occurs in real systems when coherency is not maintained.  Synchronization between transmitter and receiver oscillator is not perfectly maintained.  The models showed that symbol error rates remained functional for small errors in phase and frequency.  As phase got to $\frac{\pi}{4}$ off, the constellations became the same as for proper $\frac{\pi}{4}$-QPSK [Section~\ref{sec:qam16_phaseConst}].  At this extreme, there was significant misclassification of symbols.  \\
-
-The frequency errors did completely not ruin the transmissions [\ref{sec:results_fo}].  Because the symbol period was so brief, the accumulation of error for small frequency deviations was kept small.  As the frequency difference climbed, the effect became more and more evident.  The tell-tale sign of an offset in frequency is shown in plots such as Figure~\ref{fig:qpsk_freq}.  The blur along the unit circle demonstrates the frequency error.  The errors were catastrophic in the case of a 10 Hz frequency offset.  \\
-
-From this project, the sensitivity of modulation schemes was analyzed.  Impercise phase and frequency can ruin a data system.  In subsequent phases of the project, remedies for these issues will be explored.
 
 \appendix
 \newpage
 \bibliographystyle{plain}
-\bibliography{step2}
+\bibliography{step3}
 \newpage
 %% the \\ insures the section title is centered below the phrase: Appendix B
 %\section{Project Assignment}
