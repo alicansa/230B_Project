@@ -290,11 +290,16 @@ Now that the system has an error metric, it is passed through a loop filter and 
 \caption{BER plots of the system with Decision Directed Recovery Loop for an input with 30 degrees phase offset (using output bits starting from different indices)}
 \end{figure}
 
-
-
 \newpage
 \section{Conclusion}
 \label{sec:conc}
+
+The objective of this step was to recover the system from the phase and frequency offsets that might be present in the received signal.  To handle the noncoherent error introduced into the system, feedback loops(costas and decision directed) were installed. To combat this, the error is estimated and then fed into a feedback loop filter to track it out. 
+
+-s-curve results
+-transience results
+-constellation plot results
+-where should we start measuring the bits? -> ber results
 
 \appendix
 \newpage
