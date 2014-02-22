@@ -137,6 +137,8 @@ Now that the system has an error metric, it is passed through a loop filter and 
 
 \newpage
 \section{Step 3 Results}
+In the following sections the results of the simulations of a system using QPSK modulation and Costas Loop or Decision Directed Recovery Loop for phase/frequency offset recovery. The results are interpreted afterwards in the conclusion section.
+
 \subsection{QPSK with Costas Loop}
 
 \subsubsection{S-Curve of Phase Detector}
@@ -193,7 +195,6 @@ Now that the system has an error metric, it is passed through a loop filter and 
 
 
 \subsubsection{BER Plots for Carrier Recovery}
-
 
 \begin{figure}[H]
 \centering
@@ -294,12 +295,20 @@ Now that the system has an error metric, it is passed through a loop filter and 
 \section{Conclusion}
 \label{sec:conc}
 
-The objective of this step was to recover the system from the phase and frequency offsets that might be present in the received signal.  To handle the noncoherent error introduced into the system, feedback loops(costas and decision directed) were installed. To combat this, the error is estimated and then fed into a feedback loop filter to track it out. 
+The objective of this step was to recover the system from the phase and frequency offsets that might be present in the received signal. To handle the noncoherent error introduced into the system, feedback loops(costas and decision directed) were installed. To combat this, the error is estimated and then fed into a feedback loop filter to track it out. 
+
 
 -s-curve results
+
 -transience results
+
+
 -constellation plot results
+
 -where should we start measuring the bits? -> ber results
+
+Looking at the loop filter output results for the system where a phase offset is introduced, it can be seen that phase error estimate converges to zero very fast. This means that we don't really need to throw any of the received bits. This result can also be deduced from the BER graphs provided in the results section. When a phase offset is introduced, dropping bits doesn't really change the resulting probability of error of the system. Thus we can conclude that if the phase error estimate converges fast enough dropping bits doesn't really affect the efficiency of the system in term of bit error rate. 
+The same results are valid for the system with frequency offset too, as the frequency error estimate reaches the steady-state fast enough that dropping bits doesn't really change the bit error rate of the system. 
 
 \appendix
 \newpage
