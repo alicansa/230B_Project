@@ -52,7 +52,7 @@
 
 
 % Title Page
-\title{UCLA\\EE230B\\Digital Communication Design Project\\Step 2 Report}
+\title{UCLA\\EE230B\\Digital Communication Design Project\\Step 3 Report}
 \author{Alican Salor 404271991 \\  \href{mailto:alicansalor@ucla.edu}{alicansalor@ucla.edu} \\ \\
 Darren Reis 804359840 \\
 \href{mailto:darrer.r.reis@gmail.com}{darren.r.reis@gmail.com} }
@@ -76,7 +76,7 @@ Both of these setups are based on the same control theory fundamentals and thus 
 \label{eq:vco}
 \phi_{\text{out}} &= \int \! k_{VCO}V_{in} \mathrm{d}t
 \end{align}
-A VCO is a device with output oscillation which is varied by the voltage level of the input.  The transfer function, relating the input to the output, for this block is shown in Equation~\ref{eq:vco}. The integral action can eliminate phase error, as we see in Figure~\ref{fig:BLAH}.  To implement a VCO in simulation, a phase accumulator does the integration   action and then, to keep the result in the correct domain, the result is put through a modulo $2\pi$ block.   
+A VCO is a device with output oscillation which is varied by the voltage level of the input.  The transfer function, relating the input to the output, for this block is shown in Equation~\ref{eq:vco}. The integral action can eliminate phase error. To implement a VCO in simulation, a phase accumulator does the integration   action and then, to keep the result in the correct domain, the result is put through a modulo $2\pi$ block.   
 When the plant is of higher Type than 0, as with a frequency offset, the steady state error can grow unbounded.  To deal with this scenario, another block is inserted in the feedback line.  An additional integrator increases the order of the closed loop system to allow bounding of higher type systems.  Notice in Figure~\ref{fig:costas}, the loop filter is Proportional-Integral.  With two integrators in the feedback path, Type 1 systems, or those with ramp inputs, can be bounded to a constant steady state error level.  Because frequency can be thought of as first order phase [\ref{eq:phaseFreq}], we track out the frequency error.\\
 \begin{align}
 \label{eq:phaseFreq}
@@ -126,7 +126,7 @@ Again this system can handle both phase and frequency offset errors (under QPSK)
 
 In the Decision Directed Recovery Loop, differently from the Costas Loop, the output of the decision block is used to obtain an error metric. The sampled received signal and the output of the decision block is passed through a phase detector which has the following function:\\
 
-$\hat{\phi} = sin^{-1}\left(\frac{y(t)\hat{x}^*}{|y(t)||\hat{x(t)}}\right)  $\\
+$\hat{\phi} = sin^{-1}\left(\frac{y(t)\hat{x}^*(t)}{|y(t)||\hat{x}(t)}\right)  $\\
 
 Now that the system has an error metric, it is passed through a loop filter and then a VCO which is then multiplied with the received signal in order to correct the phase/frequency offset as shown in the Figure~\ref{fig:ddr}
 
@@ -292,7 +292,7 @@ In the following sections the results of the simulations of a system using QPSK 
 
 The objective of this step was to recover the system from the phase and frequency offsets that might be present in the received signal. To handle the noncoherent error introduced into the system, feedback loops (Costas and Decision Directed) were installed. These use control feedback to track out the errors by first finding a metric for the error, then using integrators to track away that error. 
 
-The `S' Curve results for the Costas type setup give indication of how the system reacts to different degree phase and frequency error.  Notice, in each of the graphs [\ref{fig:costasSphase}, \ref{fig:costasSfreq}], the estimation error is periodic.  This is because the the metric does a good job approximating for phase at small phase levels, but of course has some error.  We see the same results in the Decision Directed cases as well [\ref{fig:ddrsphase}, \ref{fig:ddrsfreq}].
+The `S' Curve results for the Costas type setup give indication of how the system reacts to different degree phase and frequency error.  Notice, in each of the graphs [~\ref{fig:costasSphase}, \ref{fig:costasSfreq}], the estimation error is periodic.  This is because the the metric does a good job approximating for phase at small phase levels, but of course has some error.  We see the same results in the Decision Directed cases as well [\ref{fig:ddrsphase}, \ref{fig:ddrsfreq}].
 
 In the transience plots, notice that the error in the 6 dB is zero mean and has magnitude around .01.  The 30 dB plot [\ref{fig:costasTransPhase}]  shows the typical convergence shape we would expect.  We feel that the same structure exists in the lower SNR case, but the settling time happens in only a few samples and gets lost.  This pattern is repeated for the frequency estimation trials as well [\ref{fig:costasTransFreq1}, \ref{fig:costasTransFreq2}].  Again, the Decision Directed loops have the same form [\ref{fig:ddrTransphase}, \ref{fig:ddrtransFreq1}, \ref{fig:ddrTransFreq2}].
 
