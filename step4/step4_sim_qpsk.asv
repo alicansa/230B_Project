@@ -12,7 +12,7 @@ B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
 SNR = 0:20; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
-N= 10000;  %number of bits generated
+N= 1000;  %number of bits generated
 k = 2;  % bits per symbol
 bits = random_bit_generator(N);  %random bit generation
 [quadrature, inphase] = qpsk_mod(bits,N/k);  %mapping to symbols
@@ -25,7 +25,7 @@ transmit = conv(impulse_train_inphase + j*impulse_train_quad,srrc,'same');
 %digital to analog conversion
 transmit_analog = ZeroHoldInterpolation(transmit,overSampleSizeAnalog);
 %anti aliasing filter
-filtered_transmit_analog = ButterworthFilter(4,0.2,transmit_analog); %fc at pi/4
+filtered_transmit_analog = ButterworthFilter(4,0.015,transmit_analog); %fc at pi/4
 
 %loop this section for the generation of BER vs SNR graphs and
 %constellation plots
@@ -40,7 +40,7 @@ for i=1:length(SNR)
    %pass the signals to be transmitted through awgn channel
     received_analog = awgn_complex_channel(filtered_transmit_analog,SNR(i),S);
     %noise limiting filter
-    filtered_received_analog = ButterworthFilter(4,0.1,received_analog);
+    filtered_received_analog = ButterworthFilter(4,0.9,received_analog);
     %analog to digital converter -> sample 4 times each symbol period
     received_digital = ZeroHoldDecimation(filtered_received_analog,overSampleSizeAnalog);
     
