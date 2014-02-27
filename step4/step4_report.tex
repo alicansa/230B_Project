@@ -52,7 +52,7 @@
 
 
 % Title Page
-\title{UCLA\\EE230B\\Digital Communication Design Project\\Step 2 Report}
+\title{UCLA\\EE230B\\Digital Communication Design Project\\Step 4 Report}
 \author{Alican Salor 404271991 \\  \href{mailto:alicansalor@ucla.edu}{alicansalor@ucla.edu} \\ \\
 Darren Reis 804359840 \\
 \href{mailto:darrer.r.reis@gmail.com}{darren.r.reis@gmail.com} }
@@ -66,9 +66,55 @@ Darren Reis 804359840 \\
 
 \newpage
 
+\section{Background}
+\label{sec:background}
+This step of the project introduces complications from using computers and digital methods to analyze analog signals.  Data conversion can lead to additional, even catastrophic errors.\\
+Recall, digital signals are quantized into samples, discrete points in time.  Conversely, an analog signal has a continuous value.  Going from one to the other requires a converter.  To take an analog signal and digitize it, an Analog-to-Digial Converter (A/D) is used.  Both types of signals are shown in Figure~\ref{fig:digitization}.  There is a wrinkle: the rate of conversion is critical to preserving the information.  By the Nyquist-Shannon Sampling Theorem (\ref{eq:nyquist}), the sampling frequency must be at least twice the highest frequency in the signal.  Without 
+reaching this frequency, the samples can wrongfully convey a lower frequency signal, alias, of the true signal.  This is shown in Figure~\ref{fig:alias}.  
 
-\section{System Setup}
-\label{sec:setup}
+\begin{align}
+\label{eq:nyquist}
+f_s \geq 2 f_{max}
+\end{align}
+
+
+\begin{figure}[h]
+        \centering
+        \begin{subfigure}[b]{0.4\textwidth}
+                \includegraphics[width=\textwidth]{digitization.png}
+                \caption{Analog and Digital signals}
+                \label{fig:digitization}
+        \end{subfigure}%
+        \qquad \quad %add desired spacing between images, e. g. ~, \quad, \qquad etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.5\textwidth}
+                \includegraphics[width=\textwidth]{aliasing.jpg}
+                \caption{Aliasing \label{fig:alias} \cite{aliasing}}
+                \label{fig:alias}
+        \end{subfigure}
+        \caption{Digital Conversion \label{fig:digitize}}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\textwidth]{step4.png}
+\caption{Block Diagram of Step 4 system setup }
+\end{figure}
+
+\section{System}
+\label{sec:system}
+The system simulation model is shown in Figure~\ref{fig:step4}.  As from Step 1, bits are converted into symbols and then upsampled by adding in zeros.  This then is run through a Square Root Raised Cosine (SRRC) pulse shape filter.  This shaping improves the resistance of the sequence to intersymbol interference (ISI).  The output of this filter is fed into a Digital-to-Analog Converter (DAC).  A DAC takes the digital samples and zero-order holds them at a constant voltage, creating an analog signal.  \\
+In our model, we then use a filter to restrict the bandwidth of the signals and facilitate transmission.  After the digitizer, a reconstruction filter (also sometimes called an anti-imaging filter) bandlimits the analog waveform output from the DAC.  The high frequency content contained in the stair-case digital signal is undesirable since it can create aliasing of wrongfully high frequency waves.  To avoid this, a Low Pass Filter is used for the reconstruction.  Ours is modeled as BUTTERWORTH.  BECAUSE BLAH BLAH.  This analog signal is then sent through a real world channel, modeled by gain and additive white Gaussian noise.  \\
+To bring the analog back to the digital world, an A/D will be used.  However, just like before, the conversion can be improved by the use of a filter.  An anti-aliasing low-pass filter can constrain, or band limit, the channel noise before entering the A/D.  In this setting, the LPF  protects against aliasing of high frequency content being recorded at the lower frequency.\\
+The end of the simulation model is identical to the process in Step 1: a matched filter to the SRRC picks out the symbols from the noisy received signal.  Afterwards, a sampler recovers the symbols before a demodulator converts the symbols back into bits.  
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{step4.png}
+\caption{Block Diagram of Step 4 system setup\label{fig:step4}}
+\end{figure}
+
+
 To handle the noncoherent error introduced into the system, feedback loops (Costas and Decision Directed) were installed.  As from before, the $\delta\phi$ block represents a block that introduces phase or frequency offset on the carrier.  To combat this, the error is estimated and then fed into a feedback loop filter to track it out. \\
 
 Both of these setups are based on the same control theory fundamentals and thus have similar feedback loop components. In control theory when there is steady state error in the open loop system, feedback, or `closing the loop' can track out the error.  From the plots in Step 2, we realize our situation is just this case of steady state error.  Depending on the order of the system, this error can become unbounded and damning.  Feedback can track or bound this error by `closing the loop' if the open loop system Type is 0.  \footnote{Recall, a system is of Type N when there are N poles at the s-plane origin.}  Here, the steady state error can be held to a certain level by introducing integration in the feedback line of the loop.  For us, this is true when we talk about phase error: we can send a step input phase error into a Voltage Controlled Oscillator and watch the error converge to a constant level. 
@@ -94,11 +140,6 @@ In the following sections, the two setups for error recovery are given and their
 \subsection{System with Costas Loop}
 This error recovery is accomplished first via a Costas loop, as in Figure~\ref{fig:costas}. 
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{costas.png}
-\caption{Diagram of the Costas loop used to handle error\label{fig:costas}}
-\end{figure}
 
 The phase and frequency offset error, under QPSK, can be handled by the Costas loop given above. The technique first creates an estimate of the phase error by creating a metric for it.  The error is then sent through a closed feedback loop.  This structure can track out the zero order (phase offset) and first order (carrier offset) phase errors as it contains two integrators. 
 
@@ -114,177 +155,39 @@ In a Costas loop, the I and Q component of the received signal are both sent thr
 Equation~\ref{eq:costas} is the metric for phase error.  This value is run into the loop filter and then the VCO.  Finally, the output of the VCO is used to correct the received signal's phase error as seen in the system setup in Figure~\ref{fig:costas}.
 
 \newpage
-\subsection{System with Decision Directed Recovery Loop}
-Another approach to recover the phase and carrier offset is using the Decision Directed Recovery Loop. The setup is as shown in the figure below:
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{ddr_diagram.jpg}
-\caption{Diagram of the Decision Directed Recovery loop used to handle error\label{fig:ddr}}
-\end{figure}
-
-Again this system can handle both phase and frequency offset errors (under QPSK). Similar to the Costas Loop, the phase error is estimated and sent through a closed feedback loop, thus tracking and recovering the error. The system containes two integrators, thus as mentioned before, zero order (phase offset) and first order (carrier offset) phase errors can be tracked out. 
-
-In the Decision Directed Recovery Loop, differently from the Costas Loop, the output of the decision block is used to obtain an error metric. The sampled received signal and the output of the decision block is passed through a phase detector which has the following function:\\
-
-$\hat{\phi} = sin^{-1}\left(\frac{y(t)\hat{x}^*}{|y(t)||\hat{x(t)}}\right)  $\\
-
-Now that the system has an error metric, it is passed through a loop filter and then a VCO which is then multiplied with the received signal in order to correct the phase/frequency offset as shown in the Figure~\ref{fig:ddr}
-
-
-
-
-\newpage
 \section{Step 3 Results}
 In the following sections the results of the simulations of a system using QPSK modulation and Costas Loop or Decision Directed Recovery Loop for phase/frequency offset recovery. The results are interpreted afterwards in the conclusion section.
 
-\subsection{QPSK with Costas Loop}
+%\subsection{QPSK with Decision Directed Recovery}
+%\subsubsection{Transience of Phase Recovery}
+%\begin{figure}[H]
+%\centering
+%\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpLoopFilterpo_ddr1.jpg}
+%\caption{The loop filter output of the Decision Directed Recovery Loop for an input signal with 30 degrees phase offset \label{fig:ddrTransphase}}
+%\end{figure}
+%
+%
+%\subsubsection{Constellation Plots  for Phase Recovery}
+%\begin{figure}[H]
+%\centering
+%\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpConstpo_ddr1.jpg}
+%\caption{The resulting constellation plot of the output of the system with Decision Directed Recovery Loop for an input with 30 degrees phase offset at 6dB and 30dB SNR \label{fig:ddrConstPhase}}
+%\end{figure}
+%
+%\subsubsection{BER Plots for Phase Recovery}
+%\begin{figure}[H]
+%\centering
+%\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpBERpo_ddr1.jpg}
+%\caption{BER plots of the system with Decision Directed Recovery Loop for an input with 30 degrees phase offset (using output bits starting from different indexes) \label{fig:ddrBERphase}}
+%\end{figure}
+%
+%\subsubsection{BER Plots for Carrier Recovery}
+%\begin{figure}[H]
+%\centering
+%\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpBERfo_ddr1.jpg}
+%\caption{BER plots of the system with Decision Directed Recovery Loop for an input with 1ppm frequency offset (using output bits starting from different indexes) \label{fig:ddrBERFreq1}}
+%\end{figure}
 
-\subsubsection{S-Curve of Phase Detector}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpScurvepo_costas.jpg}
-\caption{S-curve of the phase detector used in Costas Loop \label{fig:costasSphase}}
-\end{figure}
-\subsubsection{S-Curve of Carrier Detector}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpScurvefo.jpg}
-\caption{S-curve of the carrier detector used in Costas Loop \label{fig:costasSfreq}}
-\end{figure}
-\subsubsection{Transience of Phase Recovery}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpLoopFilterpo_costas1.jpg}
-\caption{The loop filter output of the Costas Loop for an input signal with 30 degrees phase offset  \label{fig:costasTransPhase}}
-\end{figure}
-
-\subsubsection{Transience of Carrier Recovery}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpLoopFilterfo_costas1.jpg}
-\caption{The loop filter output of the Costas Loop for an input signal with 1ppm frequency offset \label{fig:costasTransFreq1}}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpLoopFilterfo_costas2.jpg}
-\caption{The loop filter output of the Costas Loop for an input signal with 30ppm frequency offset \label{fig:costasTransFreq2}}
-\end{figure}
-\subsubsection{Constellation Plots  for Phase Recovery}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpConstpo_costas1.jpg}
-\caption{The resulting constellation plot of the output of the system with Costas Loop for an input with 30 degrees phase offset at 6dB and 30dB SNR \label{fig:costasConstPhase} }
-\end{figure}
-
-
-\subsubsection{Constellation Plots  for Frequency Recovery}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpConstfo_costas1.jpg}
-\caption{The resulting constellation plot of the output of the system with Costas Loop for an input with 1ppm frequency offset at 6dB and 30dB SNR \label{fig:costasConstFreq1} }
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpConstfo_costas2.jpg}
-\caption{The resulting constellation plot of the output of the system with Costas Loop for an input with 30 ppm frequency offset at 6dB and 30dB SNR \label{fig:costasConstFreq2} }
-\end{figure}
-
-\subsubsection{BER Plots for Phase Recovery}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpBERpo_costas1.jpg}
-\caption{BER plots of the system with Costas Loop for an input with 30 degrees phase offset (using output bits starting from different indexes) \label{fig:costasBERphase}}
-\end{figure}
-
-\subsubsection{BER Plots for Carrier Recovery}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpBERfo_costas1.jpg}
-\caption{BER plots of the system with Costas Loop for an input with 1ppm frequency offset (using output bits starting from different indexes) \label{fig:costasBERFreq1}}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpBERfo_costas2.jpg}
-\caption{BER plots of the system with Costas Loop for an input with 30ppm frequency offset (using output bits starting from different indexes) \label{fig:costasBERFreq2}}
-\end{figure}
-
-\subsection{QPSK with Decision Directed Recovery}
-
-\subsubsection{S-Curve of Phase Detector}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpScurvepo_ddr.jpg}
-\caption{S-curve of the phase detector used in Decision Directed Recovery Loop \label{fig:ddrsphase}}
-\end{figure}
-\subsubsection{S-Curve of Carrier Detector}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpScurvefo.jpg}
-\caption{S-curve of the frequency detector used in Decision Directed Recovery Loop \label{fig:ddrsfreq}}
-\end{figure}
-
-\subsubsection{Transience of Phase Recovery}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpLoopFilterpo_ddr1.jpg}
-\caption{The loop filter output of the Decision Directed Recovery Loop for an input signal with 30 degrees phase offset \label{fig:ddrTransphase}}
-\end{figure}
-
-\subsubsection{Transience of Carrier Recovery}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpLoopFilterfo_ddr1.jpg}
-\caption{The loop filter output of the Decision Directed Recovery Loop for an input signal with 1ppm frequency offset \label{fig:ddrtransFreq1}}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpLoopFilterfo_ddr2.jpg}
-\caption{The loop filter output of the Decision Directed Recovery Loop for an input signal with 30ppm frequency offset \label{fig:ddrTransFreq2}}
-\end{figure}
-
-\subsubsection{Constellation Plots  for Phase Recovery}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpConstpo_ddr1.jpg}
-\caption{The resulting constellation plot of the output of the system with Decision Directed Recovery Loop for an input with 30 degrees phase offset at 6dB and 30dB SNR \label{fig:ddrConstPhase}}
-\end{figure}
-
-\subsubsection{Constellation Plots for Frequency Recovery}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpConstfo_ddr1.jpg}
-\caption{The resulting constellation plot of the output of the system with Decision Directed Recovery Loop for an input with 1ppm frequency offset at 6dB and 30dB SNR \label{fig:ddrConstFreq1}}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpConstfo_ddr2.jpg}
-\caption{The resulting constellation plot of the output of the system with Decision Directed Recovery Loop for an input with 30 ppm frequency offset at 6dB and 30dB SNR \label{fig:ddrConstFreq2}}
-\end{figure}
-
-\subsubsection{BER Plots for Phase Recovery}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpBERpo_ddr1.jpg}
-\caption{BER plots of the system with Decision Directed Recovery Loop for an input with 30 degrees phase offset (using output bits starting from different indexes) \label{fig:ddrBERphase}}
-\end{figure}
-
-\subsubsection{BER Plots for Carrier Recovery}
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpBERfo_ddr1.jpg}
-\caption{BER plots of the system with Decision Directed Recovery Loop for an input with 1ppm frequency offset (using output bits starting from different indexes) \label{fig:ddrBERFreq1}}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpBERfo_ddr2.jpg}
-\caption{BER plots of the system with Decision Directed Recovery Loop for an input with 30ppm frequency offset (using output bits starting from different indexes) \label{fig:ddrBERFreq2}}
-\end{figure}
 
 \newpage
 \section{Conclusion}
@@ -305,7 +208,7 @@ The same results are valid for the system with frequency offset too, as the freq
 \appendix
 \newpage
 \bibliographystyle{plain}
-\bibliography{step3}
+\bibliography{step4}
 \newpage
 %% the \\ insures the section title is centered below the phrase: Appendix B
 %\section{Project Assignment}
@@ -313,26 +216,6 @@ The same results are valid for the system with frequency offset too, as the freq
 %\includepdf[pages={1-5}]{project_overview.pdf}
 %\cleardoublepage
 %\newpage
-
-\section{Costas Loop}
-\subsection{Costas Loop Simulation for Phase Recovery}
-\lstinputlisting{step3_costas_phase_qpsk.m}
-
-\subsection{Costas Loop Simulation for Carrier Recovery}
-\lstinputlisting{step3_costas_freq_qpsk.m}
-
-\section{Decision Directed Recovery Loop}
-\subsection{Decision Directed Recovery Loop Simulation for Phase Recovery}
-\lstinputlisting{step3_ddr_phase_qpsk.m}
-
-\subsection{Decision Directed Recovery Loop Simulation for Carrier Recovery}
-\lstinputlisting{step3_ddr_freq_qpsk.m}
-
-\section{VCO}
-\lstinputlisting{voltage_controlled_osc.m}
-
-\section{Loop Filter}
-\lstinputlisting{loop_filter.m}
 
 \section{Random Bit Sequence Generator}
 \label{app:random_bit_generator}
@@ -366,17 +249,6 @@ The same results are valid for the system with frequency offset too, as the freq
 \subsection{QPSK Demodulation}
 \label{app:qpsk_demod}
 \lstinputlisting{qpsk_demod.m}
-
-\section{Offsets}
-\label{app:offsets}
-\subsection{Carrier Phase Offset}
-\label{app:phase_offset}
-\lstinputlisting{phase_offset.m}
-
-\subsection{Carrier Frequency Offset}
-\label{app:freq_offset}
-\lstinputlisting{freq_offset.m}
-
 
 
 \end{document}
