@@ -4,7 +4,7 @@ clear all;
 clc;
 %Start by setting the initial variables
 overSampleSize = 4;
-overSampleSizeAnalog = 320; %80 times symbol period
+overSampleSizeAnalog = 20; %80 times symbol period
 rollOffFactor = 0.25;
 N= 5000; %number of bits generated
 Ts = 1; %Symbol period
@@ -26,7 +26,7 @@ transmit = conv(impulse_train_inphase + j*impulse_train_quad,srrc,'same');
 transmit_analog = ZeroHoldInterpolation(transmit,overSampleSizeAnalog);
 
 %anti aliasing filter
-filtered_transmit_analog = ButterworthFilter(4,0.1,transmit_analog); %fc at pi/4
+filtered_transmit_analog = ButterworthFilter(4,0.8,transmit_analog); %fc at pi/4
 
 %loop this section for the generation of BER vs SNR graphs and
 %constellation plots
@@ -37,9 +37,9 @@ for i=1:length(SNR)
     received_analog = awgn_complex_channel(filtered_transmit_analog,SNR(i),S);
     
     %noise limiting filter
-    filtered_received_analog = ButterworthFilter(4,0.1,received_analog);
+    filtered_received_analog = ButterworthFilter(4,0.5,received_analog);
     %analog to digital converter -> sample 4 times each symbol period
-    received_digital = ZeroHoldDecimation(filtered_received_analog,320);
+    received_digital = ZeroHoldDecimation(filtered_received_analog,20);
     
     %pass the received signal through the matched filter for optimal
     %detection
@@ -59,7 +59,7 @@ for i=1:length(SNR)
         line(xlim,[0 0], 'Color', 'k');
         line([0 0],ylim,'Color', 'k');
         xlabel('In-Phase'),ylabel('Quadrature-Phase');
-        title(['QPSK Constellation with'...
+        title(['16-QAM Constellation with'...
             sprintf('\nSNR = %d dB',SNR(i))]);
         axis([xlim, ylim]);
         num = num+1;
