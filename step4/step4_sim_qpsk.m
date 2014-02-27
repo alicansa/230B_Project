@@ -4,7 +4,7 @@ clear all;
 clc;
 %Start by setting the initial variables
 overSampleSize = 4;
-overSampleSizeAnalog = 320; %80 times symbol period
+overSampleSizeAnalog = 80; %80 times symbol period
 rollOffFactor = 0.25;
 Ts = 1; %Symbol period
 S=2; %average signal power for QPSK
@@ -22,12 +22,10 @@ bits = random_bit_generator(N);  %random bit generation
 impulse_train_quad = impulse_train(overSampleSize,N/k,quadrature);
 impulse_train_inphase = impulse_train(overSampleSize,N/k,inphase);
 transmit = conv(impulse_train_inphase + j*impulse_train_quad,srrc,'same');
-
 %digital to analog conversion
 transmit_analog = ZeroHoldInterpolation(transmit,overSampleSizeAnalog);
-
 %anti aliasing filter
-filtered_transmit_analog = ButterworthFilter(4,0.1,transmit_analog); %fc at pi/4
+filtered_transmit_analog = ButterworthFilter(4,0.015,transmit_analog); %fc at pi/4
 
 %loop this section for the generation of BER vs SNR graphs and
 %constellation plots
@@ -41,16 +39,14 @@ num = 1;
 for i=1:length(SNR)
    %pass the signals to be transmitted through awgn channel
     received_analog = awgn_complex_channel(filtered_transmit_analog,SNR(i),S);
-    
     %noise limiting filter
-    filtered_received_analog = ButterworthFilter(4,0.1,received_analog);
+    filtered_received_analog = ButterworthFilter(4,0.9,received_analog);
     %analog to digital converter -> sample 4 times each symbol period
-    received_digital = ZeroHoldDecimation(filtered_received_analog,320);
+    received_digital = ZeroHoldDecimation(filtered_received_analog,overSampleSizeAnalog);
     
     %pass the received signal through the matched filter for optimal
     %detection
     matched_output = conv(received_digital,srrc,'same');
-
     %pass the matched filter output through the sampler to obtain symbols
     %at each symbol period
     sampled = sampler(matched_output,overSampleSize,Ts);
