@@ -4,9 +4,11 @@ clear all;
 clc;
 %Start by setting the initial variables
 overSampleSize = 4;
-overSampleSizeAnalog = 20; %80 times symbol period
+overSampleSizeAnalog = 80; %80 times symbol period
 rollOffFactor = 0.25;
 N= 5000; %number of bits generated
+t_analog = 0:1/overSampleSizeAnalog:N/4;
+t_digital = 0:1/overSampleSize:N/4;
 Ts = 1; %Symbol period
 S=10; %average signal power for 16-QAM
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
@@ -21,26 +23,38 @@ bits = random_bit_generator(N);  %random bit generation
 impulse_train_quad = impulse_train(overSampleSize,N/4,quadrature);
 impulse_train_inphase = impulse_train(overSampleSize,N/4,inphase);
 transmit = conv(impulse_train_inphase + j*impulse_train_quad,srrc,'same');
-
 %digital to analog conversion
-transmit_analog = ZeroHoldInterpolation(transmit,overSampleSizeAnalog);
+transmit_analog = ZeroHoldInterpolation(transmit,overSampleSizeAnalog/overSampleSize);
+figure(1)
+plot(t_digital(1:100),real(transmit(1:100)),'r');
+hold on
+plot(t_analog(1:100*overSampleSizeAnalog/overSampleSize),real(transmit_analog(1:100*overSampleSizeAnalog/overSampleSize)),'g');
 
 %anti aliasing filter
-filtered_transmit_analog = ButterworthFilter(4,0.8,transmit_analog); %fc at pi/4
-
+filtered_transmit_analog = ButterworthFilter(4,0.05,transmit_analog); %fc at pi/20
+figure(1)
+plot(t_analog(1:100*overSampleSizeAnalog/overSampleSize),real(filtered_transmit_analog(1:100*overSampleSizeAnalog/overSampleSize)),'-bx');
 %loop this section for the generation of BER vs SNR graphs and
 %constellation plots
 num = 1;
-f = figure;
+hold off
 for i=1:length(SNR)
  %pass the signals to be transmitted through awgn channel
     received_analog = awgn_complex_channel(filtered_transmit_analog,SNR(i),S);
-    
+    figure
+    plot(t_analog(1:100*overSampleSizeAnalog/overSampleSize),real(received_analog(1:100*overSampleSizeAnalog/overSampleSize)),'g');
+    hold on;
     %noise limiting filter
-    filtered_received_analog = ButterworthFilter(4,0.5,received_analog);
+    filtered_received_analog = ButterworthFilter(4,0.5,received_analog); %fc at pi/5
+    plot(t_analog(1:100*overSampleSizeAnalog/overSampleSize),real(filtered_received_analog(1:100*overSampleSizeAnalog/overSampleSize)),'r');
     %analog to digital converter -> sample 4 times each symbol period
-    received_digital = ZeroHoldDecimation(filtered_received_analog,20);
-    
+    received_digital = ZeroHoldDecimation(filtered_received_analog,overSampleSizeAnalog/overSampleSize,1);
+    hold off
+    figure
+    plot(t_digital(1:100),real(received_digital(1:100)),'bx')
+    hold on
+    plot(t_digital(1:100),real(transmit(1:100)),'r');
+    %stem(real(received_digital(1:100)),'ko');
     %pass the received signal through the matched filter for optimal
     %detection
     matched_output = conv(received_digital,srrc,'same');
@@ -48,7 +62,7 @@ for i=1:length(SNR)
      %pass the matched filter output through the sampler to obtain symbols
     %at each symbol period
     sampled = sampler(matched_output,overSampleSize,Ts);
-    
+    f=figure(3);
     %constellation plot
     if (SNR(i) == 3) || SNR(i) == 6 || SNR(i) == 10 || ...
             SNR(i) == 15 || SNR(i) == 20
@@ -69,13 +83,19 @@ for i=1:length(SNR)
     output_bits = QAM_16_demod(real(sampled),imag(sampled));
 
     %BER/SER calculation - drop the first symbol 
-    ser(i) = SER(bits(5:N),output_bits(5:N),4);
-    ber(i) = BER(bits(5:N),output_bits(5:N));
+    ser(i) = SER(bits(9:N-8),output_bits(9:N-8),4);
+    ber(i) = BER(bits(9:N-8),output_bits(9:N-8));
     %SER/BER theoretical calculation)
     a = 10^(EbN0(i)/10);
     ser_theo(i) = 3*qfunc(sqrt((4/5)*a))-(9/4)*qfunc(sqrt((4/5)*a))^2;
     ber_theo(i) = (1/4)*(3*qfunc(sqrt((4/5)*a))-(9/4)*qfunc(sqrt((4/5)*a))^2);
+    
+    
+
+
+    
 end
+
 % save the constellation plot
 print(f,'-djpeg','-r300','qam16Const');
 

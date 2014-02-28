@@ -36,6 +36,7 @@ ser_theo = zeros(1,length(SNR));
 ber_EbN0 = zeros(1,length(SNR));
 f = figure;
 num = 1;
+
 for i=1:length(SNR)
    %pass the signals to be transmitted through awgn channel
     received_analog = awgn_complex_channel(filtered_transmit_analog,SNR(i),S);
