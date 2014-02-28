@@ -1,4 +1,4 @@
-function [output] = ZeroHoldDecimation(data,overSamplingRate)
+function [output] = ZeroHoldDecimation(data,overSamplingRate,delay)
 % FUNCTION 
 %   this takes the input signal and the sampling factor to grab samples
 %       according to the ratio
@@ -9,8 +9,8 @@ function [output] = ZeroHoldDecimation(data,overSamplingRate)
 % OUTPUTS
 % output - the resulting downsampled waveform
 
-for i = 1:length(data)/overSamplingRate
-   output(i) = data((i-1)*overSamplingRate+floor(overSamplingRate/2)+1); 
+for i = 1+delay:length(data)/overSamplingRate
+   output(i-delay) = data((i-1)*overSamplingRate+1); 
 end
 
 end
