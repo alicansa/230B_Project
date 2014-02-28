@@ -1,7 +1,6 @@
 %Simulation for the QAM-16 modulation scheme
 close all;
 clear all;
-clc;
 %Start by setting the initial variables
 overSampleSize = 4;
 overSampleSizeAnalog = 80; %80 times symbol period
@@ -89,10 +88,6 @@ for i=1:length(SNR)
     a = 10^(EbN0(i)/10);
     ser_theo(i) = 3*qfunc(sqrt((4/5)*a))-(9/4)*qfunc(sqrt((4/5)*a))^2;
     ber_theo(i) = (1/4)*(3*qfunc(sqrt((4/5)*a))-(9/4)*qfunc(sqrt((4/5)*a))^2);
-    
-    
-
-
     
 end
 
