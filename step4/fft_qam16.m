@@ -25,6 +25,24 @@ load('qam16',variables{:});
 % received_digital - after the zero decimator (the A/d) [6]
 
 
+% times
+window = 100;
+t_analog = 0:1/overSampleSizeAnalog:N/4;
+t_digital = 0:1/overSampleSize:N/4;
+
+% index array to grab
+index_analog = 1:window*overSampleSizeAnalog/overSampleSize;
+index_digital = 1:window;
+
+% array of time vectors
+time_array = {t_digital, t_analog, t_analog,...
+           t_analog, t_analog, t_digital};
+% array of indices to grab in loop
+index_array = {index_digital, index_analog, index_analog,...
+           index_analog, index_analog, index_digital};
+       
+
+% freqs
 fs = 1/overSampleSize;     % Sample frequency (Hz)
 fsa = 1/overSampleSizeAnalog; % Analog Sample freq (Hz)
 % sampling array
@@ -35,9 +53,10 @@ x = {transmit, transmit_analog, filtered_transmit_analog, ...
         received_analog, filtered_received_analog, received_digital};
 
 % allocate storage arrays
-%yMat = cell(6,1);
-%powerMat = cell(6,1);
-%leg = cell(6,1);
+freqMat = cell(1,6);
+powerMat = cell(1,6);
+leg = cell(6,1);
+f1 = figure;
 for i=1:6
     m = length(x{i});                   % Window length
     n = pow2(nextpow2(m));              % Transform length
@@ -64,7 +83,7 @@ ylabel('Normalized Power');
 title('{\bf 0-Centered Periodogram}');
 %legend(leg{:},'Location','Best');
 
-f = figure;
+f2 = figure;
 col = ['b','r','y','m','k','g'];
 for i=1:6
     subplot(2,3,i);
@@ -73,4 +92,14 @@ for i=1:6
     ylabel('Normalized Power');
     title(['Signal at Step ' num2str(i)]);
 end
-    
+
+f3 = figure;
+for i=1:6
+    subplot(2,3,i);
+    time = time_array{i}(index_array{i});
+    sig = real(x{i}(index_array{i}));
+    plot(time,sig,col(i));
+    xlabel('Time (s)');
+    ylabel('Real Amplitude (V)');
+    title(['Signal at Step ' num2str(i)]);
+end

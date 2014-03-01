@@ -11,7 +11,7 @@ function [output] = sampler(input_signal, overSamplingFactor, Ts)
 % output - the sampled data signal
 
 N = length(input_signal);
-output = zeros(1,N/overSamplingFactor);
+output = zeros(1,floor(N/overSamplingFactor));
 for i=1:N/overSamplingFactor
     output(i) = input_signal((i-1)*overSamplingFactor*Ts+1);
 end

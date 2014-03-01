@@ -13,8 +13,8 @@ function [output] = ButterworthFilter(order,wc,data)
 [b,a] = butter(order,wc);  % returns as [num, denom] of T.F
 output = filter(b,a,data);
 [h,w] = freqz(b,a);
-figure(4)
-plot(w,abs(h));
+% figure(4)
+% plot(w,abs(h));
 
 
 end
