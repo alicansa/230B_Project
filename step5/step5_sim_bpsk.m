@@ -4,7 +4,10 @@ clear all;
 %Start by setting the initial variables
 N= 5000; %number of bits generated
 overSampleSize = 4;
-t=0:1/overSampleSize:N;
+t_channel1=0:1/overSampleSize:N;
+t_channel2=0:1/overSampleSize:N+2;
+t_channel3=-1:1/overSampleSize:N+1;
+
 rollOffFactor = 0.25;
 Ts = 1; %Symbol period
 S=1; %average signal power for BPSK
@@ -22,47 +25,67 @@ sym = bpsk_mod(bits,N/k);%mapping to symbols
 impulse_train = impulse_train(overSampleSize,N/k,sym);
 transmit = conv(impulse_train,srrc,'same');
 figure(1);
-plot(t(1:100),real(transmit(1:100)),'r');
+plot(t_channel1(1:100),real(transmit(1:100)),'r');
 hold on
-
-
 
 for k=1:3
 
 
-    
-   
-    %channel 1
-    transmit_channel_3 = channel_3(transmit,overSampleSize);
-    figure(1)
-    plot(t(1:100),real(transmit_channel_3(1:100)),'-bx');
-    hold off
     %loop this section for the generation of BER vs SNR graphs and
     %constellation plots
     num = 1;
 
     if k==1
         %channel 1
-        transmit_channel = channel_1(transmit,overSampleSize);
+        h = [1 0 0 0 0.25];
+        transmit_channel = bandlimited_channel(h,transmit);
         figure(1)
-        plot(t(1:100),real(transmit_channel(1:100)),'g');
-       received = awgn_channel(transmit_channel,SNR(i),S);
-    elseif k==2
+        plot(t_channel1(1:100),real(transmit_channel(1:100)),'g');
         
-       received = awgn_channel(transmit_channel,SNR(i),S);
+        %channel equalizers
+        %ZF
+        L = 5; % number of taps
+        c = ZFEqualizer(h,L);
+        
+    elseif k==2
+        %channel 2
+        h=[1 0 0 0 -0.25 0 0 0 0.125];
+        transmit_channel = bandlimited_channel(h,transmit);
+        figure(1)
+        plot(t_channel2(1:100),real(transmit_channel(1:100)),'-ko');
+        
+        %channel equalizers
+        %ZF
+        L = 5; % number of taps
+        c = ZFEqualizer(h,L);
     else
-       received = awgn_channel(transmit_channel,SNR(i),S);
+       %channel 3
+       h=[0.1 0 0 0 1 0 0 0 -0.25];
+        transmit_channel = bandlimited_channel(h,transmit);
+        figure(1)
+        plot(t_channel3(5:105),real(transmit_channel(5:105)),'-bx');
+        
+        %channel equalizers
+        %ZF
+        L = 5; % number of taps
+        c = ZFEqualizer(h,L);
+        
     end
     
     f = figure;
     for i=1:length(SNR)
         
         %pass the signals to be transmitted through awgn channel
-        received = awgn_channel(transmit_channel_1,SNR(i),S);
+        received = awgn_channel(transmit_channel,SNR(i),S);
      
+        
+        %equalize channel
+        received_equalized = conv(received,c);
+        
+        
         %pass the received signal through the matched filter for optimal
         %detection
-        matched_output = conv(received,srrc,'same');
+        matched_output = conv(received_equalized,srrc,'same');
 
         %pass the matched filter output through the sampler to obtain symbols
         %at each symbol period

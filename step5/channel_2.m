@@ -6,7 +6,7 @@ for i =overSampleSize+1:length(data)
 end
 
 for i =2*overSampleSize+1:length(data)
-    output_data(i) = output_data(i) +  0.12*data(i-2*overSampleSize);
+    output_data(i) = output_data(i) +  0.125*data(i-2*overSampleSize);
 end
 
 end
