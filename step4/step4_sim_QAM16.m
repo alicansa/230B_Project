@@ -25,14 +25,14 @@ transmit = conv(impulse_train_inphase + j*impulse_train_quad,srrc,'same');
 %digital to analog conversion
 transmit_analog = ZeroHoldInterpolation(transmit,overSampleSizeAnalog/overSampleSize);
 figure(1)
-plot(t_digital(1:100),real(transmit(1:100)),'r');
+% plot(t_digital(1:100),real(transmit(1:100)),'r');
 hold on
-plot(t_analog(1:100*overSampleSizeAnalog/overSampleSize),real(transmit_analog(1:100*overSampleSizeAnalog/overSampleSize)),'g');
+% plot(t_analog(1:100*overSampleSizeAnalog/overSampleSize),real(transmit_analog(1:100*overSampleSizeAnalog/overSampleSize)),'g');
 
 %anti aliasing filter
 filtered_transmit_analog = ButterworthFilter(4,0.05,transmit_analog); %fc at pi/20
 figure(1)
-plot(t_analog(1:100*overSampleSizeAnalog/overSampleSize),real(filtered_transmit_analog(1:100*overSampleSizeAnalog/overSampleSize)),'-bx');
+% plot(t_analog(1:100*overSampleSizeAnalog/overSampleSize),real(filtered_transmit_analog(1:100*overSampleSizeAnalog/overSampleSize)),'-bx');
 %loop this section for the generation of BER vs SNR graphs and
 %constellation plots
 num = 1;
@@ -41,18 +41,18 @@ for i=1:length(SNR)
  %pass the signals to be transmitted through awgn channel
     received_analog = awgn_complex_channel(filtered_transmit_analog,SNR(i),S);
     figure
-    plot(t_analog(1:100*overSampleSizeAnalog/overSampleSize),real(received_analog(1:100*overSampleSizeAnalog/overSampleSize)),'g');
+%     plot(t_analog(1:100*overSampleSizeAnalog/overSampleSize),real(received_analog(1:100*overSampleSizeAnalog/overSampleSize)),'g');
     hold on;
     %noise limiting filter
     filtered_received_analog = ButterworthFilter(4,0.5,received_analog); %fc at pi/5
-    plot(t_analog(1:100*overSampleSizeAnalog/overSampleSize),real(filtered_received_analog(1:100*overSampleSizeAnalog/overSampleSize)),'r');
+%     plot(t_analog(1:100*overSampleSizeAnalog/overSampleSize),real(filtered_received_analog(1:100*overSampleSizeAnalog/overSampleSize)),'r');
     %analog to digital converter -> sample 4 times each symbol period
     received_digital = ZeroHoldDecimation(filtered_received_analog,overSampleSizeAnalog/overSampleSize,1);
     hold off
     figure
-    plot(t_digital(1:100),real(received_digital(1:100)),'bx')
+%     plot(t_digital(1:100),real(received_digital(1:100)),'bx')
     hold on
-    plot(t_digital(1:100),real(transmit(1:100)),'r');
+%     plot(t_digital(1:100),real(transmit(1:100)),'r');
     %stem(real(received_digital(1:100)),'ko');
     %pass the received signal through the matched filter for optimal
     %detection
