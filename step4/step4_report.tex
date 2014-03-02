@@ -108,7 +108,7 @@ After passing through the reconstruction filter, the analog signal is  sent thro
 \caption{Block Diagram of Step 4 system setup\label{fig:step4}}
 \end{figure}
 
-To bring the analog back to the digital world, an Analog-to-Digital converter (A/D) is used [Appendix~\ref{app:ad}].  However, just like before, the conversion is improved by the use of a filter.  An anti-aliasing low-pass filter constrains, or band limits, the channel noise before entering the A/D.  In this setting, the LPF protects against aliasing of high frequency content being recorded at the lower frequency.  We use the same Butterworth filter to accomplish this function.\\
+To bring the analog back to the digital world, an Analog-to-Digital converter is used [Appendix~\ref{app:ad}].  However, just like before, the conversion is improved by the use of a filter.  An anti-aliasing low-pass filter constrains, or band limits, the channel noise before entering the A/D.  In this setting, the LPF protects against aliasing of high frequency content being recorded at the lower frequency.  We use the same Butterworth filter to accomplish this function.\\
 
 The end of the simulation model is identical to the process in Step 1: a matched filter to the SRRC picks out the symbols from the noisy received signal.  Afterwards, a sampler recovers [Appendix~\ref{app:sampler}] the symbols before a demodulator converts the symbols back into bits [\ref{app:dblocks}].  
 
@@ -153,7 +153,7 @@ In the following sections the results of the simulations of a system using QPSK 
 
 The objective of this step was to visualize the effects of data converters in the system model.  Analog and digital waveforms can be safely interchanged only under certain conditions - namely when the sampling is fast enough.  In addition to a minimum sampling rate, low pass filters are necessary to protect against aliasing of high frequency content.  \\
 
-We included A/D and DAC blocks in our system to see how well the modulation and recovery performed in comparison to earlier trials.  TALK ABOUT COMPARE
+We included A/D and DAC blocks in our system to see how well the modulation and recovery performed in comparison to earlier trials.  TALK ABOUT RESULTS.
 
 We can also understand the importance of sampling timing on the bit error rate.  From a sensitivity analysis of the delay through the system, the A/D will sample at varying degrees of synch.  We would expect the sampling not to matter within a certain range, namely, when the symbols are above a certain threshold they are safely all interpreted as `1' - the actual level doesn't matter.  From such an experiment written in Appendix~\ref{app:delay}, when all other parameters like SNR and cutoff frequencies are kept equal, we do end up seeing periodic values for the SER.  This is shown in Figure~\ref{fig:delay}.\\
 
@@ -163,20 +163,23 @@ We can also understand the importance of sampling timing on the bit error rate. 
 \caption{SER plot as a function of delay through the system.  This shows that the system can peform better and worse depending on how in-time the A/D converts.  The effect is not large though. \label{fig:delay}}
 \end{figure}
 
-A similar analysis is done for changing the cutoff frequency of the TX reconstruction filter. Figure
+A similar analysis is done for the cutoff frequency of the TX reconstruction filter.   Recall, this filter is in place to bandlimit the DAC output so the high frequency content in the stairs does not create aliases in the lower, passband.  The filter model is controlled by a normalized cutoff frequency, where zero and one are mapped to $\left(0,f_s\right)$.  As such, we expect that the cutoff frequency will not make much difference except if it is way too low.  Even by choosing $f_c$ near one, all frequencies above the sampling frequency will be attenuated and the filter serves its purpose.  However, if $f_c$ gets too low, the information in the waveform may be lost.   \\
 
 \begin{figure}[H]
 \centering
 \hspace*{-2cm}\includegraphics[width=0.7\textwidth]{freqTX.jpg}
-\caption{SER plot as a function of cutoff frequency in the TX anti-aliasing Reconstruction filter.  When the cutoff is too low, BLAH BLAH. \label{fig:freqTX}}
+\caption{SER plot as a function of cutoff frequency in the TX anti-aliasing Reconstruction filter.  When the cutoff approaches zero, the data is lost. \label{fig:freqTX}}
 \end{figure}
 
+Figure~\ref{fig:freqTX} shows the sensitivity analysis of the anti-aliasing LPF normalized cutoff frequency.  The graph confirms the expected behavior discussed above.
 
 \begin{figure}[H]
 \centering
 \hspace*{-2cm}\includegraphics[width=0.7\textwidth]{freqRX.jpg}
-\caption{SER plot as a function of cutoff frequency in the RX noise limiting filter.  When the cutoff is too low, BLAH BLAH. \label{fig:freqRX}}
+\caption{SER plot as a function of cutoff frequency in the RX noise-limiting filter.  When the cutoff is too low, BLAH BLAH. \label{fig:freqRX}}
 \end{figure}
+
+We performed an equivalent analysis on the cutoff frequency in the RX noise-limiting filter.  This filter was aimed to low pass filter the high frequency content from the noise and only allow the signal through.  The same filter model was used, so a similar trend was expected.  The cutoff frequency would always limit the noise with frequency above sampling rate, so the response would mostly look flat.  
 
 \appendix
 \newpage

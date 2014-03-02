@@ -3,7 +3,7 @@ close all;
 clear all;
 clc;
 
-freqs = .01:.01:.99;  % cuttoff frequency of LPF on RX
+freqs = logspace(-2,-.1,20);  % cuttoff frequency of LPF on RX
 del = 1;
 
 N= 1000;  %number of bits generated
@@ -51,11 +51,11 @@ for f=1:length(freqs)
     %SER calculation - drop first symbol
     ser(f) = SER(bits(3:N),output_bits(3:N),k);
 end
-
+ser = mean(ser,1);
 %% plot theoretical/simulation BER vs SNR graph
 FS = 16; LW = 1.5;
 g=figure;
-plot(freqs,ser,'LineWidth',LW);
+semilogx(freqs,ser,'LineWidth',LW);
 ylabel('Probability of Error','FontSize',FS-2);
 xlabel('Normalized f_c','FontSize',FS-2);
 legend('Simulation(Symbol Error)','Location','SouthWest');
