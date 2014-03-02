@@ -1,11 +1,16 @@
-function [c] = ZFEqualizer(h,L)
+function [c] = ZFEqualizer(h,L,overSampling)
 %ZFEQUALIZER Summary of this function goes here
 %   Detailed explanation goes here
-k = 1;
-hM = toeplitz([h([2:end]) zeros(1,2*k+1-L+1)], [ h([2:-1:1]) zeros(1,2*k+1-L+1) ]);
-e  = zeros(1,2*k+1);
-e(k+1) = 1;
+h_coeff = downsample(h,overSampling);
+N = length(h_coeff);
+hM = toeplitz([h_coeff([N-1:end]) zeros(1,L-length(h_coeff([N-1:end])))],...
+                [ h_coeff([N-1:-1:1]) zeros(1,L-length(h_coeff([N-1:-1:1])))]);
+e  = zeros(1,L);
+e(ceil(L/2)) = 1;
 c  = [pinv(hM)*e.'].';
+%oversample 
+c = upsample(c,overSampling);
+
 
 end
 

@@ -44,7 +44,7 @@ for k=1:3
         
         %channel equalizers
         %ZF
-        L = 2; % number of taps
+        L = 5; % number of taps
         c = ZFEqualizer(h,L,overSampleSize);
         
         
@@ -83,6 +83,7 @@ for k=1:3
         
         %equalize channel
         received_equalized = conv(received,c);
+        received_equalized = received_equalized(0:end-overSample*2
         
         %pass the received signal through the matched filter for optimal
         %detection
