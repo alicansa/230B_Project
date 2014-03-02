@@ -33,10 +33,10 @@ num = 1;
 f = figure;
 for i=1:length(SNR)
     %pass the signals to be transmitted through awgn channel
-    received_analog = awgn_channel(filtered_transmit_analog,SNR(i),20*S);
+    received_analog = awgn_channel(filtered_transmit_analog,SNR(i),5*S);
 
     %noise limiting filter
-    filtered_received_analog = ButterworthFilter(4,0.06,received_analog);
+    filtered_received_analog = ButterworthFilter(4,0.2,received_analog);
     
     %analog to digital converter -> sample 4 times each symbol period
     received_digital = ZeroHoldDecimation(filtered_received_analog,overSampleSizeAnalog,1);

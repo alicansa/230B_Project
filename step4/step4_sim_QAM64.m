@@ -2,7 +2,7 @@
 close all;
 clear all;
 overSampleSize = 4;
-overSampleSizeAnalog = 320; %80 times symbol period
+overSampleSizeAnalog = 80; %80 times symbol period
 rollOffFactor = 0.25;
 Ts = 1;%Symbol period
 S=42; %average signal power for 64-QAM
@@ -24,7 +24,7 @@ transmit = conv(impulse_train_inphase + j*impulse_train_quad,srrc,'same');
 transmit_analog = ZeroHoldInterpolation(transmit,overSampleSizeAnalog);
 
 %anti aliasing filter
-filtered_transmit_analog = ButterworthFilter(4,0.1,transmit_analog); %fc at pi/4
+filtered_transmit_analog = ButterworthFilter(4,0.05,transmit_analog); %fc at pi/4
 
 %loop this section for the generation of BER vs SNR graphs and
 %constellation plots
@@ -34,12 +34,12 @@ ber = zeros(1,length(SNR));
 ber_theo = zeros(1,length(SNR));
 for i=1:length(SNR)
  %pass the signals to be transmitted through awgn channel
-    received_analog = awgn_complex_channel(filtered_transmit_analog,SNR(i),S);
+    received_analog = awgn_complex_channel(filtered_transmit_analog,SNR(i),20*S);
     
     %noise limiting filter
-    filtered_received_analog = ButterworthFilter(4,0.1,received_analog);
+    filtered_received_analog = ButterworthFilter(4,0.06,received_analog);
     %analog to digital converter -> sample 4 times each symbol period
-    received_digital = ZeroHoldDecimation(filtered_received_analog,320);
+    received_digital = ZeroHoldDecimation(filtered_received_analog,overSampleSizeAnalog,1);
     
     %pass the received signal through the matched filter for optimal
     %detection
@@ -68,8 +68,8 @@ for i=1:length(SNR)
     output_bits = QAM_64_demod(real(sampled),imag(sampled));
 
     %SER calculation - drop first symbol
-    ser(i) = SER(bits(7:N),output_bits(7:N),6);
-    ber(i) = BER(bits(7:N),output_bits(7:N));
+    ser(i) = SER(bits(13:N-12),output_bits(13:N-12),6);
+    ber(i) = BER(bits(13:N-12),output_bits(13:N-12));
     %SER theoretical calculation
     a = 10^(EbN0(i)/10);
     ser_theo(i) = 1-(1-(14/8)*qfunc(sqrt((18/63)*a)))^2;
