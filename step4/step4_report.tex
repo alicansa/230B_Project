@@ -114,7 +114,7 @@ The end of the simulation model is identical to the process in Step 1: a matched
 
 \section{Experiments}
 \label{sec:experiments}
-
+In this phase of the project, we compare the effect 
 
 \section{Step 4 Results}
 \label{sec:results}
@@ -144,28 +144,39 @@ In the following sections the results of the simulations of a system using QPSK 
 %\end{figure}
 %
 %\subsubsection{BER Plots for Carrier Recovery}
-%\begin{figure}[H]
-%\centering
-%\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpBERfo_ddr1.jpg}
-%\caption{BER plots of the system with Decision Directed Recovery Loop for an input with 1ppm frequency offset (using output bits starting from different indexes) \label{fig:ddrBERFreq1}}
-%\end{figure}
+
 
 
 \newpage
 \section{Conclusion}
 \label{sec:conc}
 
-The objective of this step was to recover the system from the phase and frequency offsets that might be present in the received signal. To handle the noncoherent error introduced into the system, feedback loops (Costas and Decision Directed) were installed. These use control feedback to track out the errors by first finding a metric for the error, then using integrators to track away that error. 
+The objective of this step was to visualize the effects of data converters in the system model.  Analog and digital waveforms can be safely interchanged only under certain conditions - namely when the sampling is fast enough.  In addition to a minimum sampling rate, low pass filters are necessary to protect against aliasing of high frequency content.  \\
 
-The `S' Curve results for the Costas type setup give indication of how the system reacts to different degree phase and frequency error.  Notice, in each of the graphs [\ref{fig:costasSphase}, \ref{fig:costasSfreq}], the estimation error is periodic.  This is because the the metric does a good job approximating for phase at small phase levels, but of course has some error.  We see the same results in the Decision Directed cases as well [\ref{fig:ddrsphase}, \ref{fig:ddrsfreq}].
+We included A/D and DAC blocks in our system to see how well the modulation and recovery performed in comparison to earlier trials.  TALK ABOUT COMPARE
 
-In the transience plots, notice that the error in the 6 dB is zero mean and has magnitude around .01.  The 30 dB plot [\ref{fig:costasTransPhase}]  shows the typical convergence shape we would expect.  We feel that the same structure exists in the lower SNR case, but the settling time happens in only a few samples and gets lost.  This pattern is repeated for the frequency estimation trials as well [\ref{fig:costasTransFreq1}, \ref{fig:costasTransFreq2}].  Again, the Decision Directed loops have the same form [\ref{fig:ddrTransphase}, \ref{fig:ddrtransFreq1}, \ref{fig:ddrTransFreq2}].
+We can also understand the importance of sampling timing on the bit error rate.  From a sensitivity analysis of the delay through the system, the A/D will sample at varying degrees of synch.  We would expect the sampling not to matter within a certain range, namely, when the symbols are above a certain threshold they are safely all interpreted as `1' - the actual level doesn't matter.  From such an experiment written in Appendix~\ref{app:delay}, when all other parameters like SNR and cutoff frequencies are kept equal, we do end up seeing periodic values for the SER.  This is shown in Figure~\ref{fig:delay}.\\
 
-The constellation plots are also informative.  Note how in the Phase Costas Loop, Figure~\ref{fig:costasConstPhase}, there are a few points that have the stretching characteristic of phase error.  Then the blurring stops and the loop locks on, creating the clumps for the symbols.  This same tracking happens in the Decision Directed constellation [\ref{fig:ddrConstPhase}].  The frequency offsets never show this tracking, perhaps because they get locked on so quickly the tail never appears.
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{delaySensitivity.jpg}
+\caption{SER plot as a function of delay through the system.  This shows that the system can peform better and worse depending on how in-time the A/D converts.  The effect is not large though. \label{fig:delay}}
+\end{figure}
 
-Looking at the loop filter output results for the system where a phase offset is introduced, it can be seen that phase error estimate converges to zero very fast. This means that we don't really need to throw any of the received bits. This result can also be deduced from the BER graphs provided in the results section. When a phase offset is introduced, dropping bits doesn't really change the resulting probability of error of the system. Thus we can conclude that if the phase error estimate converges fast enough dropping bits doesn't really affect the efficiency of the system in term of bit error rate. 
+A similar analysis is done for changing the cutoff frequency of the TX reconstruction filter. Figure
 
-The same results are valid for the system with frequency offset too, as the frequency error estimate reaches the steady-state fast enough that dropping bits doesn't really change the bit error rate of the system. 
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{freqTX.jpg}
+\caption{SER plot as a function of cutoff frequency in the TX anti-aliasing Reconstruction filter.  When the cutoff is too low, BLAH BLAH. \label{fig:freqTX}}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{freqRX.jpg}
+\caption{SER plot as a function of cutoff frequency in the RX noise limiting filter.  When the cutoff is too low, BLAH BLAH. \label{fig:freqRX}}
+\end{figure}
 
 \appendix
 \newpage
@@ -228,5 +239,23 @@ The same results are valid for the system with frequency offset too, as the freq
 \label{app:zero}
 \lstinputlisting{ZeroHoldDecimation.m}
 \lstinputlisting{ZeroHoldInterpolation.m}
+
+\section{Sensitivity}
+\label{app:sensitivity}
+\subsection{Setup Code}
+\lstinputlisting{qpskSetupFile.m}
+
+\subsection{Delay}
+\label{app:delay}
+\lstinputlisting{sensitivityDelay.m}
+
+\subsection{TX Filter $f_c$}
+\label{app:freqTX}
+\lstinputlisting{sensitivityFreqTX.m}
+
+\subsection{RX Filter $f_c$}
+\label{app:freqRX}
+\lstinputlisting{sensitivityFreqRX.m}
+
 
 \end{document}

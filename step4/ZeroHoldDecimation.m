@@ -5,6 +5,7 @@ function [output] = ZeroHoldDecimation(data,overSamplingRate,delay)
 % INPUTS 
 % data - the input signal waveform
 % overSamplingRate - the number of samples to skip between points
+% delay - the delay in the line
 
 % OUTPUTS
 % output - the resulting downsampled waveform
