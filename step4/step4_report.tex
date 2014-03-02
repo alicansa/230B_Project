@@ -118,16 +118,77 @@ In this phase of the project, we compare the effect
 
 \section{Step 4 Results}
 \label{sec:results}
-In the following sections the results of the simulations of a system using QPSK modulation and Costas Loop or Decision Directed Recovery Loop for phase/frequency offset recovery. The results are interpreted afterwards in the conclusion section.
+In the following sections, the results of the simulations of the different modulation schemes are shown.  For each SER plot, the corresponding results from Step 1 are presented alongside.  The results are interpreted afterwards in the conclusion section.
 
-%\subsection{QPSK with Decision Directed Recovery}
-%\subsubsection{Transience of Phase Recovery}
-%\begin{figure}[H]
-%\centering
-%\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpLoopFilterpo_ddr1.jpg}
-%\caption{The loop filter output of the Decision Directed Recovery Loop for an input signal with 30 degrees phase offset \label{fig:ddrTransphase}}
-%\end{figure}
-%
+\begin{figure}[h]
+        \centering
+        \begin{subfigure}[b]{0.4\textwidth}
+                \includegraphics[width=\textwidth]{bpSNR.jpg}
+                \caption{Step 4}
+                \label{fig:bpSNR}
+        \end{subfigure}%
+        \qquad \quad %add desired spacing between images, e. g. ~, \quad, \qquad etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.4\textwidth}
+                \includegraphics[width=\textwidth]{bpSNRstep1.jpg}
+                \caption{Step 1}
+                \label{fig:bpSNR1}
+        \end{subfigure}
+        \caption{BPSK Symbol Error Rate Comparison \label{fig:bpsk}}
+\end{figure}
+
+\begin{figure}[h]
+        \centering
+        \begin{subfigure}[b]{0.4\textwidth}
+                \includegraphics[width=\textwidth]{qpSNR.jpg}
+                \caption{Step 4}
+                \label{fig:pqSNR}
+        \end{subfigure}%
+        \qquad \quad %add desired spacing between images, e. g. ~, \quad, \qquad etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.4\textwidth}
+                \includegraphics[width=\textwidth]{qpSNRstep1.jpg}
+                \caption{Step 1}
+                \label{fig:qpSNR1}
+        \end{subfigure}
+        \caption{QPSK Bit Error Rate Comparison \label{fig:qpsk}}
+\end{figure}
+
+\begin{figure}[h]
+        \centering
+        \begin{subfigure}[b]{0.4\textwidth}
+                \includegraphics[width=\textwidth]{qam16SNR.jpg}
+                \caption{Step 4}
+                \label{fig:bpSNR}
+        \end{subfigure}%
+        \qquad \quad %add desired spacing between images, e. g. ~, \quad, \qquad etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.4\textwidth}
+                \includegraphics[width=\textwidth]{qam16SNRstep1.jpg}
+                \caption{Step 1}
+                \label{fig:bpSNR1}
+        \end{subfigure}
+        \caption{16-QAM Bit Error Rate Comparison \label{fig:qam16}}
+\end{figure}
+
+\begin{figure}[h]
+        \centering
+        \begin{subfigure}[b]{0.4\textwidth}
+                \includegraphics[width=\textwidth]{qam64SNR.jpg}
+                \caption{Step 4}
+                \label{fig:bpSNR}
+        \end{subfigure}%
+        \qquad \quad %add desired spacing between images, e. g. ~, \quad, \qquad etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.4\textwidth}
+                \includegraphics[width=\textwidth]{qam64SNRstep1.jpg}
+                \caption{Step 1}
+                \label{fig:bpSNR1}
+        \end{subfigure}
+        \caption{64-QAM Symbol Error Rate Comparison \label{fig:qam64}}
+\end{figure}
+
+
 %
 %\subsubsection{Constellation Plots  for Phase Recovery}
 %\begin{figure}[H]
@@ -176,10 +237,12 @@ Figure~\ref{fig:freqTX} shows the sensitivity analysis of the anti-aliasing LPF 
 \begin{figure}[H]
 \centering
 \hspace*{-2cm}\includegraphics[width=0.7\textwidth]{freqRX.jpg}
-\caption{SER plot as a function of cutoff frequency in the RX noise-limiting filter.  When the cutoff is too low, BLAH BLAH. \label{fig:freqRX}}
+\caption{SER plot as a function of cutoff frequency in the RX noise-limiting filter.  When the cutoff is too low, the data transmitted . \label{fig:freqRX}}
 \end{figure}
 
-We performed an equivalent analysis on the cutoff frequency in the RX noise-limiting filter.  This filter was aimed to low pass filter the high frequency content from the noise and only allow the signal through.  The same filter model was used, so a similar trend was expected.  The cutoff frequency would always limit the noise with frequency above sampling rate, so the response would mostly look flat.  
+We performed an equivalent analysis on the cutoff frequency in the RX noise-limiting filter.  This filter was aimed to low pass filter the high frequency content from the noise and only allow the signal through.  The same filter model was used, so a similar trend was expected.  The cutoff frequency would always limit the noise with frequency above sampling rate, so the response would mostly look flat.  At near zero cutoff, again we expect none of the data to be transmitted.
+
+
 
 \appendix
 \newpage
