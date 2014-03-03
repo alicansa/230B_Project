@@ -4,7 +4,7 @@ clear all;
 clc;
 
 freqs = [0.001 0.002 0.003 0.004 0.005 0.006 0.007 0.008 0.009 0.01 ...
-    0.0125 0.02 0.03 0.05 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9];  % cuttoff frequency of LPF on TX
+    0.0125 0.02 0.03 0.05 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9];  % cuttoff frequency of LPF on RX
 del = 1; 
 
 N= 5000;  %number of bits generated

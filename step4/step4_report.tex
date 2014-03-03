@@ -131,7 +131,7 @@ Following figure shows the outputs the process explained above (simulated with Q
 \end{figure}
 
 \newpage
-An important issue we had to dealt was the bilinear transform MATLAB uses to transform the analog Butterworth filter into the discrete domain. As shown in the figure below $tan(.)$ function is non-linear at higher frequencies and linear at frequencies close to 0:
+An important issue we had to deal with, was the bilinear transform MATLAB uses to transform the analog Butterworth filter into the discrete domain. As shown in the figure below $tan(.)$ function is non-linear at higher frequencies and linear at frequencies close to 0:
 
 \begin{figure}[H]
 \centering
@@ -143,7 +143,7 @@ Thus in order to have cut-off frequencies at the linear regions (assumed to be l
 
 
 
-Furthermore the end of the simulation model is identical to the process in Step 1: a matched filter to the SRRC picks out the symbols from the noisy received signal.  Afterwards, a sampler recovers [Appendix~\ref{app:sampler}] the symbols before a demodulator converts the symbols back into bits [\ref{app:dblocks}].  
+The end of the simulation model is identical to the process in Step 1: a matched filter to the SRRC picks out the symbols from the noisy received signal.  Afterwards, a sampler recovers [Appendix~\ref{app:sampler}] the symbols before a demodulator converts the symbols back into bits [\ref{app:dblocks}].  
 
 
 \section{Step 4 Results}
@@ -335,7 +335,7 @@ We included A/D and DAC blocks in our system to see how well the modulation and 
 \item The importance of sampling timing on the bit error rate is crucial due to the fact that we using low pass filters at both RX and TX  which delay the signals passing through them. From a sensitivity analysis of the delay through the system, the A/D will sample at varying degrees of synch. From such an experiment written in Appendix~\ref{app:delay}, when all other parameters like SNR and cutoff frequencies are kept equal to the optimal, we end up seeing the system works best at sampling delays 1 and 2. This is shown in Figure~\ref{fig:delay}.
 \item A similar analysis is done for the cutoff frequency of the TX reconstruction filter. Recall, this filter is in place to bandlimit the DAC output so the high frequency content in the stairs does not create aliases in the lower, passband. The filter model is controlled by a normalized cutoff frequency, where zero and one are mapped to $\left(0,f_s\right)$.  As such, we expect that the cutoff frequency will not make much difference except if it is lower than $\pi/$(over sampling size of analog signal).  Even by choosing $f_c$ near $\pi/10$ (end of assumed linear region), all frequencies above the sampling frequency will be attenuated and the filter serves its purpose.  However, if $f_c$ gets too low, the information in the waveform may be lost. 
 Figure~\ref{fig:freqTX} shows the sensitivity analysis of the anti-aliasing LPF normalized cutoff frequency.  The graph confirms the expected behavior discussed above.
-\item We performed an equivalent analysis on the cutoff frequency in the RX noise-limiting filter.  This filter was aimed to low pass filter the high frequency content from the noise and only allow the signal through.  The same filter model was used with a lower cut-off frequency, so a similar trend was expected. Again At near zero cutoff, again we expect loss of data. But also this time, when the cut-off frequency is increased to the limits of the linear region we see an increase of the BER due to the fact that more noise is passing through the filter. Figure~\ref{fig:freqRX} shows the sensitivity analysis of the noise-limiting LPF normalized cutoff frequency.  The graph confirms the expected behavior discussed above.
+\item We performed an equivalent analysis on the cutoff frequency in the RX noise-limiting filter.  This filter was aimed to low pass filter the high frequency content from the noise and only allow the signal through.  The same filter model was used with a lower cut-off frequency, so a similar trend was expected. Again at near zero cutoff, again we expect loss of data. But also this time, when the cut-off frequency is increased to the limits of the linear region we see an increase of the BER due to the fact that more noise is passing through the filter. Figure~\ref{fig:freqRX} shows the sensitivity analysis of the noise-limiting LPF normalized cutoff frequency.  The graph confirms the expected behavior discussed above.
 \end{itemize}
 
 In conclusion we have seen that the system works best at the following:
@@ -344,7 +344,7 @@ In conclusion we have seen that the system works best at the following:
 \item Sampling points at a delay of 1 sample.
 \end{itemize}
 
-Although the results obtained in this step are close to the theoretical values, they can never achieve the theoretical limit due to the fact that we need an over sampling of infinite to construct an analog signal from a digital signal. Thus the theoretical limits form a lower bound to a system with data converters.  
+Although the results obtained in this step are close to the theoretical values, they can never achieve the theoretical limit due to the fact that we need infinite over sampling to construct an analog signal from a digital signal. Thus the theoretical limits form a lower bound to a system with data converters.  
 
 \appendix
 \newpage
