@@ -3,7 +3,7 @@ close all;
 clear all;
 clc;
 
-freqs = logspace(-2,-.1,10);  % cuttoff frequency of LPF on TX
+freqs = logspace(-5,-.1,10);  % cuttoff frequency of LPF on TX
 del = 1; 
 
 N= 1000;  %number of bits generated
