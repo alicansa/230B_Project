@@ -3,10 +3,11 @@ close all;
 clear all;
 clc;
 
-freqs = logspace(-2,-.1,10);  % cuttoff frequency of LPF on TX
+freqs = [0.001 0.002 0.003 0.004 0.005 0.006 0.007 0.008 0.009 0.01 ...
+    0.0125 0.02 0.03 0.05 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9];  % cuttoff frequency of LPF on TX
 del = 1; 
 
-N= 1000;  %number of bits generated
+N= 5000;  %number of bits generated
 
 load('qpskSetup');  % load in the setup variables
 EbN0 = SNR2EbN0(SNR,2,B);
@@ -19,23 +20,21 @@ impulse_train_quad = impulse_train(overSampleSize,N/k,quadrature);
 impulse_train_inphase = impulse_train(overSampleSize,N/k,inphase);
 transmit = conv(impulse_train_inphase + 1i*impulse_train_quad,srrc,'same');
 %digital to analog conversion
-transmit_analog = ZeroHoldInterpolation(transmit,overSampleSizeAnalog);
+transmit_analog = ZeroHoldInterpolation(transmit,overSampleSizeAnalog/overSampleSize);
 
 
-ser = zeros(5,length(freqs));
 a = 10^(EbN0/10);
 ser_theo =   ones(1,length(freqs))*(2*qfunc(sqrt(2*a))...
                                     -qfunc(sqrt(2*a))^2);
 
-for j=1:5
 for f=1:length(freqs)                                
     %anti aliasing filter
     filtered_transmit_analog = ButterworthFilter(4,freqs(f),transmit_analog);
     %pass the signals to be transmitted through awgn channel
-    received_analog = awgn_complex_channel(filtered_transmit_analog,SNR,S);
+    received_analog = awgn_complex_channel(filtered_transmit_analog,SNR,80*S);
     
     %noise limiting filter
-    filtered_received_analog = ButterworthFilter(4,0.1,received_analog);
+    filtered_received_analog = ButterworthFilter(4,0.02,received_analog);
 
     %analog to digital converter -> sample 4 times each symbol period
     received_digital = ZeroHoldDecimation(filtered_received_analog,...
@@ -52,18 +51,14 @@ for f=1:length(freqs)
     output_bits = qpsk_demod(real(sampled),imag(sampled));
   
     %SER calculation - drop first symbol   
-    ser(j,f) = SER(bits(3:N),output_bits(3:N),k);
+    ser(f) = SER(bits(5:N-4),output_bits(5:N-4),k);
 end
-end
-ser = mean(ser,1);
 
 %% plot theoretical/simulation BER vs SNR graph
 FS = 16; LW = 1.5;
 g=figure;
-semilogx(freqs,ser,'LineWidth',LW);
-ylabel('Probability of Error','FontSize',FS-2);
-xlabel('Normalized f_c','FontSize',FS-2);
-legend('Simulation(Symbol Error)','Location','SouthWest');
-title('Effect of Shifting f_c of TX Anti-Aliasing LPF','FontSize',FS);
+semilogx(freqs,ser);
+ylabel('Probability of Error');
+xlabel('log(w_c)');
 % save
 print(g,'-djpeg','-r300','freqTX');

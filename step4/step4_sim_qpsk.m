@@ -4,7 +4,7 @@ clear all;
 clc;
 %Start by setting the initial variables
 overSampleSize = 4;
-overSampleSizeAnalog = 80; %80 times symbol rate
+overSampleSizeAnalog = 320; %80 times symbol rate
 rollOffFactor = 0.25;
 Ts = 1; %Symbol period
 S=2; %average signal power for QPSK
@@ -23,7 +23,7 @@ impulse_train_quad = impulse_train(overSampleSize,N/k,quadrature);
 impulse_train_inphase = impulse_train(overSampleSize,N/k,inphase);
 transmit = conv(impulse_train_inphase + j*impulse_train_quad,srrc,'same');
 %digital to analog conversion
-transmit_analog = ZeroHoldInterpolation(transmit,overSampleSizeAnalog);
+transmit_analog = ZeroHoldInterpolation(transmit,overSampleSizeAnalog/overSampleSize);
 %anti aliasing filter
 filtered_transmit_analog = ButterworthFilter(4,0.05,transmit_analog); %fc at pi/4
 
@@ -39,11 +39,11 @@ num = 1;
 
 for i=1:length(SNR)
    %pass the signals to be transmitted through awgn channel
-    received_analog = awgn_complex_channel(filtered_transmit_analog,SNR(i),20*S);
+    received_analog = awgn_complex_channel(filtered_transmit_analog,SNR(i),80*S);
     %noise limiting filter
-    filtered_received_analog = ButterworthFilter(4,0.06,received_analog);
+    filtered_received_analog = ButterworthFilter(4,0.02,received_analog);
     %analog to digital converter -> sample 4 times each symbol period
-    received_digital = ZeroHoldDecimation(filtered_received_analog,overSampleSizeAnalog,1);
+    received_digital = ZeroHoldDecimation(filtered_received_analog,overSampleSizeAnalog/overSampleSize,1);
     
     %pass the received signal through the matched filter for optimal
     %detection

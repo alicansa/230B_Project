@@ -3,7 +3,7 @@ close all;
 clc;
 % setup data for sensitivity analysis 
 overSampleSize = 4;
-overSampleSizeAnalog = 20; %80 times symbol rate
+overSampleSizeAnalog = 320; %80 times symbol rate
 rollOffFactor = 0.25;
 Ts = 1; %Symbol period
 S=2; %average signal power for QPSK

@@ -1,11 +1,11 @@
-%Delay sensitivity
+%Sensitivity of TX filter cutoff frequency
 close all;
 clear all;
 clc;
 
-freq = .1;  % cuttoff frequency of LPF on TX
-del = 0:1:1000;
-N= 1000;  %number of bits generated
+delay = 0:1:20;
+
+N= 5000;  %number of bits generated
 
 load('qpskSetup');  % load in the setup variables
 EbN0 = SNR2EbN0(SNR,2,B);
@@ -18,25 +18,21 @@ impulse_train_quad = impulse_train(overSampleSize,N/k,quadrature);
 impulse_train_inphase = impulse_train(overSampleSize,N/k,inphase);
 transmit = conv(impulse_train_inphase + 1i*impulse_train_quad,srrc,'same');
 %digital to analog conversion
-transmit_analog = ZeroHoldInterpolation(transmit,overSampleSizeAnalog);
+transmit_analog = ZeroHoldInterpolation(transmit,overSampleSizeAnalog/overSampleSize);
 
-ser = zeros(1,length(del));
-a = 10^(EbN0/10);
-ser_theo =   ones(1,length(del))*(2*qfunc(sqrt(2*a))...
-    -qfunc(sqrt(2*a))^2);
 
-%anti aliasing filter
-filtered_transmit_analog = ButterworthFilter(4,freq,transmit_analog);
-%pass the signals to be transmitted through awgn channel
-received_analog = awgn_complex_channel(filtered_transmit_analog,SNR,S);
-
-%noise limiting filter
-filtered_received_analog = ButterworthFilter(4,0.1,received_analog);
-for d=1:length(del)
+for f=1:length(delay)                                
+    %anti aliasing filter
+    filtered_transmit_analog = ButterworthFilter(4,0.05,transmit_analog);
+    %pass the signals to be transmitted through awgn channel
+    received_analog = awgn_complex_channel(filtered_transmit_analog,SNR,80*S);
     
+    %noise limiting filter
+    filtered_received_analog = ButterworthFilter(4,0.02,received_analog);
+
     %analog to digital converter -> sample 4 times each symbol period
     received_digital = ZeroHoldDecimation(filtered_received_analog,...
-        overSampleSizeAnalog/overSampleSize,del(d));
+                        overSampleSizeAnalog/overSampleSize,delay(f));
     
     %pass the received signal through the matched filter for optimal
     %detection
@@ -45,20 +41,17 @@ for d=1:length(del)
     %at each symbol period
     sampled = sampler(matched_output,overSampleSize,Ts);
     
-    %pass the received symbols through ML-decision box
+    %pass the received symbols through ML-decision box 
     output_bits = qpsk_demod(real(sampled),imag(sampled));
-    
-    %SER calculation - drop first symbol
-    ser(d) = SER(bits(3:N),output_bits(3:N),k);
+  
+    %SER calculation - drop first symbol   
+    ser(f) = SER(bits(2*delay(f)+1:N-2*delay(f)),output_bits(2*delay(f)+1:N-2*delay(f)),k);
 end
 
-%plot theoretical/simulation BER vs SNR graph
-FS = 16; LW = 1.5;
+%% plot theoretical/simulation BER vs SNR graph
 g=figure;
-plot(del,ser,'LineWidth',LW);
-ylabel('Probability of Error','FontSize',FS-2);
-xlabel('Delay (samples)','FontSize',FS-2);
-legend('Simulation(Symbol Error)','Location','SouthWest');
-title('Effect of Delay on A/D Sampling Instant','FontSize',FS);
+plot(delay,ser);
+ylabel('Probability of Error');
+xlabel('delay (samples)');
 % save
 print(g,'-djpeg','-r300','delaySensitivity');

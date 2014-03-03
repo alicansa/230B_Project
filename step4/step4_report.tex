@@ -4,6 +4,7 @@
 
 \usepackage{graphicx,forloop,caption,subcaption,float,hyperref,arrayjob,listings,color,booktabs,mathtools}
 \usepackage{pdfpages}
+\usepackage{float}
 \usepackage[margin=1.2in]{geometry}
 \usepackage{amsmath}
 \usepackage{multirow}
@@ -76,7 +77,6 @@ Recall, digital signals are quantized into samples, discrete points in time.  Co
 f_s \geq 2 f_{max}
 \end{align}
 
-
 \begin{figure}[h]
         \centering
         \begin{subfigure}[b]{0.4\textwidth}
@@ -88,19 +88,16 @@ f_s \geq 2 f_{max}
           %(or a blank line to force the subfigure onto a new line)
         \begin{subfigure}[b]{0.5\textwidth}
                 \includegraphics[width=\textwidth]{aliasing.jpg}
-                \caption{Aliasing \label{fig:alias} \cite{aliasing}}
+                \caption{Aliasing \label{fig:alias}}
                 \label{fig:alias}
         \end{subfigure}
         \caption{Digital Conversion \label{fig:digitize}}
 \end{figure}
 
+\newpage
 \section{System}
 \label{sec:system}
-The system simulation model is shown in Figure~\ref{fig:step4}.  As from Step 1, randomly generated bits [Appendix~\ref{app:random_bit_generator}] are converted into symbols [\ref{app:bittosym}] and then upsampled by adding in zeros [\ref{app:impulse_train}].  The result is then is run through a Square Root Raised Cosine (SRRC) pulse shape filter [\ref{app:sqrt_raised_cosine}].  This shaping improves the resistance of the sequence to intersymbol interference (ISI).  The output of this filter is fed into a Digital-to-Analog Converter (DAC).  A DAC takes the digital samples and zero-order holds them at a constant voltage, creating an analog signal [Appendix~\ref{app:da},~\ref{app:zero}].  \\
-
-After the digitizer, a reconstruction filter (also sometimes called an anti-imaging filter) bandlimits the analog waveform output from the DAC.  The high frequency content contained in the stair-case digital signal is undesirable since it can create aliasing of wrongfully high frequency waves.  To avoid this, the Low Pass Filter is used for the reconstruction.  Ours is modeled as a Butterworth filter, or a maximally flat magnitude filter \cite{butter}.  The aim of the filter is to have uniformly flat passband frequency response and roll to zero in the stopband.  As with all filters, the cutoff frequency parameter sets the bands and the order of the filter determines the roll-off of the frequency response in the stopband.  We used a fourth order Butterworth so that the roll-off was $80 \mathtt{\frac{dB}{dec}}$.  We set the cutoff frequency to BLAH BLAH $\mathtt{Hz}$. The interior workings of the filter are not pertinent to this project, so the code in Appendix~\ref{app:butterworth} uses built-in MATLAB functions.  \\
-
-After passing through the reconstruction filter, the analog signal is  sent through a real world channel, modeled by gain and additive white Gaussian noise [Appendix~\ref{app:awgn_channel}].\\
+The system simulation model is shown in Figure~\ref{fig:step4}.  
 
 \begin{figure}[H]
 \centering
@@ -108,141 +105,246 @@ After passing through the reconstruction filter, the analog signal is  sent thro
 \caption{Block Diagram of Step 4 system setup\label{fig:step4}}
 \end{figure}
 
-To bring the analog back to the digital world, an Analog-to-Digital converter is used [Appendix~\ref{app:ad}].  However, just like before, the conversion is improved by the use of a filter.  An anti-aliasing low-pass filter constrains, or band limits, the channel noise before entering the A/D.  In this setting, the LPF protects against aliasing of high frequency content being recorded at the lower frequency.  We use the same Butterworth filter to accomplish this function.\\
+As from Step 1, randomly generated bits [Appendix~\ref{app:random_bit_generator}] are converted into symbols [\ref{app:bittosym}] and then upsampled by adding in zeros [\ref{app:impulse_train}].  The result is then is run through a Square Root Raised Cosine (SRRC) pulse shape filter [\ref{app:sqrt_raised_cosine}].  This shaping improves the resistance of the sequence to intersymbol interference (ISI).  The output of this filter is fed into a Digital-to-Analog Converter (DAC).  A DAC takes the digital samples and zero-order holds them at a constant voltage, creating an analog signal [Appendix~\ref{app:da},~\ref{app:zero}]. After the digitizer, a reconstruction filter (also called an anti-aliasing filter) bandlimits the analog waveform output from the DAC.  The high frequency content contained in the stair-case digital signal is undesirable since it can create aliasing of wrongfully high frequency waves. To avoid this, the Low Pass Filter is used for the reconstruction.  Ours is modeled as a Butterworth filter, or a maximally flat magnitude filter.  The aim of the filter is to have uniformly flat passband frequency response and roll to zero in the stopband.  As with all filters, the cutoff frequency parameter sets the bands and the order of the filter determines the roll-off of the frequency response in the stopband.  We used a fourth order Butterworth so that the roll-off was $80 \mathtt{\frac{dB}{dec}}$.  We set the cutoff frequency approx. to $\frac{\pi}{20}$ $\mathtt{Hz}$ at the TX part. The interior workings of the filter are not pertinent to this project, so the code in Appendix~\ref{app:butterworth} uses built-in MATLAB functions.  \\
 
-The end of the simulation model is identical to the process in Step 1: a matched filter to the SRRC picks out the symbols from the noisy received signal.  Afterwards, a sampler recovers [Appendix~\ref{app:sampler}] the symbols before a demodulator converts the symbols back into bits [\ref{app:dblocks}].  
+\newpage
+Following figure shows the outputs the process explained above (simulated with QPSK modulation):
 
-\section{Experiments}
-\label{sec:experiments}
-In this phase of the project, we compare the effect 
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{DtoA.jpg}
+\caption{The original digital signal and the outputs of D/A converter and anti-aliasing filter at SNR=100dB for the first 100 symbols (QPSK modulation)\label{fig:dtoa}}
+\end{figure}
+
+After passing through the reconstruction filter, the analog signal is  sent through a real world channel, modeled by gain and additive white Gaussian noise [Appendix~\ref{app:awgn_channel}].\\
+
+
+To bring the analog back to the digital world, an Analog-to-Digital converter is used [Appendix~\ref{app:ad}].  However, just like before, the conversion is improved by the use of a filter.  An anti-aliasing low-pass filter constrains, or band limits, the channel noise before entering the A/D.  In this setting, the LPF protects against aliasing of high frequency content being recorded at the lower frequency.  We use the same Butterworth filter to accomplish this function set the cut-off frequency to approx. $\frac{\pi}{50}$ $\mathtt{Hz}$ at the RX \\
+
+\newpage
+Following figure shows the outputs the process explained above (simulated with QPSK modulation):
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{AtoD.jpg}
+\caption{The original digital signal and the outputs of A/D converter and noise-limiting filter at SNR=100dB for the first 100 symbols (QPSK modulation) \label{fig:atod}}
+\end{figure}
+
+\newpage
+An important issue we had to dealt was the bilinear transform MATLAB uses to transform the analog Butterworth filter into the discrete domain. As shown in the figure below $tan(.)$ function is non-linear at higher frequencies and linear at frequencies close to 0:
+
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{tan_graph.jpg}
+\caption{SER plot as a function of delay at the samplin g points of the A/D converter at SNR=20dB (QPSK modulation). \label{fig:delay}}
+\end{figure} 
+
+Thus in order to have cut-off frequencies at the linear regions (assumed to be linear around $\left[ -\pi/10,\pi/10 \right] $) of the $tan(.)$ function, the over sampling rate of the analog signal is set to 80 times more than the digital signal. \\
+
+
+
+Furthermore the end of the simulation model is identical to the process in Step 1: a matched filter to the SRRC picks out the symbols from the noisy received signal.  Afterwards, a sampler recovers [Appendix~\ref{app:sampler}] the symbols before a demodulator converts the symbols back into bits [\ref{app:dblocks}].  
+
 
 \section{Step 4 Results}
 \label{sec:results}
 In the following sections, the results of the simulations of the different modulation schemes are shown.  For each SER plot, the corresponding results from Step 1 are presented alongside.  The results are interpreted afterwards in the conclusion section.
 
+\newpage
+\subsection{Probability Error Rate Comparison}
+
 \begin{figure}[h]
         \centering
-        \begin{subfigure}[b]{0.4\textwidth}
+        \begin{subfigure}[b]{0.6\textwidth}
                 \includegraphics[width=\textwidth]{bpSNR.jpg}
                 \caption{Step 4}
                 \label{fig:bpSNR}
         \end{subfigure}%
         \qquad \quad %add desired spacing between images, e. g. ~, \quad, \qquad etc.
           %(or a blank line to force the subfigure onto a new line)
-        \begin{subfigure}[b]{0.4\textwidth}
+        \begin{subfigure}[b]{0.6\textwidth}
                 \includegraphics[width=\textwidth]{bpSNRstep1.jpg}
                 \caption{Step 1}
                 \label{fig:bpSNR1}
         \end{subfigure}
-        \caption{BPSK Symbol Error Rate Comparison \label{fig:bpsk}}
+        \caption{BPSK Error Rate Comparison }
 \end{figure}
 
+\newpage
 \begin{figure}[h]
+
         \centering
-        \begin{subfigure}[b]{0.4\textwidth}
+        \begin{subfigure}[b]{0.6\textwidth}
                 \includegraphics[width=\textwidth]{qpSNR.jpg}
                 \caption{Step 4}
-                \label{fig:pqSNR}
+                \label{fig:qpSNR}
         \end{subfigure}%
         \qquad \quad %add desired spacing between images, e. g. ~, \quad, \qquad etc.
           %(or a blank line to force the subfigure onto a new line)
-        \begin{subfigure}[b]{0.4\textwidth}
+        \begin{subfigure}[b]{0.6\textwidth}
                 \includegraphics[width=\textwidth]{qpSNRstep1.jpg}
                 \caption{Step 1}
                 \label{fig:qpSNR1}
         \end{subfigure}
-        \caption{QPSK Bit Error Rate Comparison \label{fig:qpsk}}
+        \caption{QPSK Error Rate Comparison }
 \end{figure}
+
+\newpage
 
 \begin{figure}[h]
         \centering
-        \begin{subfigure}[b]{0.4\textwidth}
+        \begin{subfigure}[b]{0.6\textwidth}
                 \includegraphics[width=\textwidth]{qam16SNR.jpg}
                 \caption{Step 4}
-                \label{fig:bpSNR}
+                \label{fig:qam16SNR}
         \end{subfigure}%
         \qquad \quad %add desired spacing between images, e. g. ~, \quad, \qquad etc.
           %(or a blank line to force the subfigure onto a new line)
-        \begin{subfigure}[b]{0.4\textwidth}
+        \begin{subfigure}[b]{0.6\textwidth}
                 \includegraphics[width=\textwidth]{qam16SNRstep1.jpg}
                 \caption{Step 1}
-                \label{fig:bpSNR1}
+                \label{fig:qam16SNR1}
         \end{subfigure}
-        \caption{16-QAM Bit Error Rate Comparison \label{fig:qam16}}
+        \caption{16-QAM Error Rate Comparison }
 \end{figure}
+
+
+\newpage
+\begin{figure}[h]
+        \centering
+        \begin{subfigure}[b]{0.6\textwidth}
+                \includegraphics[width=\textwidth]{qam64SNR.jpg}
+                \caption{Step 4}
+                \label{fig:qam64SNR}
+        \end{subfigure}%
+        \qquad \quad %add desired spacing between images, e. g. ~, \quad, \qquad etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.6\textwidth}
+                \includegraphics[width=\textwidth]{qam64SNRstep1.jpg}
+                \caption{Step 1}
+                \label{fig:qam64SNR1}
+        \end{subfigure}
+        \caption{64-QAM Error Rate Comparison}
+\end{figure}
+
+\newpage
+\subsection{Constellation Comparison}
 
 \begin{figure}[h]
         \centering
-        \begin{subfigure}[b]{0.4\textwidth}
-                \includegraphics[width=\textwidth]{qam64SNR.jpg}
+        \begin{subfigure}[b]{0.6\textwidth}
+                \includegraphics[width=\textwidth]{bpConst.jpg}
                 \caption{Step 4}
-                \label{fig:bpSNR}
+                \label{fig:bpConst}
         \end{subfigure}%
         \qquad \quad %add desired spacing between images, e. g. ~, \quad, \qquad etc.
           %(or a blank line to force the subfigure onto a new line)
-        \begin{subfigure}[b]{0.4\textwidth}
-                \includegraphics[width=\textwidth]{qam64SNRstep1.jpg}
+        \begin{subfigure}[b]{0.6\textwidth}
+                \includegraphics[width=\textwidth]{bpConst1.jpg}
                 \caption{Step 1}
-                \label{fig:bpSNR1}
+                \label{fig:bpConst1}
         \end{subfigure}
-        \caption{64-QAM Symbol Error Rate Comparison \label{fig:qam64}}
+        \caption{BPSK Constellation Comparison }
 \end{figure}
 
+\newpage
+\begin{figure}[h]
+        \centering
+        \begin{subfigure}[b]{0.6\textwidth}
+                \includegraphics[width=\textwidth]{qpConst.jpg}
+                \caption{Step 4}
+                \label{fig:qpConst}
+        \end{subfigure}%
+        \qquad \quad %add desired spacing between images, e. g. ~, \quad, \qquad etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.6\textwidth}
+                \includegraphics[width=\textwidth]{qpConst1.jpg}
+                \caption{Step 1}
+                \label{fig:qpConst1}
+        \end{subfigure}
+        \caption{QPSK Constellation Comparison }
+\end{figure}
 
-%
-%\subsubsection{Constellation Plots  for Phase Recovery}
-%\begin{figure}[H]
-%\centering
-%\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpConstpo_ddr1.jpg}
-%\caption{The resulting constellation plot of the output of the system with Decision Directed Recovery Loop for an input with 30 degrees phase offset at 6dB and 30dB SNR \label{fig:ddrConstPhase}}
-%\end{figure}
-%
-%\subsubsection{BER Plots for Phase Recovery}
-%\begin{figure}[H]
-%\centering
-%\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{qpBERpo_ddr1.jpg}
-%\caption{BER plots of the system with Decision Directed Recovery Loop for an input with 30 degrees phase offset (using output bits starting from different indexes) \label{fig:ddrBERphase}}
-%\end{figure}
-%
-%\subsubsection{BER Plots for Carrier Recovery}
+\newpage
+\begin{figure}[h]
+        \centering
+        \begin{subfigure}[b]{0.6\textwidth}
+                \includegraphics[width=\textwidth]{qam16Const.jpg}
+                \caption{Step 4}
+                \label{fig:qam16Const}
+        \end{subfigure}%
+        \qquad \quad %add desired spacing between images, e. g. ~, \quad, \qquad etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.6\textwidth}
+                \includegraphics[width=\textwidth]{qam16Const1.jpg}
+                \caption{Step 1}
+                \label{fig:qam16Const1}
+        \end{subfigure}
+        \caption{16-QAM Constellation Comparison }
+\end{figure}
 
+\newpage
+\begin{figure}[h]
+        \centering
+        \begin{subfigure}[b]{0.6\textwidth}
+                \includegraphics[width=\textwidth]{qam64Const.jpg}
+                \caption{Step 4}
+                \label{fig:qam64Const}
+        \end{subfigure}%
+        \qquad \quad %add desired spacing between images, e. g. ~, \quad, \qquad etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.6\textwidth}
+                \includegraphics[width=\textwidth]{qam64Const1.jpg}
+                \caption{Step 1}
+                \label{fig:qam64Const1}
+        \end{subfigure}
+        \caption{64-QAM Error Rate Comparison }
+\end{figure}
 
+\newpage
+\subsection{TX Cut-off Frequency Sensitivity}
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{freqTX.jpg}
+\caption{SER plot as a function of cutoff frequency in the TX anti-aliasing Reconstruction filter at SNR=20dB (QPSK modulation). \label{fig:freqTX}}
+\end{figure}
+
+\subsection{RX Cut-off Frequency Sensitivity}
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{freqRX.jpg}
+\caption{SER plot as a function of cutoff frequency in the RX noise-limiting filter at SNR=20dB (QPSK modulation). \label{fig:freqRX}}
+\end{figure}
+
+\subsection{Sampling Delay Sensitivity}
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{delaySensitivity.jpg}
+\caption{SER plot as a function of delay at the samplin g points of the A/D converter at SNR=20dB (QPSK modulation). \label{fig:delay}}
+\end{figure}
 
 \newpage
 \section{Conclusion}
 \label{sec:conc}
 
-The objective of this step was to visualize the effects of data converters in the system model.  Analog and digital waveforms can be safely interchanged only under certain conditions - namely when the sampling is fast enough.  In addition to a minimum sampling rate, low pass filters are necessary to protect against aliasing of high frequency content.  \\
+The objective of this step was to visualize the effects of data converters in the system model.  Analog and digital waveforms can be safely interchanged only under certain conditions - namely when the sampling is fast enough.  In addition to a minimum sampling rate, low pass filters are necessary to protect against aliasing of high frequency content which should be operated at the linear regions of the $tan(.) $ function due to the bilinear transformation of analog filters into discrete domain.  \\
 
-We included A/D and DAC blocks in our system to see how well the modulation and recovery performed in comparison to earlier trials.  TALK ABOUT RESULTS.
+We included A/D and DAC blocks in our system to see how well the modulation and recovery performed in comparison to earlier trials. The following conclusions are made from the results of this step:
 
-We can also understand the importance of sampling timing on the bit error rate.  From a sensitivity analysis of the delay through the system, the A/D will sample at varying degrees of synch.  We would expect the sampling not to matter within a certain range, namely, when the symbols are above a certain threshold they are safely all interpreted as `1' - the actual level doesn't matter.  From such an experiment written in Appendix~\ref{app:delay}, when all other parameters like SNR and cutoff frequencies are kept equal, we do end up seeing periodic values for the SER.  This is shown in Figure~\ref{fig:delay}.\\
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{delaySensitivity.jpg}
-\caption{SER plot as a function of delay through the system.  This shows that the system can peform better and worse depending on how in-time the A/D converts.  The effect is not large though. \label{fig:delay}}
-\end{figure}
-
-A similar analysis is done for the cutoff frequency of the TX reconstruction filter.   Recall, this filter is in place to bandlimit the DAC output so the high frequency content in the stairs does not create aliases in the lower, passband.  The filter model is controlled by a normalized cutoff frequency, where zero and one are mapped to $\left(0,f_s\right)$.  As such, we expect that the cutoff frequency will not make much difference except if it is way too low.  Even by choosing $f_c$ near one, all frequencies above the sampling frequency will be attenuated and the filter serves its purpose.  However, if $f_c$ gets too low, the information in the waveform may be lost.   \\
-
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{freqTX.jpg}
-\caption{SER plot as a function of cutoff frequency in the TX anti-aliasing Reconstruction filter.  When the cutoff approaches zero, the data is lost. \label{fig:freqTX}}
-\end{figure}
-
+\begin{itemize}
+\item The importance of sampling timing on the bit error rate is crucial due to the fact that we using low pass filters at both RX and TX  which delay the signals passing through them. From a sensitivity analysis of the delay through the system, the A/D will sample at varying degrees of synch. From such an experiment written in Appendix~\ref{app:delay}, when all other parameters like SNR and cutoff frequencies are kept equal to the optimal, we end up seeing the system works best at sampling delays 1 and 2. This is shown in Figure~\ref{fig:delay}.
+\item A similar analysis is done for the cutoff frequency of the TX reconstruction filter. Recall, this filter is in place to bandlimit the DAC output so the high frequency content in the stairs does not create aliases in the lower, passband. The filter model is controlled by a normalized cutoff frequency, where zero and one are mapped to $\left(0,f_s\right)$.  As such, we expect that the cutoff frequency will not make much difference except if it is lower than $\pi/$(over sampling size of analog signal).  Even by choosing $f_c$ near $\pi/10$ (end of assumed linear region), all frequencies above the sampling frequency will be attenuated and the filter serves its purpose.  However, if $f_c$ gets too low, the information in the waveform may be lost. 
 Figure~\ref{fig:freqTX} shows the sensitivity analysis of the anti-aliasing LPF normalized cutoff frequency.  The graph confirms the expected behavior discussed above.
+\item We performed an equivalent analysis on the cutoff frequency in the RX noise-limiting filter.  This filter was aimed to low pass filter the high frequency content from the noise and only allow the signal through.  The same filter model was used with a lower cut-off frequency, so a similar trend was expected. Again At near zero cutoff, again we expect loss of data. But also this time, when the cut-off frequency is increased to the limits of the linear region we see an increase of the BER due to the fact that more noise is passing through the filter. Figure~\ref{fig:freqRX} shows the sensitivity analysis of the noise-limiting LPF normalized cutoff frequency.  The graph confirms the expected behavior discussed above.
+\end{itemize}
 
-\begin{figure}[H]
-\centering
-\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{freqRX.jpg}
-\caption{SER plot as a function of cutoff frequency in the RX noise-limiting filter.  When the cutoff is too low, the data transmitted . \label{fig:freqRX}}
-\end{figure}
+In conclusion we have seen that the system works best at the following:
+\begin{itemize}
+\item RX and TX filters  at $w_c$ which are in the range $\left[0.02,0.09\right]  $
+\item Sampling points at a delay of 1 sample.
+\end{itemize}
 
-We performed an equivalent analysis on the cutoff frequency in the RX noise-limiting filter.  This filter was aimed to low pass filter the high frequency content from the noise and only allow the signal through.  The same filter model was used, so a similar trend was expected.  The cutoff frequency would always limit the noise with frequency above sampling rate, so the response would mostly look flat.  At near zero cutoff, again we expect none of the data to be transmitted.
-
-
+Although the results obtained in this step are close to the theoretical values, they can never achieve the theoretical limit due to the fact that we need an over sampling of infinite to construct an analog signal from a digital signal. Thus the theoretical limits form a lower bound to a system with data converters.  
 
 \appendix
 \newpage
@@ -262,9 +364,21 @@ We performed an equivalent analysis on the cutoff frequency in the RX noise-limi
 
 \section{Bit to Symbol Mapper}
 \label{app:bittosym}
+\subsection{BPSK Modulation}
+\label{app:bpsk_mod}
+\lstinputlisting{bpsk_mod.m}
+
 \subsection{QPSK Modulation}
 \label{app:qpsk_mod}
 \lstinputlisting{qpsk_mod.m}
+
+\subsection{16-QAM Modulation}
+\label{app:qam16_mod}
+\lstinputlisting{qam_16_mod.m}
+
+\subsection{64-QAM Modulation}
+\label{app:qam64_mod}
+\lstinputlisting{qam_64_mod.m}
 
 \section{Up Sampler}
 \label{app:impulse_train}
@@ -284,9 +398,21 @@ We performed an equivalent analysis on the cutoff frequency in the RX noise-limi
 
 \section{Decision Block}
 \label{app:dblocks}
+\subsection{BPSK Demodulation}
+\label{app:bpsk_demod}
+\lstinputlisting{bpsk_demod.m}
+
 \subsection{QPSK Demodulation}
 \label{app:qpsk_demod}
 \lstinputlisting{qpsk_demod.m}
+
+\subsection{16-QAM Demodulation}
+\label{app:16qam_demod}
+\lstinputlisting{qam_16_demod.m}
+
+\subsection{64-QAM Demodulation}
+\label{app:64qam_demod}
+\lstinputlisting{qam_64_demod.m}
 
 \section{Butterworth Filter}
 \label{app:butterworth}
@@ -303,25 +429,37 @@ We performed an equivalent analysis on the cutoff frequency in the RX noise-limi
 
 \subsection{Zero Hold}
 \label{app:zero}
+\subsection{Decimation}
 \lstinputlisting{ZeroHoldDecimation.m}
+\subsection{Interpolation}
 \lstinputlisting{ZeroHoldInterpolation.m}
 
 \section{Sensitivity}
 \label{app:sensitivity}
-\subsection{Setup Code}
-\lstinputlisting{qpskSetupFile.m}
 
-\subsection{Delay}
+\subsection{Sampling Delay Analysis}
 \label{app:delay}
 \lstinputlisting{sensitivityDelay.m}
 
-\subsection{TX Filter $f_c$}
+\subsection{TX Filter $f_c$ Shifting Analysis}
 \label{app:freqTX}
 \lstinputlisting{sensitivityFreqTX.m}
 
-\subsection{RX Filter $f_c$}
+\subsection{RX Filter $f_c$ Shifting Analysis}
 \label{app:freqRX}
 \lstinputlisting{sensitivityFreqRX.m}
 
+\section{Simulations}
+\subsection{BPSK Simulation}
+\lstinputlisting{step4_sim_bpsk.m}
+
+\subsection{QPSK Simulation}
+\lstinputlisting{step4_sim_qpsk.m}
+
+\subsection{16-QAM Simulation}
+\lstinputlisting{step4_sim_QAM16.m}
+
+\subsection{64-QAM Simulation}
+\lstinputlisting{step4_sim_QAM64.m}
 
 \end{document}
