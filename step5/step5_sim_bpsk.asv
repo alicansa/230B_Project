@@ -2,7 +2,7 @@
 close all;
 clearvars
 %Start by setting the initial variables
-N= 1000; %number of bits generated
+N= 5000; %number of bits generated
 overSampleSize = 4;
 t_channel=0:1/overSampleSize:N;
 

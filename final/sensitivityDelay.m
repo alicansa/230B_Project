@@ -21,11 +21,7 @@ transmit = conv(impulse_train_inphase + 1i*impulse_train_quad,srrc,'same');
 transmit_analog = ZeroHoldInterpolation(transmit,overSampleSizeAnalog/overSampleSize);
 
 
-a = 10^(EbN0/10);
-ser_theo =   ones(1,length(freqs))*(2*qfunc(sqrt(2*a))...
-                                    -qfunc(sqrt(2*a))^2);
-
-for f=1:length(freqs)                                
+for f=1:length(delay)                                
     %anti aliasing filter
     filtered_transmit_analog = ButterworthFilter(4,0.05,transmit_analog);
     %pass the signals to be transmitted through awgn channel
@@ -36,7 +32,7 @@ for f=1:length(freqs)
 
     %analog to digital converter -> sample 4 times each symbol period
     received_digital = ZeroHoldDecimation(filtered_received_analog,...
-                        overSampleSizeAnalog/overSampleSize,delay);
+                        overSampleSizeAnalog/overSampleSize,delay(f));
     
     %pass the received signal through the matched filter for optimal
     %detection
@@ -49,13 +45,13 @@ for f=1:length(freqs)
     output_bits = qpsk_demod(real(sampled),imag(sampled));
   
     %SER calculation - drop first symbol   
-    ser(f) = SER(bits(5:N-4),output_bits(5:N-4),k);
+    ser(f) = SER(bits(2*delay(f)+1:N-2*delay(f)),output_bits(2*delay(f)+1:N-2*delay(f)),k);
 end
 
 %% plot theoretical/simulation BER vs SNR graph
 g=figure;
-plot(freqs,ser);
+plot(delay,ser);
 ylabel('Probability of Error');
-xlabel('delay');
+xlabel('delay (samples)');
 % save
-print(g,'-djpeg','-r300','delay');
+print(g,'-djpeg','-r300','delaySensitivity');
