@@ -86,7 +86,7 @@ for k=1:3
         
         
         %pass the signals to be transmitted through awgn channel
-        [received variance] = awgn_channel(transmit_channel,SNR(i),S);
+        [received, variance] = awgn_channel(transmit_channel,SNR(i),S);
      
         
         %MMSE
