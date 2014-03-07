@@ -82,33 +82,32 @@ This step of the project deals with the effect of Inter Symbol Interference (ISI
 \item Use Nyquist's Pulse-Shaping Criterion and MLSE
 \item Use an Equalizer
 \end{itemize}
-For this project, we use an Equalizer to handle the ISI.  \\
+For this project, we use various equalizers to handle the ISI.  \\
 
-
-\begin{figure}[H]
+\begin{figure}[b]
 \centering
-\includegraphics[width=\textwidth]{equalizer.png}
+\includegraphics[width=.6\textwidth]{equalizer.png}
 \caption{Generic Equalizer Filter to zero out the ISI\label{fig:equalizer}}
 \end{figure}
 
-%\begin{thm}
-%\label{thm:zero}
-%Zero-ISI:
-%$$x\left(nT\right) = \left\{
-%\begin{array}{1 1}
-%1 & \quad n=0 \\
-%0 & \quad \text{else}
-%\end{array} \right.$$
-%\end{thm}
+\begin{thm}
+\label{thm:zero}
+Zero-ISI:
+$$x\left(nT\right) = \left\{
+\begin{array}{c c}
+1 & \quad n=0 \\
+0 & \quad \text{else}
+\end{array} \right.$$
+\end{thm}
 
 \subsection{Estimation}
 \label{sec:estimate}
 
-Considering this system, where Table~\ref{tab:filtersummary} describes the variables and Table~\ref{tab:Paramsummary} describes the dimension parameters, the channel is must be known before anything else.
+Considering this system, where Table~\ref{tab:filtersummary} describes the variables and Table~\ref{tab:Paramsummary} describes the dimension parameters, the channel is must be known before anything else. \\
 
 To do channel estimation, a known sequence is sent through the system and error on the signal at output is measured.  That is, the input ($r$) and output ($y$) of the filter are known, and the tap weights ($f$) are to be determined - we can look at the impulse response of the unknown channel facing the known input.  
 
-\subsection{Equalization}
+\section{Equalization}
 \label{sec:equal}
 An equalizer is a filter that zeros out the ISI in the end-to-end system.  It can be preset to handle the channel, or can adapt to the time-varying nature of a channel.  In the latter case, the equalizer parameter are adjusted on the fly by periodic transmission of a known sequence to re-estimate the channel.  In either case, the equalizer is a filter whose frequency response counteracts the system model such that Condition~\ref{thm:zero} is met.  We did a one-shot channel estimation and used the results over the entirety of the experiment
 
@@ -117,18 +116,19 @@ An equalizer is a filter that zeros out the ISI in the end-to-end system.  It ca
 \begin{tabular}{|c|c|c|c|}
 \hline Variable & Meaning & Dimensions \\
 \hline \hline
-$\vec{s}$ & Source & $m\times 1 $\\ \hline
-$\vec{r}$ & Received Signal & $m\times 1$ \\ \hline
+$\mathbf{I}$ & Symbol Source & $ m \times 1$ \\ \hline
+$\mathbf{s}$ & Source & $m\times 1 $\\ \hline
+$\mathbf{r}$ & Received Signal & $m\times 1$ \\ \hline
 $R$ & Channel Response Matrix & $p\times n$ \\ \hline
-$\vec{f}$ & Tap Line / Impulse Response & $n\times 1 $ \\ \hline
-$\vec{y}$ & Equalizer Output & $ m\times 1 $ \\ \hline
- $\vec{e}$ & Training Error & $ m\times 1 $ \\ \hline
+$\mathbf{f}$ & Tap Line / Impulse Response & $n\times 1 $ \\ \hline
+$\mathbf{y}$ & Equalizer Output & $ m\times 1 $ \\ \hline
+ $\mathbf{e}$ & Training Error & $ m\times 1 $ \\ \hline
 \end{tabular}
 \caption{Summary of Signal Variables} \label{tab:filtersummary}
 \end{center}
 \end{table}
 
-\begin{table}[B]
+\begin{table}[b]
 \begin{center}
 \begin{tabular}{|c|c|}
 \hline Parameter & Meaning \\
@@ -147,9 +147,10 @@ The FIR form of the equalizer can then be written as Equation~\ref{eq:equalizerV
  
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{tapEqualizer.png}
+\includegraphics[width=.6\textwidth]{tapEqualizer.png}
 \caption{Tapped Delay Line Represenation\label{fig:tap}}
 \end{figure}
+
 \begin{equation}
 \label{eq:equalizer}
 y\left[k\right] = \sum_{j=0}^n f_jr\left[k-j\right]
@@ -166,51 +167,61 @@ The direct form of the FIR equalizor is shown in Figure~\ref{fig:tap}.  This is 
 \vdots  \\
 y\left[ p \right] \end{array} \right] = 
 \begin{bmatrix} 
-r \left[ n+1\right]  & r[n] \cdots & r\left[ 1 \right] \\ 
-r \left[ n+2\right]  & r[n+1] \cdots & r\left[ 2 \right] \\ 
-r \left[ n+2\right]  & r[n+2] \cdots & r\left[ 3 \right] \\ 
+r \left[ n+1\right]  & r[n] & \cdots & r\left[ 1 \right] \\ 
+r \left[ n+2\right]  & r[n+1] & \cdots & r\left[ 2 \right] \\ 
+r \left[ n+2\right]  & r[n+2] & \cdots & r\left[ 3 \right] \\ 
 \vdots & \vdots & & \vdots \\
-r \left[p \right] & r\left[ p-1 \right] & \cdots r\left[ p-n \right]
+r \left[p \right] & r\left[ p-1 \right] & \cdots & r\left[ p-n \right]
 \end{bmatrix}
  \left[ \begin{array}{c} f_0 \\ f_1 \\ f_2 \\ \vdots \\ f_n \end{array} \right]
 \end{equation}
 
 \begin{equation}
 \label{eq:equalizerMatrix}
-\vec{y} = R\vec{f}
+\mathbf{y} = R\mathbf{f}
 \end{equation}
-What we want is to optimally force the channel to zero for all other symbols than the present one.  As an aside, because there is delay in the system, the intuitive sense of causality is blurred. That is, forward symbols from the present moment can actually cause interference to the present symbol.   \\
+What we want is force the channel to zero for all other symbols other than the present one.  As an aside, because there is delay in the system, the intuitive sense of causality is blurred. That is, forward symbols from the present moment can actually cause interference to the present symbol.   \\
 
-\section{Optimality}
+\subsection{Zero Forcing Equalizer}
+\label{sec:zf}
+The first equalizer we consider is a Zero-Forcing (ZF) architecture.  To meet the goal of satisfying Condition~\ref{thm:zero}, the weight vector, $\mathbf{f}$, must perfectly negate all taps except the present time one.  The present received symbol is a column within the $R$ matrix: $\mathbf{r}[i]$, often chosen to be the center one.  
+$$ \mathbf{f}^{\ast}R = \mathbf{w}[i]^{\top} $$
+Here, we used  $\mathbf{w} [i] \in \mathbb{R}^n$ to represent the i$^{th}$ Standard basis vector, or a column of zeros except in row $i$.  In this setting, we can find the tap weight vector to accomplish this by Equation~\ref{eq:zf}.  This is an ideal BLAH BLAH BLAH.
+
+\begin{equation}
+\label{eq:zf} 
+\mathbf{f}_{ZF} = R \left(R^{\ast}R \right)^{-1} \mathbf{w}
+\end{equation}
+
+\subsection{Mean Square Error Equalizer}
 \label{sec:optimal}
-In order to find an optimal equalizer weighting function, we need to define a cost function as a metric to minimize cost, $J(\vec{f})$.  Here, we look at the Mean Square Error.  We can interpret this as the deviation of the estimate from the truth, squared [Equation~\ref{eq:mse}].  This formulation uses the $R$ matrix from before and defines the estimate error as $\vec{e} = \vec{s} - \vec{y}$.  This setting is well studied and the optimal weighting vector, $\vec{f}_{LS}$ is shown in Equation~\ref{eq:optimal}\footnote{Note that this setting assumes $R$ has more rows than columns and that such an inverse exists}.
+In order to find an \emph{optimal} equalizer weighting function, we need to define a cost function, $J(\mathbf{f})$, as a metric to minimize.  In this way, we can formulate an optimal estimator in the sense of cost.  Here, we look at the Mean Square Error.  Mean Square Error can be interpreted as the deviation of the estimate from the truth, squared [Equation~\ref{eq:mse}].  This formulation uses the $R$ matrix from before and defines the estimate error as $\mathbf{e} = \mathbf{s} - \mathbf{y}$.  This setting is well studied and the optimal weighting vector, $\mathbf{f}_{LS}$ is shown in Equation~\ref{eq:optimal}\footnote{Note that this setting assumes $R$ has more rows than columns and that such an inverse exists}.
 \begin{equation}
 \label{eq:mse} 
-J_{MSE} \left( \vec{f}\right) = \mathbb{E} \left[ \left(\vec{s} - R \vec{f} \right)^2 \right]
+J_{MSE} \left( \mathbf{f}\right) = \mathbb{E} \left[ \left(\mathbf{s} - R \mathbf{f} \right)^2 \right]
 \end{equation}
 
 \begin{equation}
 \label{eq:optimal}
-\vec{f}^{\circ} = \left(R^{\top}R\right)^{-1}R^{\top}\vec{s}
+\mathbf{f}_{MSE} = \left(R^{\ast}R\right)^{-1}R^{\ast}\mathbf{s}
 \end{equation}
 
-When such a weighting vector is used as the equalizer taps, the output reachse the minimum mean square error metric  [Equation~\ref{eq:mmse}].  It is interesting to note, the first term in this minimal cost function is the variance of the transmitted signal and the second term is a bias term.
+When such a weighting vector is used as the equalizer taps, the output reaches the minimum mean square error metric  [Equation~\ref{eq:mmse}].  It is interesting to note, the first term in this minimal cost function is the variance of the transmitted signal and the second term is a bias term.
 \begin{equation}
 \label{eq:mmse}
-J_{MMSE} = \mathbb{E} \left[ \vec{s}^{\top} \vec{s} - \vec{s}^{\top} \vec{f}^{\circ} \right]
+J_{MMSE} =  \sigma_{\mathbf{s}}^{2} - \mathbb{E} \left[ \mathbf{s}^{\ast} \mathbf{f}_{MSE} \right]
 \end{equation}
+
 \newpage
 \section{System}
 \label{sec:system}
-The system simulation model is shown in Figure~\ref{fig:step4}.  
+The system simulation model is shown in Figure~\ref{fig:step5}.  As from Step 1, randomly generated bits [Appendix~\ref{app:random_bit_generator}] are converted into symbols [\ref{app:bittosym}] and then upsampled by adding in zeros [\ref{app:impulse_train}].  The result is then is run through a Square Root Raised Cosine (SRRC) pulse shape filter [\ref{app:sqrt_raised_cosine}].  The use of the raised cosine shape no longer, in itself, satisfies Condition~\ref{thm:zero}.  Thus we need to do equalization.\\
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{step5.png}
-\caption{Block Diagram of Step 5 system setup\label{fig:step5}}
+\caption{Block Diagram of Step 5 System Setup\label{fig:step5}}
 \end{figure}
-
-As from Step 1, randomly generated bits [Appendix~\ref{app:random_bit_generator}] are converted into symbols [\ref{app:bittosym}] and then upsampled by adding in zeros [\ref{app:impulse_train}].  The result is then is run through a Square Root Raised Cosine (SRRC) pulse shape filter [\ref{app:sqrt_raised_cosine}].  This no longer, in itself, satisfies Condition~\ref{thm:zero}.  Thus we need to do equalization.
 
 First, to predetermine the channel, we send a delayed version of the transmitted signal, or a \emph{training} sequence, to create a metric of the channel.  We convolve the input with the unknown channel impulse response, or tap filter coefficients, to come up with the output.  This is shown in \ref{eq:channel}.  Here we  Since the input is known and the output is measured, we can back-out the values of the filter coefficients.  \\
 
@@ -225,7 +236,7 @@ With the system channel modeled, we introduce AWGN noise into the game.  We can 
 The end of the simulation model is identical to the process in Step 1: a matched filter to the SRRC picks out the symbols from the noisy received signal.  Afterwards, a sampler recovers [Appendix~\ref{app:sampler}] the symbols before a demodulator converts the symbols back into bits [\ref{app:dblocks}].  
 
 
-\section{Step 4 Results}
+\section{Step 5 Results}
 \label{sec:results}
 In the following sections, the results of the simulations of the different modulation schemes are shown.  For each SER plot, the corresponding results from Step 1 are presented alongside.  The results are interpreted afterwards in the conclusion section.
 
@@ -277,9 +288,14 @@ BLAH
 \label{app:sqrt_raised_cosine}
 \lstinputlisting{sqrt_raised_cosine.m}
 
-\section{Additive Gaussian White Noise Channel}
+\section{Channel Models}
+\subsection{Ideal AWGN Channel}
 \label{app:awgn_channel}
-\lstinputlisting{awgn_complex_channel.m}
+\lstinputlisting{awgn_channel.m}
+
+\subsection{Bandlimited Channel}
+\label{app:bandlimited}
+\lstinputlisting{bandlimited_channel.m}
 
 \section{Sampler}
 \label{app:sampler}
@@ -295,52 +311,27 @@ BLAH
 \label{app:qpsk_demod}
 \lstinputlisting{qpsk_demod.m}
 
-\section{Butterworth Filter}
-\label{app:butterworth}
-\lstinputlisting{ButterworthFilter.m}
+\section{Equalizers}
+\label{app:equal}
+\subsection{Mean Square Error Equalizer}
+\label{app:mse}
+\lstinputlisting{MMSE_Equalizer.m}
 
-\section{Conversion}
-\label{app:convert}
-\subsection{Analog-to-Digital Converter}
-\label{app:ad}
-\lstinputlisting{AD_conv.m}
-\subsection{Digital-to-Analog Converter}
-\label{app:da}
-\lstinputlisting{DA_conv.m}
+%\lstinputlisting{MMSE_Equalizer_Train.m}
 
-\subsection{Zero Hold}
-\label{app:zero}
-\subsection{Decimation}
-\lstinputlisting{ZeroHoldDecimation.m}
-\subsection{Interpolation}
-\lstinputlisting{ZeroHoldInterpolation.m}
+\subsection{Zero Forcing Equalizer}
+\label{app:zf}
+\lstinputlisting{ZFEqualizer.m}
 
-\section{Sensitivity}
-\label{app:sensitivity}
-
-\subsection{Sampling Delay Analysis}
-\label{app:delay}
-\lstinputlisting{sensitivityDelay.m}
-
-\subsection{TX Filter $f_c$ Shifting Analysis}
-\label{app:freqTX}
-\lstinputlisting{sensitivityFreqTX.m}
-
-\subsection{RX Filter $f_c$ Shifting Analysis}
-\label{app:freqRX}
-\lstinputlisting{sensitivityFreqRX.m}
+\subsection{Mean Square Error Decision Feedback Equalizer}
+\label{app:dfe}
+%\lstinputlisting{sensitivityFreqRX.m}
 
 \section{Simulations}
 \subsection{BPSK Simulation}
-\lstinputlisting{step4_sim_bpsk.m}
+\lstinputlisting{step5_sim_bpsk.m}
 
 \subsection{QPSK Simulation}
-\lstinputlisting{step4_sim_qpsk.m}
-
-\subsection{16-QAM Simulation}
-\lstinputlisting{step4_sim_QAM16.m}
-
-\subsection{64-QAM Simulation}
-\lstinputlisting{step4_sim_QAM64.m}
+\lstinputlisting{step5_sim_qpsk.m}
 
 \end{document}
