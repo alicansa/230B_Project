@@ -1,0 +1,501 @@
+\documentclass[]{article}
+
+
+
+\usepackage{graphicx,forloop,caption,subcaption,float,hyperref,listings,color,booktabs,mathtools}
+\usepackage{pdfpages}
+\usepackage{float}
+\usepackage[margin=1.2in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{multirow}
+%vhdl code
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\DeclareMathOperator*{\argmin}{\arg\!\min}
+\newcommand{\rom}[1]{\uppercase\expandafter{\romannumeral#1}}
+
+% declare theorem definitions
+\newtheorem{thm}{Condition}
+
+\lstset{frame=tb,
+  language=VHDL,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true
+  tabsize=3
+}
+
+
+%matlab code
+\lstset{frame=tb,
+  language=Matlab,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true
+  tabsize=3
+}
+
+
+% Title Page
+\title{UCLA\\EE230B\\Digital Communication Design Project\\Final Report}
+\author{Alican Salor 404271991 \\  \href{mailto:alicansalor@ucla.edu}{alicansalor@ucla.edu} \\ \\
+Darren Reis 804359840 \\
+\href{mailto:darrer.r.reis@gmail.com}{darren.r.reis@gmail.com} }
+
+
+\begin{document}
+\maketitle
+
+\newpage
+\tableofcontents
+
+
+\section{Background 4}
+\label{sec:adbackground}
+This step of the project introduces complications from using computers and digital methods to analyze analog signals.  Data conversion, the process of taking a continuous signal and descretizing it, can lead to additional and sometimes catastrophic errors.\\
+
+Recall, digital signals are quantized into samples, discrete points in time.  Conversely, an analog signal has a continuous value.  Going from one to the other requires a converter.  To take an analog signal and digitize it, an Analog-to-Digial Converter (A/D) is used.  Both types of signals are shown in Figure~\ref{fig:digitization}.  There is a wrinkle: the rate of conversion is critical to preserving the information.  By the Nyquist-Shannon Sampling Theorem (\ref{eq:nyquist}), the sampling frequency must be at least twice the highest frequency in the signal.  Without reaching this frequency, the samples can wrongfully convey a lower frequency signal, alias, of the true signal.  This is shown in Figure~\ref{fig:alias}.  
+
+\begin{align}
+\label{eq:nyquist}
+f_s \geq 2 f_{max}
+\end{align}
+
+\begin{figure}[h]
+        \centering
+        \begin{subfigure}[b]{0.4\textwidth}
+                \includegraphics[width=\textwidth]{digitization.png}
+                \caption{Analog and Digital signals}
+                \label{fig:digitization}
+        \end{subfigure}%
+        \qquad \quad %add desired spacing between images, e. g. ~, \quad, \qquad etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.5\textwidth}
+                \includegraphics[width=\textwidth]{aliasing.jpg}
+                \caption{Aliasing \label{fig:alias}}
+                \label{fig:alias}
+        \end{subfigure}
+        \caption{Digital Conversion \label{fig:digitize}}
+\end{figure}
+
+
+\newpage
+\section{Background5}
+\label{sec:ISIbackground}
+This step of the project deals with the effect of Inter Symbol Interference (ISI), when residual signal from symbols meddles the level of subsequent symbols.  This has previously not been modeled in the system because we have been considering an ideal scenario.  In reality, transmission over a channel has to deal with the finite bandwidth of the medium.  Because of the bandlimiting, where the response of the system is 0 above a limiting frequency, the symbols will interfere with one another. To deal with the dispersion, the Zero-ISI condition [\ref{thm:zero}] must be met.  A number of techniques can be utilized to accomplish what effectively amounts to canceling out delayed versions of symbols:
+
+\begin{itemize}
+\item Use $C^{-1}\left(f\right)$ to undo the channel
+\item Use precoding
+\item Use Nyquist's Pulse-Shaping Criterion and MLSE
+\item Use an Equalizer
+\end{itemize}
+For this project, we use various types of equalizers to handle the ISI [Section~\ref{sec:equal}].  For this to be effective, the system channel medium must be known or estimated [Section~\ref{sec:estimate}].\\
+
+\begin{figure}[b]
+\centering
+\includegraphics[width=.6\textwidth]{equalizer.png}
+\caption{Generic Equalizer Filter to zero out the ISI\label{fig:equalizer}}
+\end{figure}
+
+\begin{thm}
+\label{thm:zero}
+Zero-ISI:
+$$x\left(nT\right) = \left\{
+\begin{array}{c c}
+1 & \quad n=0 \\
+0 & \quad \text{else}
+\end{array} \right.$$
+\end{thm}
+
+\subsection{Estimation}
+\label{sec:estimate}
+Considering this system, where Table~\ref{tab:filtersummary} describes the variables and Table~\ref{tab:Paramsummary} describes the dimension parameters, the channel is must be known before anything else. \\
+
+To do channel estimation, a known sequence is sent through the system and error on the signal at output is measured.  That is, the input ($r$) and output ($y$) of the filter are known, and the tap weights ($f$) are to be determined - we can look at the impulse response of the unknown channel facing the known input.  Once the channel is understood, we can use an assortment of metrics to perform equalization.
+
+\subsection{Equalization}
+\label{sec:equal}
+An equalizer is a filter that zeros out the ISI in the end-to-end system.  It can be preset to handle the channel, or can adapt to the time-varying nature of a channel.  In the latter case, the equalizer parameter are adjusted on the fly by periodic transmission of a known sequence to re-estimate the channel.  In either case, the equalizer is a filter whose frequency response counteracts the system model such that Condition~\ref{thm:zero} is met. 
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline Variable & Meaning & Dimensions \\
+\hline \hline
+$\mathbf{I}$ & Symbol Source & $ m \times 1$ \\ \hline
+$\mathbf{s}$ & Source & $m\times 1 $\\ \hline
+$\mathbf{r}$ & Received Signal & $m\times 1$ \\ \hline
+$R$ & Channel Response Matrix & $p\times n$ \\ \hline
+$\mathbf{f}$ & Tap Line / Impulse Response & $n\times 1 $ \\ \hline
+$\mathbf{y}$ & Equalizer Output & $ m\times 1 $ \\ \hline
+ $\mathbf{e}$ & Training Error & $ m\times 1 $ \\ \hline
+\end{tabular}
+\caption{Summary of Signal Variables} \label{tab:filtersummary}
+\end{center}
+\end{table}
+
+\begin{table}[b]
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline Parameter & Meaning \\
+\hline \hline
+$m$ & Signal Length \\ \hline
+$N$ & Channel Filter Order \\ \hline
+$n$ & Equalizer Filter Order \\ \hline
+$p$ & Training Sequence Length \\ \hline
+\end{tabular}
+\caption{Summary of Parameters} \label{tab:Paramsummary}
+\end{center}
+\end{table}
+
+The FIR form of the equalizer can then be written as Equation~\ref{eq:equalizerVector} and Equation~\ref{eq:equalizerMatrix}.  The compact form of this relation uses a matrix equation where the filter is expressed as a Toeplitz matrix.  This neat fact allows us to use the power of linear algebra to solve for the zero forcing channel.  
+  
+ 
+\begin{figure}[H]
+\centering
+\includegraphics[width=.6\textwidth]{tapEqualizer.png}
+\caption{Tapped Delay Line Represenation\label{fig:tap}}
+\end{figure}
+
+\begin{equation}
+\label{eq:equalizer}
+y\left[k\right] = \sum_{j=0}^n f_jr\left[k-j\right]
+\end{equation}
+
+The direct form of the FIR equalizor is shown in Figure~\ref{fig:tap}.  This is a subblock diagram view of the equalizer filter.  The transfer function can be gathered from Equation~\ref{eq:equalizer}.  The objective of this filter is to counter the system channel.  \\
+
+\begin{equation}
+\label{eq:equalizerVector}
+\left[ \begin{array}{c}
+ y \left[n+1\right] \\
+ y \left[n+2\right] \\
+ y \left[n+3\right] \\
+\vdots  \\
+y\left[ p \right] \end{array} \right] = 
+\begin{bmatrix} 
+r \left[ n+1\right]  & r[n] & \cdots & r\left[ 1 \right] \\ 
+r \left[ n+2\right]  & r[n+1] & \cdots & r\left[ 2 \right] \\ 
+r \left[ n+2\right]  & r[n+2] & \cdots & r\left[ 3 \right] \\ 
+\vdots & \vdots & & \vdots \\
+r \left[p \right] & r\left[ p-1 \right] & \cdots & r\left[ p-n \right]
+\end{bmatrix}
+ \left[ \begin{array}{c} f_0 \\ f_1 \\ f_2 \\ \vdots \\ f_n \end{array} \right]
+\end{equation}
+
+\begin{equation}
+\label{eq:equalizerMatrix}
+\mathbf{y} = R\mathbf{f}
+\end{equation}
+What we want is force the channel to zero for all other symbols other than the present one.  As an aside, because there is delay in the system, the intuitive sense of causality is blurred. That is, forward symbols from the present moment can actually cause interference to the present symbol. \\
+
+\subsubsection{Mean Square Error Equalizer}
+\label{sec:optimal}
+Because a perfect ZF equalizer requires explicit knowledge of the channel and has the problem of noise enhancement, other observation-based equalization techniques are more common.  In order to find an optimal equalizer weighting function from observed data, we need to define a cost function, $J(\mathbf{f})$, as a metric to minimize.  In this way, we can formulate an optimal estimator in the sense of cost.  Here, we look at the Mean Square Error.  Mean Square Error can be interpreted as the deviation of the estimate from the truth, squared [Equation~\ref{eq:mse}].  This formulation uses the $R$ matrix from before and defines the estimate error as $\mathbf{e} = \mathbf{s} - \mathbf{y}$.  This setting is well studied and the optimal weighting vector, $\mathbf{f}_{LS}$ is shown in Equation~\ref{eq:optimal}\footnote{Note that this setting assumes $R$ has more rows than columns and that such an inverse exists}.
+\begin{equation}
+\label{eq:mse} 
+J_{MSE} \left( \mathbf{f}\right) = \mathbb{E} \left[ \left(\mathbf{s} - R \mathbf{f} \right)^2 \right]
+\end{equation}
+
+\begin{equation}
+\label{eq:optimal}
+\mathbf{f}_{MSE} = \left(R^{\ast}R\right)^{-1}R^{\ast}\mathbf{s}
+\end{equation}
+
+When such a weighting vector is used as the equalizer taps, the output reaches the minimum mean square error metric  [Equation~\ref{eq:mmse}].  It is interesting to note, the first term in this minimal cost function is the variance of the transmitted signal and the second term is a bias term.  Also realize the MSE equalizer is not a perfect tool either: there is no gaurentee that all ISI is removed.
+\begin{equation}
+\label{eq:mmse}
+J_{MMSE} =  \sigma_{\mathbf{s}}^{2} - \mathbb{E} \left[ \mathbf{s}^{\ast} \mathbf{f}_{MSE} \right]
+\end{equation}
+
+\newpage
+\section{System}
+
+\subsection{System Setup 2}
+\label{sec:setup2}
+
+In addition to the modeling blocks used previously, non coherent error was included in the model.  The $\delta\phi$ block represents a block that introduces phase or frequency offset on the carrier.  The effect of this is to rotate and blur the constellations and the SNR plots [Section~\ref{sec:qam16_phaseConst}].
+
+The new block was modeled by two different functions.  For Phase offset, the signal was subjected to a constant phase bias, as described in Appendix~\ref{app:phase_offset}.  Similarly, the Frequency offsets were handled by introducing a first order phase term.  Recall, phase is related to frequency by $f(t) = \frac{1}{2 \pi} \phi^\prime(t)$.  Appendix~\ref{app:freq_offset} shows how this was implemented in the simulations.
+
+With the new design worked out, the system was put through a similar set of tests on the four modulation schemes: BPSK, QPSK, 16-QAM, 64-QAM.  Each was subjected to phase offsets from $5\deg$ to $45\deg$ for a range of SNR levels.  Similarly, the modulated signals faced frequency offsets from 10 mHz to 10 Hz.  The system performance was determined by comparing a theoretical error rate to experimental bit error rate.  
+
+
+
+\subsection{System Setup 3}
+\label{sec:setup3}
+To handle the noncoherent error introduced into the system, feedback loops (Costas and Decision Directed) were installed.  As from before, the $\delta\phi$ block represents a block that introduces phase or frequency offset on the carrier.  To combat this, the error is estimated and then fed into a feedback loop filter to track it out. \\
+
+Both of these setups are based on the same control theory fundamentals and thus have similar feedback loop components. In control theory when there is steady state error in the open loop system, feedback, or `closing the loop' can track out the error.  From the plots in Step 2, we realize our situation is just this case of steady state error.  Depending on the order of the system, this error can become unbounded and damning.  Feedback can track or bound this error by `closing the loop' if the open loop system Type is 0.  \footnote{Recall, a system is of Type N when there are N poles at the s-plane origin.}  Here, the steady state error can be held to a certain level by introducing integration in the feedback line of the loop.  For us, this is true when we talk about phase error: we can send a step input phase error into a Voltage Controlled Oscillator and watch the error converge to a constant level. 
+\begin{align}
+\label{eq:vco}
+\phi_{\text{out}} &= \int \! k_{VCO}V_{in} \mathrm{d}t
+\end{align}
+A VCO is a device with output oscillation which is varied by the voltage level of the input.  The transfer function, relating the input to the output, for this block is shown in Equation~\ref{eq:vco}. The integral action can eliminate phase error. To implement a VCO in simulation, a phase accumulator does the integration   action and then, to keep the result in the correct domain, the result is put through a modulo $2\pi$ block.   
+When the plant is of higher Type than 0, as with a frequency offset, the steady state error can grow unbounded.  To deal with this scenario, another block is inserted in the feedback line.  An additional integrator increases the order of the closed loop system to allow bounding of higher type systems.  Notice in Figure~\ref{fig:costas}, the loop filter is Proportional-Integral.  With two integrators in the feedback path, Type 1 systems, or those with ramp inputs, can be bounded to a constant steady state error level.  Because frequency can be thought of as first order phase [\ref{eq:phaseFreq}], we track out the frequency error.\\
+\begin{align}
+\label{eq:phaseFreq}
+\phi &= \int \! 2\pi f \mathrm{d}t 
+\end{align}
+
+
+Furthermore, as  can be seen in the simulation files, a different approach of coding is taken compared to the previous simulations. Note that unlike in previous simulations of the system, this analysis required sample-wise operations instead of signal-wise operations. That is, to maintain causality, the samples were analyzed one by one so that future samples could not influence present values.\\
+
+In the following sections, the two setups for error recovery are given and their error metrics are examined.
+\newpage
+
+\subsubsection{System with Costas Loop}
+This error recovery is accomplished first via a Costas loop, as in Figure~\ref{fig:costas}. 
+
+The phase and frequency offset error, under QPSK, can be handled by the Costas loop given above. The technique first creates an estimate of the phase error by creating a metric for it.  The error is then sent through a closed feedback loop.  This structure can track out the zero order (phase offset) and first order (carrier offset) phase errors as it contains two integrators. 
+
+In a Costas loop, the I and Q component of the received signal are both sent through a $\tanh\left(\cdot\right)$ block in order to discern their sign.  This works because, for $k>>1$, $\text{sign}\left(x\right) \approx \tanh \left(x\right)$.  These $\pm1$ signals are multiplied by the opposite component signal.  The I component is then subtracted from the Q component, creating a phase error metric [\ref{eq:costas}].  This is labeled in Figure~\ref{fig:costas} as \rom{1}. 
+
+\begin{align}
+  \label{eq:costas}
+  S_{\rom{1}} &= \left[I\left(t\right)\sin\left(\phi_e\right)+Q\left(t\right)\cos\left(\phi_e\right)\right]\text{sign}\left(I\left(t\right)\cos\left(\phi_e\right)- Q\left(t\right)\sin\left(\phi_e\right)\right)\nonumber \\
+  &\qquad {} - \left[I\left(t\right)\cos\left(\phi_e\right)-Q\left(t\right)\sin\left(\phi_e\right)\right]\text{sign}\left(I\left(t\right)\sin\left(\phi_e\right)+Q\left(t\right)\cos\left(\phi_e\right)\right)
+  \end{align}
+
+
+Equation~\ref{eq:costas} is the metric for phase error.  This value is run into the loop filter and then the VCO.  Finally, the output of the VCO is used to correct the received signal's phase error as seen in the system setup in Figure~\ref{fig:costas}.
+
+
+
+\newpage
+\subsection{System4}
+\label{sec:system4}
+The system simulation model is shown in Figure~\ref{fig:step4}.  
+
+As from Step 1, randomly generated bits [Appendix~\ref{app:random_bit_generator}] are converted into symbols [\ref{app:bittosym}] and then upsampled by adding in zeros [\ref{app:impulse_train}].  The result is then is run through a Square Root Raised Cosine (SRRC) pulse shape filter [\ref{app:sqrt_raised_cosine}].  This shaping improves the resistance of the sequence to intersymbol interference (ISI).  The output of this filter is fed into a Digital-to-Analog Converter (DAC).  A DAC takes the digital samples and zero-order holds them at a constant voltage, creating an analog signal [Appendix~\ref{app:da},~\ref{app:zero}]. After the digitizer, a reconstruction filter (also called an anti-aliasing filter) bandlimits the analog waveform output from the DAC.  The high frequency content contained in the stair-case digital signal is undesirable since it can create aliasing of wrongfully high frequency waves. To avoid this, the Low Pass Filter is used for the reconstruction.  Ours is modeled as a Butterworth filter, or a maximally flat magnitude filter.  The aim of the filter is to have uniformly flat passband frequency response and roll to zero in the stopband.  As with all filters, the cutoff frequency parameter sets the bands and the order of the filter determines the roll-off of the frequency response in the stopband.  We used a fourth order Butterworth so that the roll-off was $80 \mathtt{\frac{dB}{dec}}$.  We set the cutoff frequency approx. to $\frac{\pi}{20}$ $\mathtt{Hz}$ at the TX part. The interior workings of the filter are not pertinent to this project, so the code in Appendix~\ref{app:butterworth} uses built-in MATLAB functions.  \\
+
+\newpage
+Following figure shows the outputs the process explained above (simulated with QPSK modulation):
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{DtoA.jpg}
+\caption{The original digital signal and the outputs of D/A converter and anti-aliasing filter at SNR=100dB for the first 100 symbols (QPSK modulation)\label{fig:dtoa}}
+\end{figure}
+
+After passing through the reconstruction filter, the analog signal is  sent through a real world channel, modeled by gain and additive white Gaussian noise [Appendix~\ref{app:awgn_channel}].\\
+
+
+To bring the analog back to the digital world, an Analog-to-Digital converter is used [Appendix~\ref{app:ad}].  However, just like before, the conversion is improved by the use of a filter.  An anti-aliasing low-pass filter constrains, or band limits, the channel noise before entering the A/D.  In this setting, the LPF protects against aliasing of high frequency content being recorded at the lower frequency.  We use the same Butterworth filter to accomplish this function set the cut-off frequency to approx. $\frac{\pi}{50}$ $\mathtt{Hz}$ at the RX \\
+
+\newpage
+Following figure shows the outputs the process explained above (simulated with QPSK modulation):
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{AtoD.jpg}
+\caption{The original digital signal and the outputs of A/D converter and noise-limiting filter at SNR=100dB for the first 100 symbols (QPSK modulation) \label{fig:atod}}
+\end{figure}
+
+\newpage
+An important issue we had to deal with, was the bilinear transform MATLAB uses to transform the analog Butterworth filter into the discrete domain. As shown in the figure below $tan(.)$ function is non-linear at higher frequencies and linear at frequencies close to 0:
+
+\begin{figure}[H]
+\centering
+\hspace*{-2cm}\includegraphics[width=0.7\textwidth]{tan_graph.jpg}
+\caption{SER plot as a function of delay at the samplin g points of the A/D converter at SNR=20dB (QPSK modulation). \label{fig:delay}}
+\end{figure} 
+
+Thus in order to have cut-off frequencies at the linear regions (assumed to be linear around $\left[ -\pi/10,\pi/10 \right] $) of the $tan(.)$ function, the over sampling rate of the analog signal is set to 80 times more than the digital signal. \\
+
+
+
+The end of the simulation model is identical to the process in Step 1: a matched filter to the SRRC picks out the symbols from the noisy received signal.  Afterwards, a sampler recovers [Appendix~\ref{app:sampler}] the symbols before a demodulator converts the symbols back into bits [\ref{app:dblocks}].  
+
+\subsection{step 5 system}
+\label{sec:system5}
+The system simulation model is shown in Figure~\ref{fig:step5}.  As from Step 1, randomly generated bits [Appendix~\ref{app:random_bit_generator}] are converted into symbols [\ref{app:bittosym}] and then upsampled by adding in zeros [\ref{app:impulse_train}].  The result is then is run through a Square Root Raised Cosine (SRRC) pulse shape filter [\ref{app:sqrt_raised_cosine}].  The use of the raised cosine shape no longer, in itself, satisfies Condition~\ref{thm:zero}.  Thus we need to do equalization.
+
+First, to predetermine the channel, we send a delayed version of the transmitted signal, or a \emph{training} sequence, to create a metric of the channel.  We convolve the input with the unknown channel impulse response, or tap filter coefficients, to come up with the output.  This is shown in \ref{eq:channel}.  Since the input is known and the output is measured, we can back-out the values of the filter coefficients.  \\
+
+\begin{equation}
+\label{eq:channel}
+r\left[k\right] = \sum_{j=0}^N h[j]s\left[k-j\right]
+\end{equation}
+
+We have used the following bandlimited channel responses in this step of the project:
+
+\begin{itemize}
+\item $h_1(t) = 1\delta(t) - 0.25\delta(t - T_{sym})  $
+\item $h_2(t) = 1\delta(t) - 0.25\delta(t - T_{sym})   + 0.125\delta(t - 2T_{sym}) $
+\item $h_3(t) = 0.1\delta(t + T_{sym}) +1\delta(t - T_{sym}) - 0.25\delta(t - T_{sym})   $
+\end{itemize} 
+
+Now that we have a channel response that is non-ideal we need to do equalization which as mentioned previously is essentially convolving the sampled signal with the inverse of the channel response as shown below: 
+
+\begin{equation}
+\label{eq:channel}
+y\left[k\right] = \sum_{j=0}^N c[j]r\left[k-j\right]
+\end{equation}
+\\
+In order to equalize the effects of the channels given above, three different equalizers were used: 
+
+\begin{itemize}
+\item ZF equalizer \\
+$c_{ZF} = U(U^HU)^{-1}e$ \\
+\item MMSE equalizer \\
+$c_{MMSE} = (U^HU + N_oI)^{-1}U^He$ \\
+\item MMSE-DFE equalizer
+$c_{LS} = \hat{R}^{-1}\hat{p} $ \\
+$ \hat{R} = \frac{1}{N} \sum_{n=1}^N r[n](r[n])^H, \; \hat{p} = \frac{1}{N}\sum_{n=1}^N b^*[n]r[n]$ \\
+
+
+\end{itemize}
+
+
+The end of the simulation model is identical to the process in Step 1: a matched filter to the SRRC picks out the symbols from the noisy received signal.  Afterwards, a sampler recovers [Appendix~\ref{app:sampler}] the symbols before a demodulator converts the symbols back into bits [\ref{app:dblocks}].  
+
+
+
+
+\newpage
+
+\section{Conclusion}
+\subsection{step 1 conclusion}
+This project was a demonstration of a digital communication with various modulation schemes which are:
+\begin{itemize}
+\item BPSK
+\item QPSK
+\item 16-QAM
+\item 64-QAM
+\end{itemize}
+
+Randomly generated and equally probable bits are modulated using the given schemes above.  They are filtered with a square-root raised cosine pulse and passed through an AWGN channel whose noise is varied from tolerable to overpowering.  This can be seen in the both sets of plots.  These plots were made by sending 48,000 bits through the system and measuring the error rate, as explained through the report.
+
+The following are deduced from this step of the project:
+\begin{itemize}
+\item For each modulation scheme, \emph{increasing} the input SNR \emph{decreases} the probability of symbol error
+\item \emph{Increasing} the constellation size \emph{increases} the bit rate.  That being said, the plots show the probability of symbol error \emph{increases} as well.
+\item With sufficient simulation test bits, experimental error rates match up with  the theoretical probability of symbol error. 
+\item As the constellation size \emph{increases}, the difference between experimental and theoretical bit error rates at low SNR values \emph{amplifies}. However, at high SNR levels, theoretical and experimental bit error rates are almost identical. This is due to the theoretical bit error rates being crudely approximated (dividing the theoretical symbol error rates by the number of bits used per symbol). By doing so, we assume that bit errors are only caused by a one-bit difference.  This underestimates the error rate - simulation symbol errors can occur with more than one bit error. Therefore we see that this approximation works best at high SNR values. 
+\item Finally, it must also be mentioned that the theoretical error rates are calculated using Eb/No rather than the symbol SNR. This conversion is made by dividing the SNR by the number of bits used per symbol. Thus, if the theoretical error rates where plotted with Eb/No values as the x-axis the graphs would shift left.  
+
+\end{itemize}
+
+
+\subsection{step 2 conc}
+This section of the project showed off the effects of carrier phase and frequency offsets.  This occurs in real systems when coherency is not maintained.  Synchronization between transmitter and receiver oscillator is not perfectly maintained.  The models showed that symbol error rates remained functional for small errors in phase and frequency.  As phase got to $\frac{\pi}{4}$ off, the constellations became the same as for proper $\frac{\pi}{4}$-QPSK [Section~\ref{sec:qam16_phaseConst}].  At this extreme, there was significant misclassification of symbols.  \\
+
+The frequency errors did completely not ruin the transmissions [\ref{sec:results_fo}].  Because the symbol period was so brief, the accumulation of error for small frequency deviations was kept small.  As the frequency difference climbed, the effect became more and more evident.  The tell-tale sign of an offset in frequency is shown in plots such as Figure~\ref{fig:qpsk_freq}.  The blur along the unit circle demonstrates the frequency error.  The errors were catastrophic in the case of a 10 Hz frequency offset.  \\
+
+From this project, the sensitivity of modulation schemes was analyzed.  Impercise phase and frequency can ruin a data system.  In subsequent phases of the project, remedies for these issues will be explored.
+
+
+
+\subsection{Step 3 Conclusion}
+\label{sec:conc}
+
+The objective of this step was to recover the system from the phase and frequency offsets that might be present in the received signal. To handle the noncoherent error introduced into the system, feedback loops (Costas and Decision Directed) were installed. These use control feedback to track out the errors by first finding a metric for the error, then using integrators to track away that error. 
+
+The `S' Curve results for the Costas type setup give indication of how the system reacts to different degree phase and frequency error.  Notice, in each of the graphs [~\ref{fig:costasSphase}, \ref{fig:costasSfreq}], the estimation error is periodic.  This is because the the metric does a good job approximating for phase at small phase levels, but of course has some error.  We see the same results in the Decision Directed cases as well [\ref{fig:ddrsphase}, \ref{fig:ddrsfreq}].
+
+In the transience plots, notice that the error in the 6 dB is zero mean and has magnitude around .01.  The 30 dB plot [\ref{fig:costasTransPhase}]  shows the typical convergence shape we would expect.  We feel that the same structure exists in the lower SNR case, but the settling time happens in only a few samples and gets lost.  This pattern is repeated for the frequency estimation trials as well [\ref{fig:costasTransFreq1}, \ref{fig:costasTransFreq2}].  Again, the Decision Directed loops have the same form [\ref{fig:ddrTransphase}, \ref{fig:ddrtransFreq1}, \ref{fig:ddrTransFreq2}].
+
+The constellation plots are also informative.  Note how in the Phase Costas Loop, Figure~\ref{fig:costasConstPhase}, there are a few points that have the stretching characteristic of phase error.  Then the blurring stops and the loop locks on, creating the clumps for the symbols.  This same tracking happens in the Decision Directed constellation [\ref{fig:ddrConstPhase}].  The frequency offsets never show this tracking, perhaps because they get locked on so quickly the tail never appears.
+
+Looking at the loop filter output results for the system where a phase offset is introduced, it can be seen that phase error estimate converges to zero very fast. This means that we don't really need to throw any of the received bits. This result can also be deduced from the BER graphs provided in the results section. When a phase offset is introduced, dropping bits doesn't really change the resulting probability of error of the system. Thus we can conclude that if the phase error estimate converges fast enough dropping bits doesn't really affect the efficiency of the system in term of bit error rate. 
+
+The same results are valid for the system with frequency offset too, as the frequency error estimate reaches the steady-state fast enough that dropping bits doesn't really change the bit error rate of the system. 
+
+\subsection{step 4 conclusion}
+The objective of this step was to visualize the effects of data converters in the system model.  Analog and digital waveforms can be safely interchanged only under certain conditions - namely when the sampling is fast enough.  In addition to a minimum sampling rate, low pass filters are necessary to protect against aliasing of high frequency content which should be operated at the linear regions of the $tan(.) $ function due to the bilinear transformation of analog filters into discrete domain.  \\
+
+We included A/D and DAC blocks in our system to see how well the modulation and recovery performed in comparison to earlier trials. The following conclusions are made from the results of this step:
+
+\begin{itemize}
+\item The importance of sampling timing on the bit error rate is crucial due to the fact that we using low pass filters at both RX and TX  which delay the signals passing through them. From a sensitivity analysis of the delay through the system, the A/D will sample at varying degrees of synch. From such an experiment written in Appendix~\ref{app:delay}, when all other parameters like SNR and cutoff frequencies are kept equal to the optimal, we end up seeing the system works best at sampling delays 1 and 2. This is shown in Figure~\ref{fig:delay}.
+\item A similar analysis is done for the cutoff frequency of the TX reconstruction filter. Recall, this filter is in place to bandlimit the DAC output so the high frequency content in the stairs does not create aliases in the lower, passband. The filter model is controlled by a normalized cutoff frequency, where zero and one are mapped to $\left(0,f_s\right)$.  As such, we expect that the cutoff frequency will not make much difference except if it is lower than $\pi/$(over sampling size of analog signal).  Even by choosing $f_c$ near $\pi/10$ (end of assumed linear region), all frequencies above the sampling frequency will be attenuated and the filter serves its purpose.  However, if $f_c$ gets too low, the information in the waveform may be lost. 
+Figure~\ref{fig:freqTX} shows the sensitivity analysis of the anti-aliasing LPF normalized cutoff frequency.  The graph confirms the expected behavior discussed above.
+\item We performed an equivalent analysis on the cutoff frequency in the RX noise-limiting filter.  This filter was aimed to low pass filter the high frequency content from the noise and only allow the signal through.  The same filter model was used with a lower cut-off frequency, so a similar trend was expected. Again at near zero cutoff, again we expect loss of data. But also this time, when the cut-off frequency is increased to the limits of the linear region we see an increase of the BER due to the fact that more noise is passing through the filter. Figure~\ref{fig:freqRX} shows the sensitivity analysis of the noise-limiting LPF normalized cutoff frequency.  The graph confirms the expected behavior discussed above.
+\end{itemize}
+
+In conclusion we have seen that the system works best at the following:
+\begin{itemize}
+\item RX and TX filters  at $w_c$ which are in the range $\left[0.02,0.09\right]  $
+\item Sampling points at a delay of 1 sample.
+\end{itemize}
+
+Although the results obtained in this step are close to the theoretical values, they can never achieve the theoretical limit due to the fact that we need infinite over sampling to construct an analog signal from a digital signal. Thus the theoretical limits form a lower bound to a system with data converters. 
+
+\appendix
+\newpage
+\bibliographystyle{plain}
+\bibliography{final}
+\newpage
+%% the \\ insures the section title is centered below the phrase: Appendix B
+%\section{Project Assignment}
+%\label{app:assign}
+%\includepdf[pages={1-5}]{project_overview.pdf}
+%\cleardoublepage
+%\newpage
+
+\section{Random Bit Sequence Generator}
+\label{app:random_bit_generator}
+\lstinputlisting{random_bit_generator.m}
+
+\section{Bit to Symbol Mapper}
+\label{app:bittosym}
+
+\subsection{QPSK Modulation}
+\label{app:qpsk_mod}
+\lstinputlisting{qpsk_mod.m}
+
+\section{Up Sampler}
+\label{app:impulse_train}
+\lstinputlisting{impulse_train.m}
+
+\section{Square Root Raised Cosine Filter}
+\label{app:sqrt_raised_cosine}
+\lstinputlisting{sqrt_raised_cosine.m}
+
+\section{Channel Models}
+\subsection{Ideal Complex AWGN Channel}
+\label{app:awgn_channel}
+\lstinputlisting{awgn_complex_channel.m}
+
+\subsection{Bandlimited Channel}
+\label{app:bandlimited}
+\lstinputlisting{bandlimited_channel.m}
+
+\section{Sampler}
+\label{app:sampler}
+\lstinputlisting{sampler.m}
+
+\section{Decision Block}
+\label{app:dblocks}
+\subsection{QPSK Demodulation}
+\label{app:qpsk_demod}
+\lstinputlisting{qpsk_demod.m}
+
+\section{Equalizers}
+\subsection{MMSE Equalizer}
+\lstinputlisting{MMSE_Equalizer.m}
+
+\end{document}
