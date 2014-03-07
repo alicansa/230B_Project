@@ -12,7 +12,7 @@ srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
 SNR = 0:13; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
 N= 5000;  %number of bits generated
-[trainerSymbols_quad trainerSymbols_inp] = qpsk_mod('111111111111111111111111111111111111111111',21);
+[trainerSymbols_quad trainerSymbols_inp] = qpsk_mod('111111111111111111111111111111111111111111',42);
 t=0:1/overSampleSize:N/2;
 t_channel=0:1/overSampleSize:N;
 bits = random_bit_generator(N);  %random bit generation
@@ -21,13 +21,13 @@ bits = random_bit_generator(N);  %random bit generation
 %mapping symbols to signals by generating a impulse train and convolving
 %with the srrc pulse
 trainer_impulse_train_quad = impulse_train(overSampleSize,...
-                            length(trainerSymbols_quad),trainerSymbols_quad);
+                            length(trainerSymbols),trainerSymbols_quad);
 trainer_impulse_train_inp = impulse_train(overSampleSize,...
-                            length(trainerSymbols_inp),trainerSymbols_inp);                        
+                            length(trainerSymbols),trainerSymbols_inp);                        
 impulse_train_quad = impulse_train(overSampleSize,N/2,quadrature);
 impulse_train_inphase = impulse_train(overSampleSize,N/2,inphase);
 transmit = conv(impulse_train_inphase + j*impulse_train_quad,srrc,'same');
-trainerSymbols_transmit = conv(trainer_impulse_train_inp + j*trainer_impulse_train_quad,srrc,'same');
+trainerSymbols_transmit = conv(trainer_impulse_train_inp + j*impulse_train_quad,srrc,'same');
 
 % figure(1);
 % plot(t(1:100),real(transmit(1:100)),'r');
@@ -84,14 +84,7 @@ for k=1:3
     
     for i=1:length(SNR)
           
-        %MSSE training
-        trainerSymbols_channel = bandlimited_channel(upsample(h,overSampleSize),trainerSymbols_transmit);
-        trainerSymbols_channel = trainerSymbols_channel(5:length(trainerSymbols_channel)-4);
-        trainerSymbols_noisy = awgn_complex_channel(trainerSymbols_channel,SNR(i),S);
-        trainerSymbols_matched = conv(trainerSymbols_noisy,srrc,'same');
-        trainerSymbols_sampled = sampler(trainerSymbols_matched,overSampleSize,Ts);
-        c_mmse_dfe = MMSE_Equalizer_Train(trainerSymbols_inp+j*trainerSymbols_quad,trainerSymbols_sampled,L);
-
+        %MSSE 
         
         
         %pass the signals to be transmitted through awgn channel
@@ -100,32 +93,49 @@ for k=1:3
         %MMSE
         c_mmse = MMSE_Equalizer(h,variance,L);
         
- %pass the received signal through the matched filter for optimal
+        %equalize channel
+        received_equalized_zf = conv(received,upsample(c,overSampleSize));
+        received_equalized_zf = received_equalized_zf((floor(L/2))*overSampleSize+1:end-(floor(L/2))*overSampleSize);
+        received_equalized_mmse = conv(received,upsample(c_mmse,overSampleSize));
+        received_equalized_mmse = received_equalized_mmse((floor(L/2))*overSampleSize+1:end-(floor(L/2))*overSampleSize);
+        %pass the received signal through the matched filter for optimal
         %detection
-        matched_output = conv(received,srrc,'same');
+        matched_output_zf = conv(received_equalized_zf,srrc,'same');
+        matched_output_mmse = conv(received_equalized_mmse,srrc,'same');        
+        matched_output_ne = conv(received,srrc,'same');
         %pass the matched filter output through the sampler to obtain symbols
         %at each symbol period
-        sampled = sampler(matched_output,overSampleSize,Ts);
+        sampled_zf = sampler(matched_output_zf,overSampleSize,Ts);
+        sampled_mmse = sampler(matched_output_mmse,overSampleSize,Ts);
+        sampled_ne = sampler(matched_output_ne,overSampleSize,Ts);
         
-        %equalize channel
-        received_equalized_zf = conv(sampled,c);
-        received_equalized_zf = received_equalized_zf((floor(L/2))+1:end-(floor(L/2)));
-        received_equalized_mmse = conv(sampled,c_mmse);
-        received_equalized_mmse = received_equalized_mmse((floor(L/2))+1:end-(floor(L/2)));
-        received_equalized_mmse_dfe = conv(sampled,c_mmse_dfe);
-        received_equalized_mmse_dfe = received_equalized_mmse_dfe((floor(L/2))+1:end-(floor(L/2)));
-
+        %constellation plot
+        if (SNR(i) == 3) || SNR(i) == 6 || SNR(i) == 10 || ...
+                SNR(i) == 13
+            subplot(2,2,num);
+            scatter(real(sampled_ne),imag(sampled_ne),'*');
+            xlim = [1.5*min(real(sampled_ne)) 1.5*max(real(sampled_ne))];
+            ylim = [1.5*min(imag(sampled_ne)) 1.5*max(imag(sampled_ne))];
+            line(xlim,[0 0], 'Color', 'k');
+            line([0 0],ylim,'Color', 'k');
+            xlabel('In-Phase'),ylabel('Quadrature-Phase');
+            title(['QPSK Constellation'...
+                sprintf('\nSNR = %d dB',SNR(i))]);
+            axis([xlim, ylim]);
+            num = num+1;
+        end
         
         %pass the received symbols through ML-decision box
-        output_bits_zf = qpsk_demod(real(received_equalized_zf),imag(received_equalized_zf));
-        output_bits_mmse  = qpsk_demod(real(received_equalized_mmse),imag(received_equalized_mmse));
-        output_bits_ne = qpsk_demod(real(sampled),imag(sampled));
-        output_bits_mmse_dfe  = qpsk_demod(real(received_equalized_mmse_dfe),imag(received_equalized_mmse_dfe));
-        %BER calculation - drop the first bit
-        ser_zf(i) = SER(bits(2:N),output_bits_zf(2:N),2);
-        ser_mmse(i) = SER(bits(2:N),output_bits_mmse(2:N),2);
-        ser_mmse_dfe(i) = SER(bits(2:N),output_bits_mmse_dfe(2:N),2);
-        ser_ne(i) = SER(bits(2:N),output_bits_ne(2:N),2);
+        output_bits_zf = qpsk_demod(real(sampled_zf),imag(sampled_zf));
+        output_bits_mmse = qpsk_demod(real(sampled_mmse),imag(sampled_mmse));
+        output_bits_ne = qpsk_demod(real(sampled_ne),imag(sampled_ne));
+        %SER calculation - drop first symbol
+        ser_zf(i) = SER(bits(3:N),output_bits_zf(3:N),2);
+        ser_mmse(i) = SER(bits(3:N),output_bits_mmse(3:N),2);
+        ser_ne(i) = SER(bits(3:N),output_bits_ne(3:N),2);
+        ber_zf(i) = BER(bits(3:N),output_bits_zf(3:N));
+        ber_mmse(i) = BER(bits(3:N),output_bits_mmse(3:N));
+        ber_ne(i) =  BER(bits(3:N),output_bits_ne(3:N));
         %SER theoretical calculation
         a = 10^(EbN0(i)/10);
         ser_theo(i) = 2*qfunc(sqrt(2*a))-qfunc(sqrt(2*a))^2;

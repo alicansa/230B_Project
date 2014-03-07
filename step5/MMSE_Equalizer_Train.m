@@ -1,4 +1,4 @@
-function [c_mmse] = MMSE_Equalizer_Train(trainerSequence,receivedSymbols,overSampleSize,L)
+function [c_mmse] = MMSE_Equalizer_Train(trainerSequence,receivedSymbols,L)
 N = length(trainerSequence)/(2*L+1);
 R = zeros(4*L+1,4*L+1);
 p=zeros(1,4*L+1)';
