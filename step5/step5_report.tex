@@ -2,12 +2,13 @@
 
 
 
-\usepackage{graphicx,forloop,caption,subcaption,float,hyperref,arrayjob,listings,color,booktabs,mathtools}
+\usepackage{graphicx,forloop,caption,subcaption,float,hyperref,listings,color,booktabs,mathtools}
 \usepackage{pdfpages}
 \usepackage{float}
 \usepackage[margin=1.2in]{geometry}
 \usepackage{amsmath}
 \usepackage{amsthm}
+\usepackage{amsfonts}
 \usepackage{multirow}
 %vhdl code
 \definecolor{dkgreen}{rgb}{0,0.6,0}
@@ -75,9 +76,6 @@ Darren Reis 804359840 \\
 \label{sec:background}
 This step of the project deals with the effect of Inter Symbol Interference (ISI), when residual signal from symbols meddles the level of subsequent symbols.  This has previously not been modeled in the system because we have been considering an ideal scenario.  In reality, transmission over a channel has to deal with the finite bandwidth of the medium.  Because of the bandlimiting, where the response of the system is 0 above a limiting frequency, the symbols will interfere with one another. To deal with the dispersion, the Zero-ISI condition [\ref{thm:zero}] must be met.  A number of techniques can be utilized to accomplish what effectively amounts to canceling out delayed versions of symbols:
 
-
- 
-
 \begin{itemize}
 \item Use $C^{-1}\left(f\right)$ to undo the channel
 \item Use precoding
@@ -86,15 +84,6 @@ This step of the project deals with the effect of Inter Symbol Interference (ISI
 \end{itemize}
 For this project, we use an Equalizer to handle the ISI.  \\
 
-\begin{thm}
-\label{thm:zero}
-Zero-ISI:
-$$x\left(nT\right) = \left\{
-\begin{array}{1 1}
-1 & \quad n=0 \\
-0 & \quad \text{else}
-\end{array} \right.$$
-\end{thm}
 
 \begin{figure}[H]
 \centering
@@ -102,51 +91,72 @@ $$x\left(nT\right) = \left\{
 \caption{Generic Equalizer Filter to zero out the ISI\label{fig:equalizer}}
 \end{figure}
 
-An equalizer is a filter that zeros out the ISI in the end-to-end system.  It can be preset to handle the channel, or can adapt to the time-varying nature of a channel.  In the latter case, the equalizer parameter are adjusted on the fly by periodic transmission of a known sequence to re-estimate the channel.  In either case, the equalizer is a filter whose frequency response counteracts the system model such that Condition~\ref{thm:zero} is met.  
+%\begin{thm}
+%\label{thm:zero}
+%Zero-ISI:
+%$$x\left(nT\right) = \left\{
+%\begin{array}{1 1}
+%1 & \quad n=0 \\
+%0 & \quad \text{else}
+%\end{array} \right.$$
+%\end{thm}
 
-Considering this system, where Table~\ref{tab:filtersummary} describes the variables, we can determine the channel response first by 
+\subsection{Estimation}
+\label{sec:estimate}
+
+Considering this system, where Table~\ref{tab:filtersummary} describes the variables and Table~\ref{tab:Paramsummary} describes the dimension parameters, the channel is must be known before anything else.
+
+To do channel estimation, a known sequence is sent through the system and error on the signal at output is measured.  That is, the input ($r$) and output ($y$) of the filter are known, and the tap weights ($f$) are to be determined - we can look at the impulse response of the unknown channel facing the known input.  
+
+\subsection{Equalization}
+\label{sec:equal}
+An equalizer is a filter that zeros out the ISI in the end-to-end system.  It can be preset to handle the channel, or can adapt to the time-varying nature of a channel.  In the latter case, the equalizer parameter are adjusted on the fly by periodic transmission of a known sequence to re-estimate the channel.  In either case, the equalizer is a filter whose frequency response counteracts the system model such that Condition~\ref{thm:zero} is met.  We did a one-shot channel estimation and used the results over the entirety of the experiment
 
 \begin{table}[H]
 \begin{center}
 \begin{tabular}{|c|c|c|c|}
 \hline Variable & Meaning & Dimensions \\
 \hline \hline
-$\vec{s}$ & Source & mx1 \\ \hline
-$\vec{r}$ & Received Signal & mx1 \\ \hline
-$R$ & Channel Response Matrix & pxn \\ \hline
-$\vec{f}$ & Tap Line / Impulse Response & nx1 \\ \hline
-$\vec{y}$ & Equalizer Output & mx1  \\ \hline
- $\vec{e}$ & Training Error & mx1 \\ \hline
+$\vec{s}$ & Source & $m\times 1 $\\ \hline
+$\vec{r}$ & Received Signal & $m\times 1$ \\ \hline
+$R$ & Channel Response Matrix & $p\times n$ \\ \hline
+$\vec{f}$ & Tap Line / Impulse Response & $n\times 1 $ \\ \hline
+$\vec{y}$ & Equalizer Output & $ m\times 1 $ \\ \hline
+ $\vec{e}$ & Training Error & $ m\times 1 $ \\ \hline
 \end{tabular}
-\caption{Summary of Signals and Variables} \label{tab:filtersummary}
+\caption{Summary of Signal Variables} \label{tab:filtersummary}
 \end{center}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[B]
 \begin{center}
 \begin{tabular}{|c|c|}
 \hline Parameter & Meaning \\
 \hline \hline
 $m$ & Signal Length \\ \hline
-$n$ & Filter Order \\ \hline
+$N$ & Channel Filter Order \\ \hline
+$n$ & Equalizer Filter Order \\ \hline
 $p$ & Training Sequence Length \\ \hline
 \end{tabular}
 \caption{Summary of Parameters} \label{tab:Paramsummary}
 \end{center}
 \end{table}
 
-The direct form FIR is shown in Figure~\ref{fig:tap}.  The filter transfer function can be seen in Equation~\ref{eq:equalizer}.  The objective for this filter is to counter the system channel.  For our case, we did a one-shot channel estimation and used the results over the entirety of the experiment.  \\
-
-
+The FIR form of the equalizer can then be written as Equation~\ref{eq:equalizerVector} and Equation~\ref{eq:equalizerMatrix}.  The compact form of this relation uses a matrix equation where the filter is expressed as a Toeplitz matrix.  This neat fact allows us to use the power of linear algebra to solve for the zero forcing channel.  
+  
+ 
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{tapEqualizer.png}
+\caption{Tapped Delay Line Represenation\label{fig:tap}}
+\end{figure}
 \begin{equation}
 \label{eq:equalizer}
 y\left[k\right] = \sum_{j=0}^n f_jr\left[k-j\right]
 \end{equation}
 
-To do channel estimation, we sent a known sequence through the system and BLAH BLAH. \\
+The direct form of the FIR equalizor is shown in Figure~\ref{fig:tap}.  This is a subblock diagram view of the equalizer filter.  The transfer function can be seen in Equation~\ref{eq:equalizer}.  The objective for this filter is to counter the system channel.  \\
 
-The FIR form of the equalizer can then be written as Equation~\ref{eq:equalizerVector} and Equation~\ref{eq:equalizerMatrix}.  The compact form of this relation uses a matrix equation where the filter is expressed as a Toeplitz matrix.  This neat fact allows us to use the power of linear algebra to solve for the zero forcing channel.  
-  
 \begin{equation}
 \label{eq:equalizerVector}
 \left[ \begin{array}{c}
@@ -161,35 +171,34 @@ r \left[ n+2\right]  & r[n+1] \cdots & r\left[ 2 \right] \\
 r \left[ n+2\right]  & r[n+2] \cdots & r\left[ 3 \right] \\ 
 \vdots & \vdots & & \vdots \\
 r \left[p \right] & r\left[ p-1 \right] & \cdots r\left[ p-n \right]
-end{bmatrix} \left[ \begin{array}{c} f_0 \\ f_1 \\ f_2 \\ \vdots \\ f_n \right]
+\end{bmatrix}
+ \left[ \begin{array}{c} f_0 \\ f_1 \\ f_2 \\ \vdots \\ f_n \end{array} \right]
 \end{equation}
+
 \begin{equation}
 \label{eq:equalizerMatrix}
 \vec{y} = R\vec{f}
 \end{equation}
-What we want is to optimally force the channel to zero for all other symbols than the present one.  As an aside, because there is delay in the system, the intuitive sense of causality is blurred.  We can define a cost function, a metric to minimize, as in Equation~\
+What we want is to optimally force the channel to zero for all other symbols than the present one.  As an aside, because there is delay in the system, the intuitive sense of causality is blurred. That is, forward symbols from the present moment can actually cause interference to the present symbol.   \\
 
+\section{Optimality}
+\label{sec:optimal}
+In order to find an optimal equalizer weighting function, we need to define a cost function as a metric to minimize cost, $J(\vec{f})$.  Here, we look at the Mean Square Error.  We can interpret this as the deviation of the estimate from the truth, squared [Equation~\ref{eq:mse}].  This formulation uses the $R$ matrix from before and defines the estimate error as $\vec{e} = \vec{s} - \vec{y}$.  This setting is well studied and the optimal weighting vector, $\vec{f}_{LS}$ is shown in Equation~\ref{eq:optimal}\footnote{Note that this setting assumes $R$ has more rows than columns and that such an inverse exists}.
 \begin{equation}
-\label{eq:cost}
-J(
-
-
-Using the Penrose Psuedo Inverse, Equation~
-
-
-
-\begin{equation}
-\label{eq:mmse}
-
+\label{eq:mse} 
+J_{MSE} \left( \vec{f}\right) = \mathbb{E} \left[ \left(\vec{s} - R \vec{f} \right)^2 \right]
 \end{equation}
 
+\begin{equation}
+\label{eq:optimal}
+\vec{f}^{\circ} = \left(R^{\top}R\right)^{-1}R^{\top}\vec{s}
+\end{equation}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{tapEqualizer.png}
-\caption{Tapped Delay Line Represenation\label{fig:tap}}
-\end{figure}
-
+When such a weighting vector is used as the equalizer taps, the output reachse the minimum mean square error metric  [Equation~\ref{eq:mmse}].  It is interesting to note, the first term in this minimal cost function is the variance of the transmitted signal and the second term is a bias term.
+\begin{equation}
+\label{eq:mmse}
+J_{MMSE} = \mathbb{E} \left[ \vec{s}^{\top} \vec{s} - \vec{s}^{\top} \vec{f}^{\circ} \right]
+\end{equation}
 \newpage
 \section{System}
 \label{sec:system}
@@ -201,7 +210,15 @@ The system simulation model is shown in Figure~\ref{fig:step4}.
 \caption{Block Diagram of Step 5 system setup\label{fig:step5}}
 \end{figure}
 
-As from Step 1, randomly generated bits [Appendix~\ref{app:random_bit_generator}] are converted into symbols [\ref{app:bittosym}] and then upsampled by adding in zeros [\ref{app:impulse_train}].  The result is then is run through a Square Root Raised Cosine (SRRC) pulse shape filter [\ref{app:sqrt_raised_cosine}].  This shaping improves the resistance of the sequence to intersymbol interference (ISI).  The output of this filter is fed into a Digital-to-Analog Converter (DAC).  A DAC takes the digital samples and zero-order holds them at a constant voltage, creating an analog signal [Appendix~\ref{app:da},~\ref{app:zero}]. After the digitizer, a reconstruction filter (also called an anti-aliasing filter) bandlimits the analog waveform output from the DAC.  The high frequency content contained in the stair-case digital signal is undesirable since it can create aliasing of wrongfully high frequency waves. To avoid this, the Low Pass Filter is used for the reconstruction.  Ours is modeled as a Butterworth filter, or a maximally flat magnitude filter.  The aim of the filter is to have uniformly flat passband frequency response and roll to zero in the stopband.  As with all filters, the cutoff frequency parameter sets the bands and the order of the filter determines the roll-off of the frequency response in the stopband.  We used a fourth order Butterworth so that the roll-off was $80 \mathtt{\frac{dB}{dec}}$.  We set the cutoff frequency approx. to $\frac{\pi}{20}$ $\mathtt{Hz}$ at the TX part. The interior workings of the filter are not pertinent to this project, so the code in Appendix~\ref{app:butterworth} uses built-in MATLAB functions.  \\
+As from Step 1, randomly generated bits [Appendix~\ref{app:random_bit_generator}] are converted into symbols [\ref{app:bittosym}] and then upsampled by adding in zeros [\ref{app:impulse_train}].  The result is then is run through a Square Root Raised Cosine (SRRC) pulse shape filter [\ref{app:sqrt_raised_cosine}].  This no longer, in itself, satisfies Condition~\ref{thm:zero}.  Thus we need to do equalization.
+
+First, to predetermine the channel, we send a delayed version of the transmitted signal, or a \emph{training} sequence, to create a metric of the channel.  We convolve the input with the unknown channel impulse response, or tap filter coefficients, to come up with the output.  This is shown in \ref{eq:channel}.  Here we  Since the input is known and the output is measured, we can back-out the values of the filter coefficients.  \\
+
+\begin{equation}
+\label{eq:channel}
+r\left[k\right] = \sum_{j=0}^N h[j]s\left[k-j\right]
+\end{equation}
+With the system channel modeled, we introduce AWGN noise into the game.  We can do this because, even if the noise was colored, we could apply a noise-whitening filter.  Assume here, however, that the noise is already white.   
 
 
 
@@ -277,14 +294,6 @@ BLAH
 \subsection{QPSK Demodulation}
 \label{app:qpsk_demod}
 \lstinputlisting{qpsk_demod.m}
-
-\subsection{16-QAM Demodulation}
-\label{app:16qam_demod}
-\lstinputlisting{qam_16_demod.m}
-
-\subsection{64-QAM Demodulation}
-\label{app:64qam_demod}
-\lstinputlisting{qam_64_demod.m}
 
 \section{Butterworth Filter}
 \label{app:butterworth}
