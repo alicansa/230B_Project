@@ -107,9 +107,16 @@ Considering this system, where Table~\ref{tab:filtersummary} describes the varia
 
 To do channel estimation, a known sequence is sent through the system and error on the signal at output is measured.  That is, the input ($r$) and output ($y$) of the filter are known, and the tap weights ($f$) are to be determined - we can look at the impulse response of the unknown channel facing the known input.  
 
+\subsection{Estimation}
+\label{sec:estimate}
+
+Considering this system, where Table~\ref{tab:filtersummary} describes the variables and Table~\ref{tab:Paramsummary} describes the dimension parameters, the channel is must be known before anything else.
+
+To do channel estimation, a known sequence is sent through the system and error on the signal at output is measured.  That is, the input ($r$) and output ($y$) of the filter are known, and the tap weights ($f$) are to be determined - we can look at the impulse response of the unknown channel facing the known input.  
+
 \section{Equalization}
 \label{sec:equal}
-An equalizer is a filter that zeros out the ISI in the end-to-end system.  It can be preset to handle the channel, or can adapt to the time-varying nature of a channel.  In the latter case, the equalizer parameter are adjusted on the fly by periodic transmission of a known sequence to re-estimate the channel.  In either case, the equalizer is a filter whose frequency response counteracts the system model such that Condition~\ref{thm:zero} is met.  We did a one-shot channel estimation and used the results over the entirety of the experiment
+An equalizer is a filter that zeros out the ISI in the end-to-end system.  It can be preset to handle the channel, or can adapt to the time-varying nature of a channel.  In the latter case, the equalizer parameter are adjusted on the fly by periodic transmission of a known sequence to re-estimate the channel.  In either case, the equalizer is a filter whose frequency response counteracts the system model such that Condition~\ref{thm:zero} is met. 
 
 \begin{table}[H]
 \begin{center}
@@ -223,30 +230,277 @@ The system simulation model is shown in Figure~\ref{fig:step5}.  As from Step 1,
 \caption{Block Diagram of Step 5 System Setup\label{fig:step5}}
 \end{figure}
 
+
 First, to predetermine the channel, we send a delayed version of the transmitted signal, or a \emph{training} sequence, to create a metric of the channel.  We convolve the input with the unknown channel impulse response, or tap filter coefficients, to come up with the output.  This is shown in \ref{eq:channel}.  Here we  Since the input is known and the output is measured, we can back-out the values of the filter coefficients.  \\
+
+As from Step 1, randomly generated bits [Appendix~\ref{app:random_bit_generator}] are converted into symbols [\ref{app:bittosym}] and then upsampled by adding in zeros [\ref{app:impulse_train}].  The result is then is run through a Square Root Raised Cosine (SRRC) pulse shape filter [\ref{app:sqrt_raised_cosine}] which is then passed through a bandlimited channel. 
 
 \begin{equation}
 \label{eq:channel}
 r\left[k\right] = \sum_{j=0}^N h[j]s\left[k-j\right]
 \end{equation}
-With the system channel modeled, we introduce AWGN noise into the game.  We can do this because, even if the noise was colored, we could apply a noise-whitening filter.  Assume here, however, that the noise is already white.   
 
+
+We have used the following bandlimited channel responses in this step of the project:
+
+\begin{itemize}
+\item $h_1(t) = 1\delta(t) - 0.25\delta(t - T_{sym})  $
+\item $h_2(t) = 1\delta(t) - 0.25\delta(t - T_{sym})   + 0.125\delta(t - 2T_{sym}) $
+\item $h_3(t) = 0.1\delta(t + T_{sym}) +1\delta(t - T_{sym}) - 0.25\delta(t - T_{sym})   $
+\end{itemize} 
+
+Now that we have a channel response that is non-ideal we need to do equalization which as mentioned previously is essentially convolving the sampled signal with the inverse of the channel reponse as shown below: 
+
+\begin{equation}
+\label{eq:channel}
+y\left[k\right] = \sum_{j=0}^N c[j]r\left[k-j\right]
+\end{equation}
+
+%First, to predetermine the channel, we send a delayed version of the transmitted signal, or a \emph{training} sequence, to create a metric of the channel.  We convolve the input with the unknown channel impulse response, or tap filter coefficients, to come up with the output.  This is shown in \ref{eq:channel}.  Here we  
+
+%Since the input is known and the output is measured, we can back-out the values of the filter coefficients.  \\
+
+%With the system channel modeled, we introduce AWGN noise into the game.  We can do this because, even if the noise was colored, we could apply a noise-whitening filter.  Assume here, however, that the noise is already white.   
+
+
+
+In order to equalize the effects of the channels given above three different equalizers are tried out: 
+
+\begin{itemize}
+\item ZF equalizer \\
+
+$c_{ZF} = U(U^HU)^{-1}e$ \\
+
+\item MMSE equalizer \\
+
+$c_{MMSE} = (U^HU + N_oI)^{-1}U^He$ \\
+
+\item MMSE-DFE equalizer
+
+$c_{LS} = \hat{R}^{-1}\hat{p} $ \\
+
+$ \hat{R} = \frac{1}{N} \sum_{n=1}^N r[n](r[n])^H, \; \hat{p} = \frac{1}{N}\sum_{n=1}^N b^*[n]r[n]$ \\
+
+
+\end{itemize}
 
 
 The end of the simulation model is identical to the process in Step 1: a matched filter to the SRRC picks out the symbols from the noisy received signal.  Afterwards, a sampler recovers [Appendix~\ref{app:sampler}] the symbols before a demodulator converts the symbols back into bits [\ref{app:dblocks}].  
 
 
+
 \section{Step 5 Results}
 \label{sec:results}
-In the following sections, the results of the simulations of the different modulation schemes are shown.  For each SER plot, the corresponding results from Step 1 are presented alongside.  The results are interpreted afterwards in the conclusion section.
+In the following sections, the results of the simulations of the different modulation schemes are shown. 
 
-\newpage
 \subsection{Probability Error Rate Comparison}
 \label{sec:compare}
+
+\subsubsection{BPSK}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{bpSNR1.jpg}
+\caption{Comparison of BER for BPSK system with different equalizers under channel response $h_1(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{bpSNR2.jpg}
+\caption{Comparison of BER for BPSK system with different equalizers under channel response $h_2(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{bpSNR3.jpg}
+\caption{Comparison of BER for BPSK system with different equalizers under channel response $h_3(t)$}
+\end{figure}
+
+\subsubsection{QPSK}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{qpSNR1.jpg}
+\caption{Comparison of SER for QPSK system with different equalizers under channel response $h_1(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{qpSNR2.jpg}
+\caption{Comparison of SER for QPSK system with different equalizers under channel response $h_2(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{qpSNR3.jpg}
+\caption{Comparison of SER for QPSK system with different equalizers under channel response $h_3(t)$}
+\end{figure}
 
 \newpage
 \subsection{Constellation Comparison}
 \label{sec:constCompare}
+
+\subsubsection{BPSK with No Equalization}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{bpConst1.jpg}
+\caption{Constellation plot for a BPSK modulated signal with no equalization under channel reponse $h_1(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{bpConst2.jpg}
+\caption{Constellation plot for a BPSK modulated signal with no equalization under channel reponse $h_2(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{bpConst3.jpg}
+\caption{Constellation plot for a BPSK modulated signal with no equalization under channel reponse $h_3(t)$}
+\end{figure}
+
+\subsubsection{BPSK with ZF Equalization}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{bpConstZF1.jpg}
+\caption{Constellation plot for a BPSK modulated signal with ZF equalization under channel reponse $h_1(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{bpConstZF2.jpg}
+\caption{Constellation plot for a BPSK modulated signal with ZF equalization under channel reponse $h_2(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{bpConstZF3.jpg}
+\caption{Constellation plot for a BPSK modulated signal with ZF equalization under channel reponse $h_3(t)$}
+\end{figure}
+
+\subsubsection{BPSK with MMSE Equalization}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{bpConstMMSE1.jpg}
+\caption{Constellation plot for a BPSK modulated signal with MMSE equalization under channel reponse $h_1(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{bpConstMMSE2.jpg}
+\caption{Constellation plot for a BPSK modulated signal with MMSE equalization under channel reponse $h_2(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{qpConstMMSE3.jpg}
+\caption{Constellation plot for a BPSK modulated signal with MMSE equalization under channel reponse $h_3(t)$}
+\end{figure}
+
+\subsubsection{BPSK with MMSE-DFE Equalization}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{bpConstMMSEDFE1.jpg}
+\caption{Constellation plot for a BPSK modulated signal with MMSE-DFE equalization under channel reponse $h_1(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{bpConstMMSEDFE2.jpg}
+\caption{Constellation plot for a BPSK modulated signal with MMSE-DFE equalization under channel reponse $h_2(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{bpConstMMSEDFE3.jpg}
+\caption{Constellation plot for a BPSK modulated signal with MMSE-DFE equalization under channel reponse $h_3(t)$}
+\end{figure}
+
+
+\subsubsection{QPSK with No Equalization}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{qpConst1.jpg}
+\caption{Constellation plot for a QPSK modulated signal with no equalization under channel reponse $h_1(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{qpConst2.jpg}
+\caption{Constellation plot for a QPSK modulated signal with no equalization under channel reponse $h_2(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{qpConst3.jpg}
+\caption{Constellation plot for a QPSK modulated signal with no equalization under channel reponse $h_3(t)$}
+\end{figure}
+
+\subsubsection{QPSK with ZF Equalization}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{qpConstZF1.jpg}
+\caption{Constellation plot for a QPSK modulated signal with ZF equalization under channel reponse $h_1(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{qpConstZF2.jpg}
+\caption{Constellation plot for a QPSK modulated signal with ZF equalization under channel reponse $h_2(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{qpConstZF3.jpg}
+\caption{Constellation plot for a QPSK modulated signal with ZF equalization under channel reponse $h_3(t)$}
+\end{figure}
+
+\subsubsection{BPSK with MMSE Equalization}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{qpConstMMSE1.jpg}
+\caption{Constellation plot for a QPSK modulated signal with MMSE equalization under channel reponse $h_1(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{qpConstMMSE2.jpg}
+\caption{Constellation plot for a QPSK modulated signal with MMSE equalization under channel reponse $h_2(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{qpConstMMSE3.jpg}
+\caption{Constellation plot for a QPSK modulated signal with MMSE equalization under channel reponse $h_3(t)$}
+\end{figure}
+
+\subsubsection{QPSK with MMSE-DFE Equalization}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{qpConstDFEMMSE1.jpg}
+\caption{Constellation plot for a QPSK modulated signal with MMSE-DFE equalization under channel reponse $h_1(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{qpConstDFEMMSE2.jpg}
+\caption{Constellation plot for a QPSK modulated signal with MMSE-DFE equalization under channel reponse $h_2(t)$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{qpConstDFEMMSE3.jpg}
+\caption{Constellation plot for a QPSK modulated signal with MMSE-DFE equalization under channel reponse $h_3(t)$}
+\end{figure}
+
 
 \newpage
 \section{Conclusion}
@@ -326,6 +580,15 @@ BLAH
 \subsection{Mean Square Error Decision Feedback Equalizer}
 \label{app:dfe}
 %\lstinputlisting{sensitivityFreqRX.m}
+
+\section{Equalizers}
+\subsection{ZF Equalizer}
+\lstinputlisting{ZFEqualizer.m}
+\subsection{MMSE Equalizer}
+\lstinputlisting{MMSE_Equalizer.m}
+\subsection{MMSE-DFE Equalizer}
+\lstinputlisting{MMSE_Equalizer_Train.m}
+
 
 \section{Simulations}
 \subsection{BPSK Simulation}
