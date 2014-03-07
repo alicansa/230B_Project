@@ -104,7 +104,7 @@ for k=1:3
         received_equalized_zf = received_equalized_zf((floor(L/2))+1:end-(floor(L/2)));
         received_equalized_mmse = conv(sampled,c_mmse);
         received_equalized_mmse = received_equalized_mmse((floor(L/2))+1:end-(floor(L/2)));
-        received_equalized_mmse_dfe = conv(sampled,c_mmse_train);
+        received_equalized_mmse_dfe = conv(sampled,c_mmse_dfe);
         received_equalized_mmse_dfe = received_equalized_mmse_dfe((floor(L/2))+1:end-(floor(L/2)));
 
         
@@ -123,7 +123,7 @@ for k=1:3
         ber_theo(i) = qfunc(sqrt(2*a));
     end
     % save the constellation plot
-    print(f,'-djpeg','-r300',strcat('bpConst',num2str(k)));
+   % print(f,'-djpeg','-r300',strcat('bpConst',num2str(k)));
     
     %plot theoretical/simulation BER vs SNR graph
     h=figure;
@@ -137,5 +137,5 @@ for k=1:3
     legend('ZF Equalized Simulation (Bit Error)', ...
         'MMSE Equalized Simulation (Bit Error)','Simulation (Bit Error)','Theory (Bit Error)','Location','SouthWest');
     % save the BER graph
-    print(h,'-djpeg','-r300',strcat('bpSNR',num2str(k)));
+    %print(h,'-djpeg','-r300',strcat('bpSNR',num2str(k)));
 end
