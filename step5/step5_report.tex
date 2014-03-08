@@ -243,7 +243,7 @@ First, to predetermine the channel, we send a delayed version of the transmitted
 r\left[k\right] = \sum_{j=0}^N h[j]s\left[k-j\right]
 \end{equation}
 
-We have used the following bandlimited channel responses in this step of the project:
+However this step doesn't require us to estimate the channel. It is assumed that we the channel reponse is estimated before. The following bandlimited channel responses are used in this step of the project:
 
 \begin{itemize}
 \item $h_1(t) = 1\delta(t) - 0.25\delta(t - T_{sym})  $
@@ -261,19 +261,21 @@ y\left[k\right] = \sum_{j=0}^N c[j]r\left[k-j\right]
 In order to equalize the effects of the channels given above, three different equalizers were used: 
 
 \begin{itemize}
-\item ZF equalizer \\
-$c_{ZF} = U(U^HU)^{-1}e$ \\
-\item MMSE equalizer \\
-$c_{MMSE} = (U^HU + N_oI)^{-1}U^He$ \\
+\item ZF equalizer
+\item MMSE equalizer
 \item MMSE-DFE equalizer
-$c_{LS} = \hat{R}^{-1}\hat{p} $ \\
-$ \hat{R} = \frac{1}{N} \sum_{n=1}^N r[n](r[n])^H, \; \hat{p} = \frac{1}{N}\sum_{n=1}^N b^*[n]r[n]$ \\
 
+with each one having
+	\begin{itemize}
+	\item 3 taps for $h_1(t)$
+	\item 5 taps for $h_2(t)$
+	\item 3 taps for $h_3(t)$
+	\end{itemize}
 
 \end{itemize}
 
 
-The end of the simulation model is identical to the process in Step 1: a matched filter to the SRRC picks out the symbols from the noisy received signal.  Afterwards, a sampler recovers [Appendix~\ref{app:sampler}] the symbols before a demodulator converts the symbols back into bits [\ref{app:dblocks}].  
+The end of the simulation model is identical to the process in Step 1: a matched filter to the SRRC picks out the symbols from the noisy received signal.  Afterwards, a sampler recovers [Appendix~\ref{app:sampler}] the symbols before equalization of the channel. After that a demodulator converts the symbols back into bits [\ref{app:dblocks}].  
 
 
 
@@ -494,7 +496,32 @@ In the following sections, the results of the simulations of the different modul
 \section{Conclusion}
 \label{sec:conc}
 
-BLAH
+In this step of the project we have dealt with the effect of Inter Symbol Interference (ISI), caused by the transmission of signals over a channel with the finite bandwidth. Because of the bandlimiting, where the response of the system is 0 above a limiting frequency, the symbols will interfere with one another. To deal with the dispersion, the Zero-ISI condition [??] must be met. 
+
+Equalization of the channel is chosen from a variety of techniques to accomplish the cancelation of delayed verions of the symbols. 
+
+The equalizers tried out in this step, to achieve delayed symbol cancelation are:
+
+\begin{itemize}
+\item ZF equalizer
+\item MMSE equalizer
+\item MMSE-DFE equalizer
+
+with each one having
+	\begin{itemize}
+	\item 3 taps for $h_1(t)$
+	\item 5 taps for $h_2(t)$
+	\item 3 taps for $h_3(t)$
+	\end{itemize}
+\end{itemize}
+
+The results of the experiment done for each equalizers over the three channels are given in the previous section. From the BER and constellation plots obtained it can be seen that each equalizer does a good job of cancelation of the delayed symbols. The BER of the system with QPSK and BPSK modulations are almost the same as theoretical results when the channel is equalized. 
+
+As expected, out of these three equalizers MMSE-DFE is the best, MMSE is the second best and ZF is the last. This is caused by the fact that in MMSE based equalizers, the effect of AWGN noise is considered. On the other hand ZF equalization doesn't take the channel noise into account which in the end causes noise enhancement. 
+
+When the equalizer has a feedback loop, the error enhancement issue is addressed. This balances the need to eliminate ISI and the danger of noise enchancement. Therefore we see the best results with MMSE-DFE equalizer.
+
+Still one can use ZF or MMSE equalizer with more taps to achieve the same BER results instead of using MMSE-DFE equalizer which increases the complexity of the overall system. Yet this is a trade-off where an engineer has to decide on choosing between more memory or complexity of the feedback loop.
 
 \appendix
 \newpage
