@@ -102,7 +102,7 @@ $$x\left(nT\right) = \left\{
 
 \subsection{Estimation}
 \label{sec:estimate}
-Considering this system, where Table~\ref{tab:filtersummary} describes the variables and Table~\ref{tab:Paramsummary} describes the dimension parameters, the channel is must be known before anything else. \\
+Considering this system, where Table~\ref{tab:filtersummary} describes the variables and Table~\ref{tab:Paramsummary} describes the dimension parameters, the channel must be known before anything else. \\
 
 To do channel estimation, a known sequence is sent through the system and error on the signal at output is measured.  That is, the input ($r$) and output ($y$) of the filter are known, and the tap weights ($f$) are to be determined - we can look at the impulse response of the unknown channel facing the known input.  Once the channel is understood, we can use an assortment of metrics to perform equalization.
 
@@ -179,15 +179,15 @@ r \left[p \right] & r\left[ p-1 \right] & \cdots & r\left[ p-n \right]
 \label{eq:equalizerMatrix}
 \mathbf{y} = R\mathbf{f}
 \end{equation}
-What we want is force the channel to zero for all other symbols other than the present one.  As an aside, because there is delay in the system, the intuitive sense of causality is blurred. That is, forward symbols from the present moment can actually cause interference to the present symbol. \\
+What we want is to force the channel to zero for all other symbols other than the present one.  As an aside, because there is delay in the system, the intuitive sense of causality is blurred. That is, forward symbols from the present moment can actually cause interference to the present symbol. \\
 
 \subsection{Zero Forcing Equalizer}
 \label{sec:zf}
-The first equalizer we consider is a Zero-Forcing (ZF) architecture.  To meet the goal of satisfying Condition~\ref{thm:zero}, the weight vector, $\mathbf{f}$, must perfectly negate all taps except the present-time one.  The present received symbol is a column within the $R$ matrix: $\mathbf{r}[i]$, often chosen to be the center one.  
+The first equalizer we considered was a Zero-Forcing (ZF) architecture [Appendix~\ref{app:zf}].  To meet the goal of satisfying Condition~\ref{thm:zero}, the weight vector, $\mathbf{f}$, must perfectly negate all taps except the present-time one.  The present received symbol is a column within the $R$ matrix: $\mathbf{r}[i]$, often chosen to be the center one.  
 $$ \mathbf{f}^{\ast}R = \mathbf{w}[i]^{\top} $$
-Here, we used  $\mathbf{w} [i] \in \mathbb{R}^n$ to represent the i$^{th}$ Standard basis vector, or a column of zeros except in row $i$.  In this setting, we can find the tap weight vector to accomplish this by Equation~\ref{eq:zf}.  This is an ideal BLAH BLAH BLAH.\\
+Here, we used  $\mathbf{w} [i] \in \mathbb{R}^n$ to represent the i$^{th}$ Standard basis vector, or a column of zeros except in row $i$.  In this setting, we can find the tap weight vector to accomplish this by Equation~\ref{eq:zf}.  \\
 
-A common metric for the price of zero forcing is the \emph{noise enhancement}.  Because the equalizer is amplifying the system frequency response in the channel-attenuated zones in order to maintain a uniformly flat character, the noise from the channel gets similarly amplified by the equalizer.  This is the cost of knocking out ISI.  For ZF, this is a factor by which the system SNR must be scaled by in order to maintain equivalent performance after the equalizer as compared to the output after the matched filter in a no-ISI setting.  It can lead to cases where there is infinite noise PSD after the equalizer.
+A common metric for the price of Zero Forcing is the \emph{noise enhancement}.  Because the equalizer is amplifying the system frequency response in the channel-attenuated zones in order to maintain a uniformly flat character, the noise from the channel gets similarly amplified by the equalizer.  This is the cost of knocking out ISI.  For ZF, this is a factor by which the system SNR must be scaled by in order to maintain equivalent performance after the equalizer as compared to the output after the matched filter in a no-ISI setting.  It can lead to cases where there is infinite noise PSD after the equalizer.
 
 \begin{equation}
 \label{eq:zf} 
@@ -196,7 +196,7 @@ A common metric for the price of zero forcing is the \emph{noise enhancement}.  
 
 \subsection{Mean Square Error Equalizer}
 \label{sec:optimal}
-Because a perfect ZF equalizer requires explicit knowledge of the channel and has the problem of noise enhancement, other observation-based equalization techniques are more common.  In order to find an optimal equalizer weighting function from observed data, we need to define a cost function, $J(\mathbf{f})$, as a metric to minimize.  In this way, we can formulate an optimal estimator in the sense of cost.  Here, we look at the Mean Square Error.  Mean Square Error can be interpreted as the deviation of the estimate from the truth, squared [Equation~\ref{eq:mse}].  This formulation uses the $R$ matrix from before and defines the estimate error as $\mathbf{e} = \mathbf{s} - \mathbf{y}$.  This setting is well studied and the optimal weighting vector, $\mathbf{f}_{LS}$ is shown in Equation~\ref{eq:optimal}\footnote{Note that this setting assumes $R$ has more rows than columns and that such an inverse exists}.
+Because a perfect ZF equalizer requires explicit knowledge of the channel and has the problem of noise enhancement, other observation-based equalization techniques are more common.  In order to find an optimal equalizer weighting function from observed data, we need to define a cost function, $J(\mathbf{f})$, as a metric to minimize.  In this way, we can formulate an optimal estimator in the sense of cost.  Here, we look at the Mean Square Error.  Mean Square Error can be interpreted as the deviation of the estimate from the truth, squared [Equation~\ref{eq:mse}].  This formulation uses the $R$ matrix from before and defines the estimate error as $\mathbf{e} = \mathbf{s} - \mathbf{y}$.  This setting is well studied and the optimal weighting vector, $\mathbf{f}_{MSE}$ is shown in Equation~\ref{eq:optimal}\footnote{Note that this setting assumes $R$ has more rows than columns and that such an inverse exists}.
 \begin{equation}
 \label{eq:mse} 
 J_{MSE} \left( \mathbf{f}\right) = \mathbb{E} \left[ \left(\mathbf{s} - R \mathbf{f} \right)^2 \right]
@@ -207,7 +207,7 @@ J_{MSE} \left( \mathbf{f}\right) = \mathbb{E} \left[ \left(\mathbf{s} - R \mathb
 \mathbf{f}_{MSE} = \left(R^{\ast}R\right)^{-1}R^{\ast}\mathbf{s}
 \end{equation}
 
-When such a weighting vector is used as the equalizer taps, the output reaches the minimum mean square error metric  [Equation~\ref{eq:mmse}].  It is interesting to note, the first term in this minimal cost function is the variance of the transmitted signal and the second term is a bias term.  Also realize the MSE equalizer is not a perfect tool either: there is no gaurentee that all ISI is removed.
+When such a weighting vector is used as the equalizer taps, the output reaches the minimum mean square error metric  [Equation~\ref{eq:mmse}].  This type of equalizer is implemented in Appendix~\ref{app:mse}. It is interesting to note, the first term in this minimal cost function is the variance of the transmitted signal and the second term is a bias term.  Also realize the MSE equalizer is not a perfect tool either: there is no gaurentee that all ISI is removed.
 \begin{equation}
 \label{eq:mmse}
 J_{MMSE} =  \sigma_{\mathbf{s}}^{2} - \mathbb{E} \left[ \mathbf{s}^{\ast} \mathbf{f}_{MSE} \right]
@@ -215,16 +215,13 @@ J_{MMSE} =  \sigma_{\mathbf{s}}^{2} - \mathbb{E} \left[ \mathbf{s}^{\ast} \mathb
 
 \subsection{Decision-Feedback Equalizer}
 \label{sec:dfe}
-Another alternative is to use a feedback loop to handle the ISI.  A Decision-Feedback Equalizer detects symbols and uses a feedback loop to eliminate intersymbol interference from each symbol prior to detecting any following symbols.  This brings the issue of noise enhancement back into play.  As such, we can use MSE techniques together with feedback to focus on balancing the need to eliminate ISI and the danger of noise enhancement.  To do this, we use a feedforward correlator and a feedback loop to clean up the ISI.  Figure~\ref{fig:dfe} shows the block diagram for this type of equalizer.  
+Another alternative is to use a feedback loop to handle the ISI.  A Decision-Feedback Equalizer detects symbols and uses a feedback loop to eliminate intersymbol interference from each symbol prior to detecting any following symbols.  This brings the issue of noise enhancement back into play.  As such, we can use MSE techniques together with feedback to focus on balancing the need to eliminate ISI and the danger of noise enhancement.  To do this, we use a feedforward correlator and a feedback loop to clean up the ISI.  Figure~\ref{fig:dfe} shows the block diagram for this type of equalizer.  Appendix~\ref{app:dfe} shows the implementation of this equalizer.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=.6\textwidth]{mse_dfe.png}
 \caption{MSE Decision Feedback Equalizer\label{fig:dfe}}
 \end{figure}
-
-
-BLAH BLAH NEED MORE EXPLANATION
 
 \newpage
 \section{System}
@@ -235,15 +232,7 @@ The system simulation model is shown in Figure~\ref{fig:step5}.  As from Step 1,
 \includegraphics[width=.6\textwidth]{step5.png}
 \caption{Block Diagram of Step 5 System Setup\label{fig:step5}}
 \end{figure}
-
-First, to predetermine the channel, we send a delayed version of the transmitted signal, or a \emph{training} sequence, to create a metric of the channel.  We convolve the input with the unknown channel impulse response, or tap filter coefficients, to come up with the output.  This is shown in \ref{eq:channel}.  Since the input is known and the output is measured, we can back-out the values of the filter coefficients.  \\
-
-\begin{equation}
-\label{eq:channel}
-r\left[k\right] = \sum_{j=0}^N h[j]s\left[k-j\right]
-\end{equation}
-
-However this step doesn't require us to estimate the channel. It is assumed that we the channel reponse is estimated before. The following bandlimited channel responses are used in this step of the project:
+For this setting, we assume knowledge of the channel response. The following bandlimited channel responses are used in this step of the project:
 
 \begin{itemize}
 \item $h_1(t) = 1\delta(t) - 0.25\delta(t - T_{sym})  $
@@ -251,7 +240,7 @@ However this step doesn't require us to estimate the channel. It is assumed that
 \item $h_3(t) = 0.1\delta(t + T_{sym}) +1\delta(t - T_{sym}) - 0.25\delta(t - T_{sym})   $
 \end{itemize} 
 
-Now that we have a channel response that is non-ideal we need to do equalization which as mentioned previously is essentially convolving the sampled signal with the inverse of the channel response as shown below: 
+Now that we have a channel response that is non-ideal, we need to do equalization - essentially convolving the sampled signal with the inverse of the channel response as shown below: 
 
 \begin{equation}
 \label{eq:channel}
@@ -498,9 +487,9 @@ In the following sections, the results of the simulations of the different modul
 
 In this step of the project we have dealt with the effect of Inter Symbol Interference (ISI), caused by the transmission of signals over a channel with the finite bandwidth. Because of the bandlimiting, where the response of the system is 0 above a limiting frequency, the symbols will interfere with one another. To deal with the dispersion, the Zero-ISI condition [??] must be met. 
 
-Equalization of the channel is chosen from a variety of techniques to accomplish the cancelation of delayed verions of the symbols. 
+Equalization of the channel is chosen from a variety of techniques to accomplish the cancellation of delayed versions of the symbols. 
 
-The equalizers tried out in this step, to achieve delayed symbol cancelation are:
+The equalizers tried out in this step, to achieve delayed symbol cancellation are:
 
 \begin{itemize}
 \item ZF equalizer
@@ -515,13 +504,13 @@ with each one having
 	\end{itemize}
 \end{itemize}
 
-The results of the experiment done for each equalizers over the three channels are given in the previous section. From the BER and constellation plots obtained it can be seen that each equalizer does a good job of cancelation of the delayed symbols. The BER of the system with QPSK and BPSK modulations are almost the same as theoretical results when the channel is equalized. 
+The results of the experiment are given in the previous section. From the BER and constellation plots obtained, it is clear each equalizer sufficiently cancels out interference of the delayed symbols. The BER of the system with QPSK and BPSK modulations are almost the same for theoretical results as when the channel is equalized. 
 
-As expected, out of these three equalizers MMSE-DFE is the best, MMSE is the second best and ZF is the last. This is caused by the fact that in MMSE based equalizers, the effect of AWGN noise is considered. On the other hand ZF equalization doesn't take the channel noise into account which in the end causes noise enhancement. 
+As expected, the best performing equalizer is MMSE-DFE.  Zero Forcing equalization performs worse than Minimum Mean Square Error equalization because the effect of AWGN noise is considered in the latter and not in ZF.  Without being penalized for noise amplification, Zero Forcing equalization has issues from noise enhancement. 
 
-When the equalizer has a feedback loop, the error enhancement issue is addressed. This balances the need to eliminate ISI and the danger of noise enchancement. Therefore we see the best results with MMSE-DFE equalizer.
+When the equalizer has a feedback loop, the noise error enhancement issue is addressed. This balances the need to eliminate ISI and the danger of noise enhancement. Therefore we see the best results with MMSE-DFE equalizer.
 
-Still one can use ZF or MMSE equalizer with more taps to achieve the same BER results instead of using MMSE-DFE equalizer which increases the complexity of the overall system. Yet this is a trade-off where an engineer has to decide on choosing between more memory or complexity of the feedback loop.
+Still, by using additional taps, ZF and MMSE equalization can achieve the same BER results as the feedback method.  A feedback loop increases the complexity of the overall system and may not always be worthwhile. This is a design trade-off an engineer has to decide on when choosing between more memory or the complexity of a feedback loop.
 
 \appendix
 \newpage
@@ -582,28 +571,18 @@ Still one can use ZF or MMSE equalizer with more taps to achieve the same BER re
 
 \section{Equalizers}
 \label{app:equal}
-\subsection{Mean Square Error Equalizer}
-\label{app:mse}
-\lstinputlisting{MMSE_Equalizer.m}
-
-%\lstinputlisting{MMSE_Equalizer_Train.m}
 
 \subsection{Zero Forcing Equalizer}
 \label{app:zf}
 \lstinputlisting{ZFEqualizer.m}
 
+\subsection{Mean Square Error Equalizer}
+\label{app:mse}
+\lstinputlisting{MMSE_Equalizer.m}
+
 \subsection{Mean Square Error Decision Feedback Equalizer}
 \label{app:dfe}
-%\lstinputlisting{sensitivityFreqRX.m}
-
-\section{Equalizers}
-\subsection{ZF Equalizer}
-\lstinputlisting{ZFEqualizer.m}
-\subsection{MMSE Equalizer}
-\lstinputlisting{MMSE_Equalizer.m}
-\subsection{MMSE-DFE Equalizer}
 \lstinputlisting{MMSE_Equalizer_Train.m}
-
 
 \section{Simulations}
 \subsection{BPSK Simulation}
