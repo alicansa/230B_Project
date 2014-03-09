@@ -183,7 +183,7 @@ What we want is to force the channel to zero for all other symbols other than th
 
 \subsection{Zero Forcing Equalizer}
 \label{sec:zf}
-The first equalizer we considered was a Zero-Forcing (ZF) architecture [Appendix~\ref{app:zf}].  To meet the goal of satisfying Condition~\ref{thm:zero}, the weight vector, $\mathbf{f}$, must perfectly negate all taps except the present-time one.  The present received symbol is a column within the $R$ matrix: $\mathbf{r}[i]$, often chosen to be the center one.  
+The first equalizer we considered was a Zero-Forcing (ZF) architecture.  To meet the goal of satisfying Condition~\ref{thm:zero}, the weight vector, $\mathbf{f}$, must perfectly negate all taps except the present-time one.  The present received symbol is a column within the $R$ matrix: $\mathbf{r}[i]$, often chosen to be the center one.  
 $$ \mathbf{f}^{\ast}R = \mathbf{w}[i]^{\top} $$
 Here, we used  $\mathbf{w} [i] \in \mathbb{R}^n$ to represent the i$^{th}$ Standard basis vector, or a column of zeros except in row $i$.  In this setting, we can find the tap weight vector to accomplish this by Equation~\ref{eq:zf}.  \\
 
@@ -207,7 +207,7 @@ J_{MSE} \left( \mathbf{f}\right) = \mathbb{E} \left[ \left(\mathbf{s} - R \mathb
 \mathbf{f}_{MSE} = \left(R^{\ast}R\right)^{-1}R^{\ast}\mathbf{s}
 \end{equation}
 
-When such a weighting vector is used as the equalizer taps, the output reaches the minimum mean square error metric  [Equation~\ref{eq:mmse}].  This type of equalizer is implemented in Appendix~\ref{app:mse}. It is interesting to note, the first term in this minimal cost function is the variance of the transmitted signal and the second term is a bias term.  Also realize the MSE equalizer is not a perfect tool either: there is no gaurentee that all ISI is removed.
+When such a weighting vector is used as the equalizer taps, the output reaches the minimum mean square error metric  [Equation~\ref{eq:mmse}].   It is interesting to note, the first term in this minimal cost function is the variance of the transmitted signal and the second term is a bias term.  Also realize the MSE equalizer is not a perfect tool either: there is no gaurentee that all ISI is removed.
 \begin{equation}
 \label{eq:mmse}
 J_{MMSE} =  \sigma_{\mathbf{s}}^{2} - \mathbb{E} \left[ \mathbf{s}^{\ast} \mathbf{f}_{MSE} \right]
@@ -215,7 +215,7 @@ J_{MMSE} =  \sigma_{\mathbf{s}}^{2} - \mathbb{E} \left[ \mathbf{s}^{\ast} \mathb
 
 \subsection{Decision-Feedback Equalizer}
 \label{sec:dfe}
-Another alternative is to use a feedback loop to handle the ISI.  A Decision-Feedback Equalizer detects symbols and uses a feedback loop to eliminate intersymbol interference from each symbol prior to detecting any following symbols.  This brings the issue of noise enhancement back into play.  As such, we can use MSE techniques together with feedback to focus on balancing the need to eliminate ISI and the danger of noise enhancement.  To do this, we use a feedforward correlator and a feedback loop to clean up the ISI.  Figure~\ref{fig:dfe} shows the block diagram for this type of equalizer.  Appendix~\ref{app:dfe} shows the implementation of this equalizer.
+Another alternative is to use a feedback loop to handle the ISI.  A Decision-Feedback Equalizer detects symbols and uses a feedback loop to eliminate intersymbol interference from each symbol prior to detecting any following symbols.  This brings the issue of noise enhancement back into play.  As such, we can use MSE techniques together with feedback to focus on balancing the need to eliminate ISI and the danger of noise enhancement.  To do this, we use a feedforward correlator and a feedback loop to clean up the ISI.  Figure~\ref{fig:dfe} shows the block diagram for this type of equalizer. 
 
 \begin{figure}[H]
 \centering
@@ -485,7 +485,7 @@ In the following sections, the results of the simulations of the different modul
 \section{Conclusion}
 \label{sec:conc}
 
-In this step of the project we have dealt with the effect of Inter Symbol Interference (ISI), caused by the transmission of signals over a channel with the finite bandwidth. Because of the bandlimiting, where the response of the system is 0 above a limiting frequency, the symbols will interfere with one another. To deal with the dispersion, the Zero-ISI condition [??] must be met. 
+In this step of the project we have dealt with the effect of Inter Symbol Interference (ISI), caused by the transmission of signals over a channel with the finite bandwidth. Because of the bandlimiting, where the response of the system is 0 above a limiting frequency, the symbols will interfere with one another. To deal with the dispersion, the Zero-ISI condition [\ref{thm:zero}] must be met. 
 
 Equalization of the channel is chosen from a variety of techniques to accomplish the cancellation of delayed versions of the symbols. 
 

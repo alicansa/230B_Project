@@ -29,9 +29,7 @@ impulse_train_inphase = impulse_train(overSampleSize,N/2,inphase);
 transmit = conv(impulse_train_inphase + j*impulse_train_quad,srrc,'same');
 trainerSymbols_transmit = conv(trainer_impulse_train_inp + j*trainer_impulse_train_quad,srrc,'same');
 
-% figure(1);
-% plot(t(1:100),real(transmit(1:100)),'r');
-% hold on
+
 %loop this section for the generation of BER vs SNR graphs and
 %constellation plots
 % declare variables
@@ -47,9 +45,7 @@ for k=1:3
         h = [0 1 0.25];
         transmit_channel = bandlimited_channel(upsample(h,overSampleSize),transmit);
         transmit_channel = transmit_channel(5:length(transmit_channel)-4);
-        %figure(1)
-        %plot(t_channel(1:100),real(transmit_channel(5:104)),'g');
-        
+
         %channel equalizers
         %ZF
         L = 3; % 3 taps
@@ -59,9 +55,7 @@ for k=1:3
         h=[0 0 1 -0.25 0.125];
         transmit_channel = bandlimited_channel(upsample(h,overSampleSize),transmit);
         transmit_channel = transmit_channel(9:length(transmit_channel)-8);
-       % figure(1)
-       % plot(t_channel(1:100),real(transmit_channel(1:100)),'-ko');
-        
+ 
         %channel equalizers
         %ZF
         L = 5; % 5 taps
@@ -71,9 +65,7 @@ for k=1:3
         h=[0.1 1 -0.25];
         transmit_channel = bandlimited_channel(upsample(h,overSampleSize),transmit);
         transmit_channel = transmit_channel(5:length(transmit_channel)-4);
-       % figure(1)
-       % plot(t_channel(1:100),real(transmit_channel(1:100)),'-bx');
-        
+
         %channel equalizers
         %ZF
         L = 3; % 5 taps
@@ -140,6 +132,7 @@ for k=1:3
     semilogy(SNR,ser_zf, '-ko');
     hold on;
     semilogy(SNR,ser_mmse, '-g+');
+    semilogy(SNR,ber_mmse_dfe, '-m^');
     semilogy(SNR,ser_ne, '-rx');
     semilogy(SNR,ser_theo, 'b');
     ylabel('Probability of Error');
@@ -147,5 +140,5 @@ for k=1:3
     legend('ZF Equalized Simulation (Bit Error)', ...
         'MMSE Equalized Simulation (Bit Error)','Simulation (Bit Error)','Theory (Bit Error)','Location','SouthWest');
     % save the BER graph
-   % print(h,'-djpeg','-r300',strcat('qpSNR',num2str(k)));
+    print(h,'-djpeg','-r300',strcat('qpSNR',num2str(k)));
 end

@@ -25,10 +25,6 @@ trainer_impulse_train = impulse_train(overSampleSize,...
 transmit = conv(trans_impulse_train,srrc,'same');
 trainerSymbols_transmit = conv(trainer_impulse_train,srrc,'same');
 
-% figure(1);
-% plot(t_channel(1:100),real(transmit(1:100)),'r');
-% hold on
-
 for k=1:3
     %loop this section for the generation of BER vs SNR graphs and
     %constellation plots
@@ -38,9 +34,7 @@ for k=1:3
         h = [0 1 0.25];
         transmit_channel = bandlimited_channel(upsample(h,overSampleSize),transmit);
         transmit_channel = transmit_channel(5:length(transmit_channel)-4);
-       % figure(1)
-       % plot(t_channel(1:100),real(transmit_channel(5:104)),'g');
-        
+ 
         %channel equalizers
         %ZF
         L = 3; % number of taps
@@ -50,9 +44,7 @@ for k=1:3
         h=[0 0 1 -0.25 0.125];
         transmit_channel = bandlimited_channel(upsample(h,overSampleSize),transmit);
         transmit_channel = transmit_channel(9:length(transmit_channel)-8);
-      %  figure(1)
-      %  plot(t_channel(1:100),real(transmit_channel(1:100)),'-ko');
-        
+
         %channel equalizers
         %ZF
         L = 5; % number of taps
@@ -62,9 +54,7 @@ for k=1:3
         h=[0.1 1 -0.25];
         transmit_channel = bandlimited_channel(upsample(h,overSampleSize),transmit);
         transmit_channel = transmit_channel(5:length(transmit_channel)-4);
-      %  figure(1)
-      %  plot(t_channel(1:100),real(transmit_channel(1:100)),'-bx');
-        
+
         %channel equalizers
         %ZF
         L = 3; % number of taps
@@ -123,7 +113,7 @@ for k=1:3
         ber_theo(i) = qfunc(sqrt(2*a));
     end
     % save the constellation plot
-   % print(f,'-djpeg','-r300',strcat('bpConst',num2str(k)));
+    print(f,'-djpeg','-r300',strcat('bpConst',num2str(k)));
     
     %plot theoretical/simulation BER vs SNR graph
     h=figure;
@@ -131,11 +121,12 @@ for k=1:3
     hold on;
     semilogy(SNR,ber_mmse, '-g+');
     semilogy(SNR,ber_ne, '-rx');
+    semilogy(SNR,ber_mmse_dfe, '-m^');
     semilogy(SNR,ber_theo, 'b');
     ylabel('Probability of Error');
     xlabel('SNR (dB)');
     legend('ZF Equalized Simulation (Bit Error)', ...
         'MMSE Equalized Simulation (Bit Error)','Simulation (Bit Error)','Theory (Bit Error)','Location','SouthWest');
     % save the BER graph
-    %print(h,'-djpeg','-r300',strcat('bpSNR',num2str(k)));
+    print(h,'-djpeg','-r300',strcat('bpSNR',num2str(k)));
 end
