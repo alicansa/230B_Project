@@ -253,6 +253,7 @@ In order to equalize the effects of the channels given above, three different eq
 \item ZF equalizer
 \item MMSE equalizer
 \item MMSE-DFE equalizer
+\end{itemize}
 
 with each one having
 	\begin{itemize}
@@ -260,10 +261,7 @@ with each one having
 	\item 5 taps for $h_2(t)$
 	\item 3 taps for $h_3(t)$
 	\end{itemize}
-
-\end{itemize}
-
-
+	
 The end of the simulation model is identical to the process in Step 1: a matched filter to the SRRC picks out the symbols from the noisy received signal.  Afterwards, a sampler recovers [Appendix~\ref{app:sampler}] the symbols before equalization of the channel. After that a demodulator converts the symbols back into bits [\ref{app:dblocks}].  
 
 
@@ -440,7 +438,7 @@ In the following sections, the results of the simulations of the different modul
 \caption{Constellation plot for a QPSK modulated signal with ZF equalization under channel reponse $h_3(t)$}
 \end{figure}
 
-\subsubsection{BPSK with MMSE Equalization}
+\subsubsection{QPSK with MMSE Equalization}
 
 \begin{figure}[H]
 \centering
@@ -495,6 +493,7 @@ The equalizers tried out in this step, to achieve delayed symbol cancellation ar
 \item ZF equalizer
 \item MMSE equalizer
 \item MMSE-DFE equalizer
+\end{itemize}
 
 with each one having
 	\begin{itemize}
@@ -502,9 +501,8 @@ with each one having
 	\item 5 taps for $h_2(t)$
 	\item 3 taps for $h_3(t)$
 	\end{itemize}
-\end{itemize}
 
-The results of the experiment are given in the previous section. From the BER and constellation plots obtained, it is clear each equalizer sufficiently cancels out interference of the delayed symbols. The BER of the system with QPSK and BPSK modulations are almost the same for theoretical results as when the channel is equalized. 
+The results of the experiment are given in the previous section. From the BER and constellation plots obtained, it is clear each equalizer sufficiently cancels out interference of the delayed symbols. The BER of the system with QPSK and BPSK modulations are almost the same with theoretical results as when the channel is equalized. 
 
 As expected, the best performing equalizer is MMSE-DFE.  Zero Forcing equalization performs worse than Minimum Mean Square Error equalization because the effect of AWGN noise is considered in the latter and not in ZF.  Without being penalized for noise amplification, Zero Forcing equalization has issues from noise enhancement. 
 

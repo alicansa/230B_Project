@@ -13,9 +13,9 @@ Ts = 2/10^6; %Symbol period (1Mbps)
 S=2; %average signal power for QPSK
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,4,Ts);
-SNR = [1,2,3,4,5,6,7,8,9,10,15,20,30]; %SNR levels where the system will be simulated
+SNR = [1 2 3 6 10 12 15 16 30]; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
-N= 15000;  %number of bits generated
+N= 1000;  %number of bits generated
 k = 2;  % bits per symbol
 freq_offsets = [0.5 15]; %freq offsets for simulation. 
                          %1ppm and 30 ppm respectively. 
@@ -43,7 +43,6 @@ for y=1:length(freq_offsets)
        %pass the signals to be transmitted through awgn channel
 
         received = awgn_complex_channel(transmit_freq_offset,SNR(i),S);
-        output_bits = '';
         
         %initialize feedback parameters
         vco_output = 0;
@@ -58,32 +57,20 @@ for y=1:length(freq_offsets)
         delayed_moving_av_output = 0;
          
         %pass symbol-by-symbol in order to simulate the feedback loop
-        for k=1:length(received)/overSampleSize
+        for k=1:length(received)
                 
             
             delayed_moving_av_input = delayed_moving_av_output;
             delayed_phase_acc_output = phase_acc_output;
             
             %do correction
-            corr_received = exp(-j*vco_output)*received((k-1)*overSampleSize+1:k*overSampleSize);
+            corr_received(k) = exp(-j*vco_output)*received(k);
             
             delayed_vco_output = vco_output;
             
-            %pass the received signal through the matched filter for optimal
-            %detection
-            matched_output_symbol = conv(corr_received,srrc,'same');
-    
-            %pass the matched filter output through the
-            % sampler to obtain symbols at each symbol period
-            sampled(k) = sampler(matched_output_symbol,overSampleSize,Ts); 
-            
             %seperate to real and imagenary parts
-            im_received = real(sampled(k));
-            re_received = imag(sampled(k));
-            
-            %pass the received symbols through ML-decision box 
-            [output_bit,output_symbol] = qpsk_demod(im_received,...
-                re_received);
+            im_received = real(corr_received(k));
+            re_received = imag(corr_received(k));
             
             % gather the signs
             im_sign = tanh(im_received);
@@ -104,10 +91,23 @@ for y=1:length(freq_offsets)
             %pass through VCO
             [vco_output phase_acc_output] = voltage_controlled_osc(moving_av_output,...
                 delayed_phase_acc_output);
-             
-            %merge bits
-            output_bits = strcat(output_bits,output_bit);
         end
+        
+        
+         %pass the received signal through the matched filter for optimal
+            %detection
+            matched_output = conv(corr_received,srrc,'same');
+    
+            %pass the matched filter output through the
+            % sampler to obtain symbols at each symbol period
+            sampled = sampler(matched_output,overSampleSize,Ts); 
+            
+            %pass the received symbols through ML-decision box 
+            [output_bits,output_symbols] = qpsk_demod(real(sampled),...
+                imag(sampled));
+        
+        
+        
         
         if (SNR(i) == 6 || SNR(i) == 30)
             %constellation plot
