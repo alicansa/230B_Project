@@ -15,7 +15,7 @@ SNR = 20; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
 N= 5000;  %number of bits generated
 k = 2;  % bits per symbol
-f_offset = 100000; %frequency offset 100kHz
+f_offset = 1000; %frequency offset 100kHz
 bits = random_bit_generator(N);  %random bit generation
 [quadrature, inphase] = qpsk_mod(bits,N/k);  %mapping to symbols
 
@@ -37,9 +37,9 @@ h(1) = 0.1;
 h(701) = 0.8;
 h(1401) = 0.95;
 h(2101) = 0.7;
-h(2801) = 0.3;
+h(2801) = 0.35;
 L = 2801; % number of taps
-c = ZFEqualizer(h,L);
+%c = ZFEqualizer(h,L);
 
 %pass through bandlimited channel
 ISI_filtered_transmit_analog_offset = conv(filtered_transmit_analog_offset,...
@@ -47,7 +47,7 @@ ISI_filtered_transmit_analog_offset = conv(filtered_transmit_analog_offset,...
                                         
 ISI_filtered_transmit_analog_offset = ...
     ISI_filtered_transmit_analog_offset(overSampleSizeAnalog*...
-                        701+1:end-overSampleSizeAnalog*701+1);
+                        1400+1:end-overSampleSizeAnalog*1401);
 
 %loop this section for the generation of BER vs SNR graphs and
 %constellation plots
@@ -59,14 +59,13 @@ num = 1;
 
 for i=1:length(SNR)
    %pass the signals to be transmitted through awgn channel
-    received_analog = awgn_complex_channel(ISI_filtered_transmit_analog_offset ...
+    received_analog = awgn_complex_channel(filtered_transmit_analog_offset ...
         ,SNR(i),overSampleSizeAnalog/overSampleSize*S);
     %noise limiting filter
     filtered_received_analog = ButterworthFilter(4,0.02,received_analog);
-    %analog to digital converter -> sample 4 times each symbol period
+    %analog to digital converter
     received_digital = ZeroHoldDecimation(filtered_received_analog,overSampleSizeAnalog/overSampleSize,1);
-   
-    
+
     %initialize feedback parameters
     
         vco_output = 0;
@@ -102,34 +101,40 @@ for i=1:length(SNR)
             moving_av_input = phase_estimate;              
             [moving_av_output delayed_moving_av_output] = loop_filter(moving_av_input,delayed_moving_av_input,0.05,0.001);
             
+            loop_filter_output(l) = moving_av_output;
             
             %pass through VCO
             [vco_output phase_acc_output] = voltage_controlled_osc(moving_av_output,...
                 delayed_phase_acc_output);
         end
         
+        f = figure;
+        plot(loop_filter_output)
+          print(f,'-djpeg','-r300','loop_filter_qam20');
+        
           %pass the received signal through the matched filter for optimal
             %detection
             matched_output = conv(corr_received,srrc,'same');
-    
+     %       f = eyediagram(matched_output,40,10^-9);
+      %        print(f,'-djpeg','-r300','awgn_eye_qpsk5');
             %pass the matched filter output through the
             % sampler to obtain symbols at each symbol period
             sampled = sampler(matched_output,overSampleSize,Ts); 
-             
+    
              %Equalization
-             sampled_equalized = conv(sampled,c);            
-            sampled_equalized = sampled_equalized((floor(L/2))+1:end-(floor(L/2)));
+           %  sampled_equalized = conv(sampled,c);            
+           % sampled_equalized = sampled_equalized((floor(L/2))+1:end-(floor(L/2)));
             %pass the received symbols through ML-decision box 
-            [output_bits,output_symbols] = qpsk_demod(real(sampled_equalized),...
-                imag(sampled_equalized));
+            [output_bits,output_symbols] = qpsk_demod(real(sampled),...
+                imag(sampled));
     
     %constellation plot
     if (SNR(i) == 11) || SNR(i) == 12 || SNR(i) == 18 || ...
             SNR(i) == 10 || SNR(i) == 20
         subplot(2,3,num);
-        scatter(real(sampled_equalized),imag(sampled_equalized),'*');
-        xlim = [1.5*min(real(sampled_equalized)) 1.5*max(real(sampled_equalized))];
-        ylim = [1.5*min(imag(sampled_equalized)) 1.5*max(imag(sampled_equalized))];
+        scatter(real(sampled),imag(sampled),'*');
+        xlim = [1.5*min(real(sampled)) 1.5*max(real(sampled))];
+        ylim = [1.5*min(imag(sampled)) 1.5*max(imag(sampled))];
         line(xlim,[0 0], 'Color', 'k');
         line([0 0],ylim,'Color', 'k');
         xlabel('In-Phase'),ylabel('Quadrature-Phase');
@@ -138,6 +143,7 @@ for i=1:length(SNR)
         axis([xlim, ylim]);
         num = num+1;
     end
+    
     
   
     %SER calculation - drop first symbol   

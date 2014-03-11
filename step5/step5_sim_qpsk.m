@@ -9,7 +9,7 @@ Ts = 1; %Symbol period
 S=2; %average signal power for QPSK
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
-SNR = 0:13; %SNR levels where the system will be simulated
+SNR = 20; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
 N= 5000;  %number of bits generated
 [trainerSymbols_quad trainerSymbols_inp] = qpsk_mod('111111111111111111111111111111111111111111',21);
@@ -33,7 +33,6 @@ trainerSymbols_transmit = conv(trainer_impulse_train_inp + j*trainer_impulse_tra
 %loop this section for the generation of BER vs SNR graphs and
 %constellation plots
 % declare variables
-h = zeros(1,5);
 ser = zeros(1,length(SNR));
 ser_theo = zeros(1,length(SNR));
 ber_EbN0 = zeros(1,length(SNR));
@@ -95,6 +94,11 @@ for k=1:3
  %pass the received signal through the matched filter for optimal
         %detection
         matched_output = conv(received,srrc,'same');
+        
+        f =eyediagram(matched_output,10,10^-9);
+         print(f,'-djpeg','-r300','matched_eye_qpsk20');
+        
+        
         %pass the matched filter output through the sampler to obtain symbols
         %at each symbol period
         sampled = sampler(matched_output,overSampleSize,Ts);
@@ -108,6 +112,9 @@ for k=1:3
         received_equalized_mmse_dfe = received_equalized_mmse_dfe((floor(L/2))+1:end-(floor(L/2)));
 
         
+        f =eyediagram(received_equalized_zf,10,10^-9);
+          print(f,'-djpeg','-r300','equalized_eye_qpsk20');
+          
         %pass the received symbols through ML-decision box
         output_bits_zf = qpsk_demod(real(received_equalized_zf),imag(received_equalized_zf));
         output_bits_mmse  = qpsk_demod(real(received_equalized_mmse),imag(received_equalized_mmse));
