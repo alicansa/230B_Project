@@ -419,7 +419,7 @@ The results of the simulations are presented in this section. These include the 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{awgn_eye_qam20.jpg}
-\caption{ The eye-diagram of the output of the matched filter at RX-end under AWGN condition is shown. Simulated at 20 dB SNR.\label{fig:qpEyeAWGN}}
+\caption{ The eye-diagram of the output of the matched filter at RX-end under AWGN condition is shown. Simulated at 20 dB SNR.\label{fig:qamEyeAWGN}}
 \end{figure}
 
 \newpage
@@ -660,13 +660,13 @@ What we want is force the channel to zero for all other symbols other than the p
 \lstinputlisting{sqrt_raised_cosine.m}
 
 \section{Channel Models}
-\subsection{Bandlimited Channel}
-\label{app:bandlimited}
-\lstinputlisting{bandlimited_channel.m}
-
 \subsection{Ideal Complex AWGN Channel}
 \label{app:awgn_channel}
 \lstinputlisting{awgn_complex_channel.m}
+
+\subsection{Bandlimited Channel}
+\label{app:bandlimited}
+\lstinputlisting{bandlimited_channel.m}
 
 \subsection{Frequency Offset}
 \label{app:freq}
