@@ -7,14 +7,14 @@ clc;
 overSampleSize = 4;
 overSampleSizeAnalog = 320; %80 times symbol period
 rollOffFactor = 0.25;
-N= 5000; %number of bits generated
+N= 25000; %number of bits generated
 t_analog = 0:1/overSampleSizeAnalog:N/4;
 t_digital = 0:1/overSampleSize:N/4;
 Ts = 1; %Symbol period
 S=10; %average signal power for 16-QAM
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
-SNR = 0:20; %SNR levels where the system will be simulated
+SNR = 20; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,4,B); %convert given SNR levels to EbNo
 bits = random_bit_generator(N);  %random bit generation
 [quadrature, inphase] = QAM_16_mod(bits,N/4); %mapping to symbols
@@ -45,6 +45,8 @@ for i=1:length(SNR)
     %detection
     matched_output = conv(received_digital,srrc,'same');
 
+    f = eyediagram(matched_output,40,10^-9);
+        print(f,'-djpeg','-r300','awgn_eye_qam20');
      %pass the matched filter output through the sampler to obtain symbols
     %at each symbol period
     sampled = sampler(matched_output,overSampleSize,Ts);
