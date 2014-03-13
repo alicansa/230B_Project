@@ -9,7 +9,7 @@ Ts = 1; %Symbol period
 S=2; %average signal power for QPSK
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
-SNR = 0:20; %SNR levels where the system will be simulated
+SNR = 20; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
 N= 48000;  %number of bits generated
 k = 2;  % bits per symbol
@@ -41,7 +41,8 @@ for i=1:length(SNR)
     %detection
     matched_output_quad = conv(received_quad,srrc,'same');
     matched_output_inphase = conv(received_inphase,srrc,'same');
-
+ f = eyediagram(matched_output_quad + j*matched_output_inphase,40,10^-9);
+              print(f,'-djpeg','-r300','awgn_eye_qpsk5');
     %pass the matched filter output through the sampler to obtain symbols
     %at each symbol period
     sampled_quad = sampler(matched_output_quad,overSampleSize,Ts);

@@ -15,7 +15,7 @@ SNR = 20; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
 N= 5000;  %number of bits generated
 k = 2;  % bits per symbol
-f_offset = 1000; %frequency offset 100kHz
+f_offset = 0; %frequency offset 100kHz
 bits = random_bit_generator(N);  %random bit generation
 [quadrature, inphase] = qpsk_mod(bits,N/k);  %mapping to symbols
 
@@ -59,8 +59,8 @@ num = 1;
 
 for i=1:length(SNR)
    %pass the signals to be transmitted through awgn channel
-    received_analog = awgn_complex_channel(filtered_transmit_analog_offset ...
-        ,SNR(i),overSampleSizeAnalog/overSampleSize*S);
+    received_analog = awgn_complex_channel(transmit ...
+        ,SNR(i),S);
     %noise limiting filter
     filtered_received_analog = ButterworthFilter(4,0.02,received_analog);
     %analog to digital converter
@@ -78,13 +78,13 @@ for i=1:length(SNR)
         delayed_phase_acc_output = 0 ;
         
         %pass symbol-by-symbol in order to simulate the feedback loop
-        for l=1:length(received_digital)
+        for l=1:length(received_analog)
             
             delayed_moving_av_input = delayed_moving_av_output;
             delayed_phase_acc_output = phase_acc_output;
             
             %do correction
-            corr_received(l) = exp(-j*vco_output)*received_digital(l);
+            corr_received(l) = exp(-j*vco_output)*received_analog(l);
             
             delayed_vco_output = vco_output;
             
@@ -104,19 +104,19 @@ for i=1:length(SNR)
             loop_filter_output(l) = moving_av_output;
             
             %pass through VCO
-            [vco_output phase_acc_output] = voltage_controlled_osc(moving_av_output,...
-                delayed_phase_acc_output);
+          %  [vco_output phase_acc_output] = voltage_controlled_osc(moving_av_output,...
+          %      delayed_phase_acc_output);
         end
         
-        f = figure;
-        plot(loop_filter_output)
-          print(f,'-djpeg','-r300','loop_filter_qam20');
+%         f = figure;
+%         plot(loop_filter_output)
+%           print(f,'-djpeg','-r300','loop_filter_qam20');
         
           %pass the received signal through the matched filter for optimal
             %detection
             matched_output = conv(corr_received,srrc,'same');
-     %       f = eyediagram(matched_output,40,10^-9);
-      %        print(f,'-djpeg','-r300','awgn_eye_qpsk5');
+           f = eyediagram(matched_output,40,10^-9);
+              print(f,'-djpeg','-r300','awgn_eye_qpsk5');
             %pass the matched filter output through the
             % sampler to obtain symbols at each symbol period
             sampled = sampler(matched_output,overSampleSize,Ts); 

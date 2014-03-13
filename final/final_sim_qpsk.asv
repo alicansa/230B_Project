@@ -11,11 +11,11 @@ Ts = 1/Fs; %Symbol period
 S=2; %average signal power for QPSK
 B = rollOffFactor*(1/(2*Ts)) + 1/(2*Ts); %srrc pulse bandwidth
 srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
-SNR = 5; %SNR levels where the system will be simulated
+SNR = 20; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
 N= 5000;  %number of bits generated
 k = 2;  % bits per symbol
-f_offset = 100000; %frequency offset 100kHz
+f_offset = 0; %frequency offset 100kHz
 bits = random_bit_generator(N);  %random bit generation
 [quadrature, inphase] = qpsk_mod(bits,N/k);  %mapping to symbols
 
@@ -42,12 +42,12 @@ L = 2801; % number of taps
 %c = ZFEqualizer(h,L);
 
 %pass through bandlimited channel
-%ISI_filtered_transmit_analog_offset = conv(filtered_transmit_analog_offset,...
- %                                       upsample(h,overSampleSizeAnalog));
+ISI_filtered_transmit_analog_offset = conv(filtered_transmit_analog_offset,...
+                                        upsample(h,overSampleSizeAnalog));
                                         
-%ISI_filtered_transmit_analog_offset = ...
- %   ISI_filtered_transmit_analog_offset(overSampleSizeAnalog*...
-  %                      1400+1:end-overSampleSizeAnalog*1401);
+ISI_filtered_transmit_analog_offset = ...
+    ISI_filtered_transmit_analog_offset(overSampleSizeAnalog*...
+                        1400+1:end-overSampleSizeAnalog*1401);
 
 %loop this section for the generation of BER vs SNR graphs and
 %constellation plots
@@ -104,37 +104,37 @@ for i=1:length(SNR)
             loop_filter_output(l) = moving_av_output;
             
             %pass through VCO
-            [vco_output phase_acc_output] = voltage_controlled_osc(moving_av_output,...
+          %  [vco_output phase_acc_output] = voltage_controlled_osc(moving_av_output,...
                 delayed_phase_acc_output);
         end
         
         f = figure;
         plot(loop_filter_output)
-          print(f,'-djpeg','-r300','loop_filter5');
+          print(f,'-djpeg','-r300','loop_filter_qam20');
         
           %pass the received signal through the matched filter for optimal
             %detection
             matched_output = conv(corr_received,srrc,'same');
-            f = eyediagram(matched_output,40,10^-9);
+           f = eyediagram(matched_output,40,10^-9);
               print(f,'-djpeg','-r300','awgn_eye_qpsk5');
             %pass the matched filter output through the
             % sampler to obtain symbols at each symbol period
             sampled = sampler(matched_output,overSampleSize,Ts); 
     
              %Equalization
-             sampled_equalized = conv(sampled,c);            
-            sampled_equalized = sampled_equalized((floor(L/2))+1:end-(floor(L/2)));
+           %  sampled_equalized = conv(sampled,c);            
+           % sampled_equalized = sampled_equalized((floor(L/2))+1:end-(floor(L/2)));
             %pass the received symbols through ML-decision box 
-            [output_bits,output_symbols] = qpsk_demod(real(sampled_equalized),...
-                imag(sampled_equalized));
+            [output_bits,output_symbols] = qpsk_demod(real(sampled),...
+                imag(sampled));
     
     %constellation plot
     if (SNR(i) == 11) || SNR(i) == 12 || SNR(i) == 18 || ...
             SNR(i) == 10 || SNR(i) == 20
         subplot(2,3,num);
-        scatter(real(sampled_equalized),imag(sampled_equalized),'*');
-        xlim = [1.5*min(real(sampled_equalized)) 1.5*max(real(sampled_equalized))];
-        ylim = [1.5*min(imag(sampled_equalized)) 1.5*max(imag(sampled_equalized))];
+        scatter(real(sampled),imag(sampled),'*');
+        xlim = [1.5*min(real(sampled)) 1.5*max(real(sampled))];
+        ylim = [1.5*min(imag(sampled)) 1.5*max(imag(sampled))];
         line(xlim,[0 0], 'Color', 'k');
         line([0 0],ylim,'Color', 'k');
         xlabel('In-Phase'),ylabel('Quadrature-Phase');
