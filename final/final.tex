@@ -362,13 +362,13 @@ The results of the simulations are presented in this section. These include the 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.4\textwidth]{loop_filter_qpsk20.jpg}
+\includegraphics[width=0.8\textwidth]{loop_filter_qpsk20.jpg}
 \caption{The output of the loop filter used in the Costas recovery loop.  This shows there is phase error between the local oscillator at RX-end and the incoming signal. Simulated at 20 dB SNR. \label{fig:qpLoop}}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.4\textwidth]{matched_eye_qpsk20.jpg}
+\includegraphics[width=0.8\textwidth]{matched_eye_qpsk20.jpg}
 \caption{The eye-diagram of the output of the matched filter at RX-end under bandlimited channel condition is shown. Simulated at 20 dB SNR. \label{fig:qpEyeMatch}}
 \end{figure}
 
@@ -390,13 +390,13 @@ The results of the simulations are presented in this section. These include the 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{qam16SNR.jpg}
-\caption{Probability of error graph for QPSK scheme, showing hte results of simulations dones with no equalizer, with equalizer, with only AWGN and the theoretical limit. \label{fig:qamBER}}
+\caption{Probability of Error graph for QPSK scheme, showing the results of simulations dones with no equalizer, with equalizer, with only AWGN, and the theoretical limit. \label{fig:qamBER}}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{loop_filter_qam20.jpg}
-\caption{The output of the loop filter used in the costas recovery loop is given to show the phase error between the local oscillator at RX-end and the incoming signal. Simulated at 20 dB. \label{fig:qamLoop}}
+\caption{The output of the loop filter used in the Costas recovery loop.  This shows there is phase error between the local oscillator at RX-end and the incoming signal. Simulated at 20 dB SNR. \label{fig:qamLoop}}
 \end{figure}
 
 \begin{figure}[H]
@@ -414,65 +414,61 @@ The results of the simulations are presented in this section. These include the 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{awgn_eye_qam20.jpg}
-\caption{ The eye-diagram of the output of the matched filter at RX-end under AWGN condition is shown. Simulated at 20 dB SNR.\label{fig:qamEyeAWGN}}
+\caption{The eye-diagram of the output of the matched filter at RX-end under AWGN condition is shown. Simulated at 20 dB SNR.\label{fig:qamEyeAWGN}}
 \end{figure}
 
 \newpage
 \section{Conclusion}
 \label{sec:conc}
+The purpose of this project was to simulate a communication link and send a signal with 10MHz bandwidth using QPSK/16QAM modulation schemes over a bandlimited channel with AWGN and impulse response  $h(t) = 0.1\delta(t + 100 \mathtt{ns}) + 0.8\delta(t -40 \mathtt{ns}) + 0.95\delta(t - 30 \mathtt{ns}) + 0.7\delta(t - 100 \mathtt{ns}) - 0.35\delta(t - 170 \mathtt{ns})$. \\
 
-The purpose of this project was to simulate a communication link to send a signal with 10MHz bandwidth using QPSK/16QAM modulation schemes over a bandlimited channel with AWGN and impulse response  $h(t) = 0.1\delta(t + 100 \mathtt{ns}) + 0.8\delta(t -40 \mathtt{ns}) + 0.95\delta(t - 30 \mathtt{ns}) + 0.7\delta(t - 100 \mathtt{ns}) - 0.35\delta(t - 170 \mathtt{ns}) $
-
-In addition to make the simulation close to real conditions, some impairments are introduced to the system, whose impacts on the performance of a digitally modulated signal are studied. These impairments are:
+In addition, to make the simulation realistic, some impairments are introduced to the system.  The effect of these errors are dealt with and studied.  These impairments are:
 \begin{itemize}
 \item Pulse Shaping and its effects on ISI.
 \item Frequency/Phase Offset between RX osciallator and received signal and its effects on the efficiency of the system.
 \item Phase error recovery loops and their effect on the efficiency of the system.
-\item Response of Bandlimited channels an its effect on ISI.
+\item Response of Bandlimited channels and their effect on ISI.
 \item AWGN channel and its effects on the efficiency of the system
-\item Bandlimited channel equalizers and its effect on ISI cancellation
-\item DAC/ADC converters and the effects of choice of LPF cut-off frequency and sampling delay on the efficiency of the system  
+\item Bandlimited channel equalizers and their effect on ISI cancellation
+\item DAC/ADC converters and the effect of different LPF cut-off frequencies and sampling delays on the efficiency of the system  
 \end{itemize}
 
 In order to realize this system and simulate it, the block diagram in Figure~\ref{fig:system} was implemented and results of the simulations are given in Section~\ref{sec:results}.
 
 From the analysis of these results, we can deduce the following conclusions about our communication system:
 \begin{itemize}
-\item Looking at the probability of error rate graphs for both QPSK and 16-QAM schemes given in Figures~\ref{fig:qpBER} and~\ref{fig:qamBER}, we see that the theoretical limits form a lower bound and our simulations cannot reach this lower bound. There is almost 3dB difference (at high SNR values) between the theoretical limit and the simulations with equalizers for both QPSK and 16-QAM. This is caused by the fact that we are using A/D and D/A converters in our system. Although the results obtained are fairly close to the theoretical values, they can never achieve the limit due to the fact that we need infinite over sampling to construct an analog signal from a digital signal. 
+\item Looking at the probability of error rate graphs for both QPSK and 16-QAM schemes given in Figures~\ref{fig:qpBER} and~\ref{fig:qamBER}, we see that the theoretical limits form a lower bound and our simulations cannot reach this lower bound. There is almost a 3dB difference (at high SNR values) between the theoretical limit and the simulations with equalizers for both QPSK and 16-QAM. This is caused by the fact that we are using A/D and D/A converters in our system. Although the results obtained are fairly close to the theoretical values, they can never achieve the limit due to the fact that we need infinite over-sampling to construct an analog signal from a digital signal. 
 
-Furthermore it can be observed that result of system with only AWGN and result of the system with equalizers are almost the same. This was expected as the equalizer is supposed cancel out the ISI effect of the bandlimited channel so that we only seethe effects of AWGN. Thus we can deduce that the ZF equalizer is working correctly.  
+Furthermore, the success of the system with only AWGN and with equalizers handling ISI are almost the same. This was expected since the equalizer is designed to cancel out the ISI effect of the bandlimited channel.  The fact that the two scenarios perform comparably indicates the ZF equalizer is working correctly.  
 
-On the other hand the system with no equalization isn't suitable for communication, as the effect of ISI is messing up the received signal in such a way that it cannot be recovered without equalization. 
+On the other hand, the when the system is left without equalization, the performance is terrible.  An error on the order of .1 is not suitable for communication.  The effects of ISI sufficiently muddle the received signal so that it cannot be recovered without equalization. 
 
-\item The objective of the costas loop is to recover the system from the frequency offsets that might be present in the received signal and the loop filter output provide vital information about the phase error between the local oscillator at the RX and the incoming signal. This output shows how the feedback loop cancels out the error in each iteration and converges into a steady-state where there is almost no error.  
+\item The objective of the Costas Loop is to recover and track out any phase or frequency offsets that might be present in the received signal.  The integral feedback handles the phase error between the local oscillator at the receiver and the incoming signal.  
 
-The Figures~\ref{fig:qamLoop} and~\ref{fig:qpLoop} which are at 20dB SNR shows the typical convergence shape we would expect for frequency offsets.  The same structure exists in the lower SNR case, but the settling time happens in only a few samples and gets lost.  
+The Figures~\ref{fig:qamLoop} and~\ref{fig:qpLoop}, both at 20dB SNR, show the feedback filter tracks to zero the phase error.  The settling time is BLAH.  This is sufficient for our stetting.  The response structure exists in the lower SNR case, but the settling time happens in only a few samples and gets lost in the plot.  Note that the noise level sits around zero. 
 
-However setting the loop filter coefficients to the right values and increasing the sampling rate solves this problem, which is discussed in Section~\ref{sec:issues}. The loop filter output graphs prove this result, as it can be seen that frequency error estimate converges to steady state very fast. This also means that we don't really need to throw any of the received bits.
+By setting the loop filter coefficients to the right values and increasing the sampling rate, we can improve the settling time, [Section~\ref{sec:issues}]. The loop filter output graphics prove this result: the frequency error estimate converges to steady state very fast. This also means that we don't really need to throw any of the received bits.
 
-\item Looking at the eye-diagrams of the matched filter output shown in Figures~\ref{fig:qamEyeMatch} and~\ref{fig:qpEyeMatch}, we observe that no "eyes" are present at the sampling points $T_s$. This shows that the system has a very poor performance if no equalization block is present at the RX-end. This conclusion is also backed up by the probability of error rate graph of the system with no equalization. 
+\item Looking at the eye-diagrams of the matched filter output, shown in Figures~\ref{fig:qamEyeMatch} and~\ref{fig:qpEyeMatch}, we observe that there are no "eyes" present at the sampling points $T_s$. This shows that the system has a very poor performance if no equalization block is present at the RX-end. This conclusion is supported by the Probability of Error Rate graph of the system with no equalization. \\
 
-On the other hand, in the eye-diagrams of the equalizer output, shown in Figures~\ref{fig:qamEyeEqu} and~\ref{fig:qpEyeEqu}, the "eye" structures are evident. At the sampling points $T_s$, it is clearly seen that there are 4 possible constellation points for 16-QAM and 2 possible constellation points for QPSK. Thus the demodulation of the system with equalization is painless compared to no equalization case.  
+On the other hand, in the eye-diagrams of the equalizer output the "eye" structures are evident [Figures~\ref{fig:qamEyeEqu} and~\ref{fig:qpEyeEqu}].  At the sampling points $T_s$, it is clear there are four possible constellation points for 16-QAM and two possible constellation points for QPSK.  This nice alignment makes the signal demodulation in the case with an equalizer painless as compared to the case without equalization.  \\
 
-Furthermore the eye-diagrams of the system with only AWGN channel make a reference point for the system with bandlimited channel as we are expecting close similarities between the eye diagram of the equalizer outputs and the matched filter outputs under only AWGN which are shown in Figures~\ref{fig:qamEyeAWGN} and~\ref{fig:qpEyeAWGN}. 
-
-
-
-
+Furthermore, the eye-diagrams of the AWGN-only system make a reference point for the system with bandlimited channel.  We expect close similarities between the eye diagram of the equalizer outputs and the matched filter outputs under only AWGN.  These are shown in Figures~\ref{fig:qamEyeAWGN} and~\ref{fig:qpEyeAWGN}. 
 \end{itemize}
 
 
 
 \section{Future Work}
+\label{sec:future}
+In the future, the system modified in order to both improve the results and enhance realism of the model. \\
 
-In future, additions can be made to the system in order to both improve  the results and make it closer to real-world conditions. The proposed additions are as follows:
+In order to make the system more realistic, a colored gaussian noise channel might be used. As the implementation requires only one extra block, a whitening filter could then also be added to deal with the coloring. \\
 
-\begin{itemize}
-\item In order to make the system more realistic, instead of using and AWGN channel for noise addition, a colored gaussian noise channel might be used. As the implementation requires only one extra block, a whitening filter, for the colored gaussian noise channel to be used in the existing system, the complexity is not inceased. 
-\item Oversampling rate of the digital to analog conversion could be increased to improve the performance of the system. Increasing the oversampling rate means that the probability of error rate of the simulated system would be closer to the theoretical limit. The reason we didn't consider doing this is that we had to make sure we are using with sufficient oversampling rate to accurately model the analog anti-aliasing filters, yet so excessive that the simulation speed is compromised.
-\item Another improvement to the system would be using MMSE-DFE equalizer instead of the ZF equalizer which introduces the noise enhancement issue. The MMSE-DFE equalizer would give better results as it uses a feedback loop to minimize the error of the equalization. Although adding a feedback loop at the equalizer would mean more complexity, the overall results will improve when MMSE-DFE equalizer is used.
-\item Finally, instead of a phase tracker, a frequency tracker could be used in the costas loop for frequency tracking. This make the system more robust to higher frequency offsets. Moreover we would no longer need to use a relatively large sampling period compared to the frequency offset to be able to cancel it out using two integrators and a phase tracker. 
-\end{itemize}
+Alternatively, the oversampling rate of the digital to analog conversion could be increased.  Increased bandwidth would improve the performance of the system by doing a better job moving between the analog and digital signals.   Increasing the oversampling rate would bring the performance closer to the theoretical limit.  Doing so, while beneficial to the conversion, would increase the processing time of the model.  We chose sufficient oversampling rate to accurately model the analog anti-aliasing filters, yet not so excessive that the simulation speed is compromised. \\
+
+Another improvement to the system would be using a Minimum Mean Square Error Decision Feedback Equalizer (MMSE-DFE) equalizer instead of the ZF equalizer.  The noise enhancement danger, present in any Zero Forcing equalizer, is  dealt with by the use of mean square error optimization in a feedback loop.  Although adding a feedback loop at the equalizer would mean more complexity, the MMSE-DFE would improve performance if noise enhancment became a problem.  \\
+
+Finally, instead of a phase tracker, a frequency tracker could be used in the Costas Loop to handle the frequency offset.  Instead of using two integrators to hande the error, a gamble since the settling time of the loop may not be able to deal with frequencies above a certain level, the system could use a different loop to directly approximate the frequency error.  This would make the system more robust to higher frequency offsets since the error metric would then be Type 0 [See Appendix~\ref{app:feedback}].  In this case, we would no longer need to use a relatively large sampling period compared to the frequency offset.  
 
 
 \appendix
