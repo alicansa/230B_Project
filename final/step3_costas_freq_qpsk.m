@@ -79,7 +79,8 @@ for y=1:length(freq_offsets)
             % come up with metric for phase error
             phase_estimate = -im_received*re_sign + re_received*im_sign;
             moving_av_input = phase_estimate;              
-            [moving_av_output delayed_moving_av_output] = loop_filter(moving_av_input,delayed_moving_av_input,0.05,0.001);
+            [moving_av_output delayed_moving_av_output] = ...
+                loop_filter(moving_av_input,delayed_moving_av_input,0.05,0.001);
             
             if (SNR(i) == 6)
                 loop_filter_output(k) = moving_av_output;

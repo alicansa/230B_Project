@@ -12,7 +12,8 @@ srrc = sqrt_raised_cosine(overSampleSize,rollOffFactor,400,Ts);
 SNR = 20; %SNR levels where the system will be simulated
 EbN0 = SNR2EbN0(SNR,2,B); %convert given SNR levels to EbNo
 N= 5000;  %number of bits generated
-[trainerSymbols_quad trainerSymbols_inp] = qpsk_mod('111111111111111111111111111111111111111111',21);
+[trainerSymbols_quad, trainerSymbols_inp] = ...
+    qpsk_mod('111111111111111111111111111111111111111111',21);
 t=0:1/overSampleSize:N/4;
 t_channel=0:1/overSampleSize:N;
 bits = random_bit_generator(N);  %random bit generation
@@ -27,7 +28,8 @@ trainer_impulse_train_inp = impulse_train(overSampleSize,...
 impulse_train_quad = impulse_train(overSampleSize,N/4,quadrature);
 impulse_train_inphase = impulse_train(overSampleSize,N/4,inphase);
 transmit = conv(impulse_train_inphase + j*impulse_train_quad,srrc,'same');
-trainerSymbols_transmit = conv(trainer_impulse_train_inp + j*trainer_impulse_train_quad,srrc,'same');
+trainerSymbols_transmit = ...
+    conv(trainer_impulse_train_inp + j*trainer_impulse_train_quad,srrc,'same');
 
 
 %loop this section for the generation of BER vs SNR graphs and
@@ -128,7 +130,8 @@ for k=1:3
     ylabel('Probability of Error');
     xlabel('SNR (dB)');
     legend('ZF Equalized Simulation (Bit Error)', ...
-        'MMSE Equalized Simulation (Bit Error)','Simulation (Bit Error)','Theory (Bit Error)','Location','SouthWest');
+        'MMSE Equalized Simulation (Bit Error)',...
+        'Simulation (Bit Error)','Theory (Bit Error)','Location','SouthWest');
     % save the BER graph
     print(h,'-djpeg','-r300',strcat('qpSNR',num2str(k)));
 end

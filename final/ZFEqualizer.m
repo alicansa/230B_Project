@@ -1,6 +1,12 @@
 function [c] = ZFEqualizer(h,L)
-%ZFEQUALIZER Summary of this function goes here
-%   Detailed explanation goes here
+% this function takes in a channel and window size and gives a TF
+
+% INPUTS 
+%   h - the channel model
+%   L - the window size of the filter
+% OUTPUTS
+%   c - the tap coefficients
+
 N = length(h);
    
 hM = toeplitz([h(ceil(N/2):1:N) zeros(1,L-length(h(ceil(N/2):1:N)))],...

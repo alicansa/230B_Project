@@ -74,27 +74,26 @@ Darren Reis 804359840 \\
 \section{Overview and Goals}
 \label{sec:overview}
 
-The purpose of this project is to provide simulation based validation of the theory being studied in class. 
-In addition some impairments introduced to the system, whose impacts on the performance of a digitally modulated signal are studied. The implemented theory and examined impairments examined are:
+The purpose of this project is to provide simulation-based validation of digital communications theories.  To examine robustness, impairments are introduced to the system their impact on performance is studied. This project covers:
 \begin{itemize}
 \item 64-QAM/16-QAM/QPSK/BPSK modulation and demodulation
 \item Pulse Shaping and its effects on ISI.
 \item Frequency/Phase Offset between RX osciallator and received signal and its effects on the efficiency of the system.
 \item Phase error recovery loops and their effect on the efficiency of the system.
-\item Response of Bandlimited channels an its effect on ISI.
+\item Response of Bandlimited channels and their effect on ISI.
 \item AWGN channel and its effects on the efficiency of the system
-\item Bandlimited channel equalizers and its effect on ISI cancellation
-\item DAC/ADC converters and the effects of choice of LPF cut-off frequency and sampling delay on the efficiency of the system  
+\item Bandlimited channel equalizers and their effect on ISI cancellation
+\item DAC/ADC converters and the varying effects, based on choice of LPF cut-off frequency and sampling delay, on the efficiency of the system  
 \end{itemize}
 
-All the topics mentioned above were examined through the 5 steps of the project. The goal of the final stage of the project, on the other hand, is to merge all these 5 parts into one system utilizing QPSK and 16-QAM schemes and see the effects of each block when used together in a communication system. 
+These topics were examined through five steps of the project. The goal of this report to explain these experiments and demonstrate a full system simulation utilizing QPSK and 16-QAM schemes.\\
 
-Througout this report, the system setup is introduced and each block is explained in detail in Section ~\ref{sec:setup}. Furthermore the issues and challenges that were encountered while trying to build the system are discussed in Section ~\ref{sec:issues}. Afterwards the results of the simulations are given in Section ~\ref{sec:results} and finally these are analyzed in Section ~\ref{sec:conc}.  
+The system setup is introduced and each block is explained in detail in Section~\ref{sec:setup}.  The major issues and challenges of building the system are discussed in Section~\ref{sec:issues}. Afterwards, the results of the simulations are given in Section~\ref{sec:results} and finally these are analyzed in Section~\ref{sec:conc}.  
 
 \newpage
 \section{System Setup}
 \label{sec:setup}
-To simulate the communications system, code was written for each block in the diagram of Figure ~\ref{fig:system}.
+To simulate the communications system, code was written for each block in the diagram of Figure~\ref{fig:system}.
  
 \begin{figure}[H]
 \centering
@@ -106,22 +105,22 @@ Some vital information about the system parameters are listed below and each of 
 \begin{itemize}
 \item Signal bandwidth = 10MHz
 \item Square-root Raised Cosine Roll-off factor = 0.75
-\item Channel Model = Bandlimited channel with AWGN and impulse response   $h(t) = 0.1\delta(t + 100 \mathtt{ns}) + 0.8\delta(t -40 \mathtt{ns}) + 0.95\delta(t - 30 \mathtt{ns}) + 0.7\delta(t - 100 \mathtt{ns}) - 0.35\delta(t - 170 \mathtt{ns})  $
+\item Channel Model = Bandlimited channel with AWGN and impulse response   $$h(t) = 0.1\delta(t + 100 \mathtt{ns}) + 0.8\delta(t -40 \mathtt{ns}) + 0.95\delta(t - 30 \mathtt{ns}) + 0.7\delta(t - 100 \mathtt{ns}) - 0.35\delta(t - 170 \mathtt{ns})  $$
 \item Sampling Period = 0.1 ns
-\item Equalizer = ZF
+\item Equalizer Method: Zero Forcing
 \item Number of taps = 2701
 \item LPF Cut-off frequency = 5 MHz
 \item Modulation scheme = QPSK/16QAM
-\item Loop Filter coefficients = 0.05 and 0.001
+\item Loop Filter coefficients =  0.05 and 0.001
 \item Frequency offset = 5 kHz
 \end{itemize}
 
 \subsection{Bit Generation}
 \label{sec:bits}
- To start with, a random bit generator was used to output a stream of data (Appendix ~\ref{app:random_bit_generator}). In this generator we used MATLAB psuedorandom generating functions to ensure the information would be as well distributed as possible. To further ensure the modeling was fair, the number of bits generated was set to 48000. 
+ To start with, a random bit generator output a stream of data (Appendix~\ref{app:random_bit_generator}). We used MATLAB psuedorandom generating functions to ensure the information would be as well distributed as possible. To further ensure the modeling was fair, the number of bits generated was set to 48000. 
 \subsection{Modulation}
 \label{sec:modulation}
-The data stream was then passed into a bit-to-symbol mapper, transformed differently based on the modulation scheme  (Appendix~\ref{app:bittosym}).  Two  modulation schemes were used, including:
+The data stream was then passed into a bit-to-symbol mapper, transformed differently based on the modulation scheme  (Appendix~\ref{app:bittosym}).  Two modulation schemes were used as shown in Appendix~\ref{app:qpsk_mod},~\ref{app:qam_16_mod}.  These schemes were:
 \begin{itemize}
 \item Quadrature Phase Shift Keying [QPSK] which maps bits to symbols  as shown in the following constellation plot:
 
@@ -141,13 +140,11 @@ The data stream was then passed into a bit-to-symbol mapper, transformed differe
 
 \end{itemize}
 
-as shown in Appendix ~\ref{app:qpsk_mod}, ~\ref{app:qam_16_mod}.
-
-It should be noted that oth of the modulation schemes use Grey Coding which makes sure there is only one bit difference between neighbouring symbols. This greatly decreases the bit error rate as we are forcing only one bit to be different if a neighbouring symbol is demodulated instead of the correct one. 
+It should be noted, both of the modulation schemes use Grey Coding.  Here, there is only one bit difference between neighboring symbols. This greatly decreases the bit error rate.
 
 \subsection{Oversampling}
 \label{sec:oversample}
-In order to manipulate the signal without loss, the data was oversampled by four [Appendix~\ref{app:impulse_train}].  To do so, the code block zero pads the input so that an impulse train is passed along.  The sampling rate, because of this, exceeded the Nyquist sampling rule but allowed us to have some extra leeway to work with.   
+In order to manipulate the signal without loss, the data was oversampled by four [Appendix~\ref{app:impulse_train}].  To do so, the code-block 'zero pads' the input so that an impulse train is passed along.  The sampling rate, because of this, exceeded the Nyquist sampling rule but allowed us to have some extra leeway for processing.   
 
 \subsection{Pulse Shaping}
 \label{sec:srrc}
@@ -161,54 +158,51 @@ To approximate a real system, the signal is put through a square root raised cos
         \end{dcases*}
 \]
 
-as implemented in Appendix ~\ref{app:sqrt_raised_cosine}.  \\
+as implemented in Appendix~\ref{app:sqrt_raised_cosine}.  \\
 
-One can question why another pulse shape, such rectangular function, isn't used in the project. The answer is, because square root raised cosine pulse is a common tool to combat inter symbol interference [Section~\ref{sec:ISIbackground}].  This is caused by the fact that it is a Nyquist pulse with a flat spectrum. In other words because the raised cosine has zero impulse response at all integer multiples of its period, correct sampling can perfectly reconstruct the signal without having delayed symbol muddle the waveform. 
+One can question why another pulse shape, such rectangular function, isn't used in the project. The square root raised cosine pulse is a common and effective tool to combat inter symbol interference [Section~\ref{sec:ISIbackground}].  This interference is caused by the fact that it is a Nyquist pulse with a flat spectrum.  In other words, because the raised cosine has zero impulse response at all integer multiples of its period, correct sampling can perfectly reconstruct the signal without having delayed symbols muddle the waveform. 
 
 \subsection{Digital-to-Analog Conversion}
 \label{sec:da}
+The output of this shaping filter (\#1 in Figure~\ref{fig:system}) is fed into a Digital-to-Analog Converter (DAC).  A DAC takes the digital samples and zero-order holds them at a constant voltage, creating an analog signal. At this point, the signal is assumed to be sent through physical components. The demonstration of this conversion can be seen in Figure~\ref{fig:dtoa} \\
 
-The output of this shaping filter (\#1 in Figure ~\ref{fig:system}) is fed into a Digital-to-Analog Converter (DAC).  A DAC takes the digital samples and zero-order holds them at a constant voltage, creating an analog signal. At this point, the signal is assumed to be sent through physical components. The demonstration of this conversion can be seen in Figure ~\ref{fig:dtoa} \\
-
-The implementation of this block can is shown in Appendix ~\ref{app:da}, ~\ref{app:zero}.
+The implementation of this block can is shown in Appendix~\ref{app:da}..
 
 \subsection{Anti-Aliasing Reconstruction Filter}
 \label{sec:reconstruction}
-After the analog to digital conversion, a reconstruction filter (also called an anti-aliasing filter) bandlimits the analog waveform output from the DAC (\#2 in Figure ~\ref{fig:system}).  The high frequency content contained in the stair-case digital signal is undesirable since it can create aliasing of wrongfully high frequency waves. To avoid this, the Low Pass Filter is used for the reconstruction.  Ours is modeled as a Butterworth filter, or a maximally flat magnitude filter.  The aim of the filter is to have uniformly flat passband frequency response and roll to zero in the stopband.  As with all filters, the cutoff frequency parameter sets the bands and the order of the filter determines the roll-off of the frequency response in the stopband.  We used a fourth order Butterworth so that the roll-off was $80 \mathtt{\frac{dB}{dec}}$.  We set the cutoff frequency approx. to 5 $\mathtt{kHz}$ at the TX part. The interior workings of the filter are not pertinent to this project, so the code in Appendix~\ref{app:butterworth} uses built-in MATLAB functions. Furthermore the issues and challenges caused by bilinear transformation of an analog filter to digital filter and TX cut-off frequency sensitivity are addressed in Section ~\ref{sec:issues}. \\
+After the analog to digital conversion, a reconstruction filter (also called an anti-aliasing filter) bandlimits the analog waveform output from the DAC (\#2 in Figure~\ref{fig:system}).  The high frequency content contained in the stair-case digital signal is undesirable since it can create aliasing of wrongfully high frequency waves. To avoid this, the Low Pass Filter is used for the reconstruction.  Ours is modeled as a Butterworth filter, or a maximally flat magnitude filter.  The aim of the filter is to have uniformly flat passband frequency response and roll to zero in the stopband.  As with all filters, the cutoff frequency parameter sets the bands and the order of the filter determines the roll-off of the frequency response in the stopband.  We used a fourth order Butterworth so that the roll-off was $80 \mathtt{\frac{dB}{dec}}$.  We set the cutoff frequency approx. to 5 $\mathtt{kHz}$ at the TX part. The interior workings of the filter are not pertinent to this project, so the code in Appendix~\ref{app:butterworth} uses built-in MATLAB functions. Furthermore the issues and challenges caused by bilinear transformation of an analog filter to digital filter and TX cut-off frequency sensitivity are addressed in Section~\ref{sec:issues}. \\
 
-At this point (\#3 in Figure ~\ref{fig:system}), the waveform gets be transmitted through the medium. \\
+At this point (\#3 in Figure~\ref{fig:system}), the waveform is ready to be transmitted through the medium.\\
 
-A demonstration of the output of this filter can be seen in Figure ~\ref{fig:dtoa}.
+A demonstration of the output of this filter can be seen in Figure~\ref{fig:dtoa}.
 
-	\begin{figure}[H]
-	\centering
-	\includegraphics[width=\textwidth]	{DtoA.jpg}
-	\caption{The original digital signal and the outputs of D/A converter and anti-aliasing filter at SNR=100dB for the first 100 symbols (QPSK modulation)\label{fig:dtoa}}
-	\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{DtoA.jpg}
+\caption{The original digital signal and the outputs of D/A converter and anti-aliasing filter at SNR=100dB for the first 100 symbols (QPSK modulation)\label{fig:dtoa}}
+\end{figure}
 
 \subsection{Channel Medium}
-After processing the data at the TX end of the system, it is sent through a bandlimited channel which is modelled to produce a phase error, white gaussian noise. 
-
 \label{sec:channel}
+After processing the data at the TX end of the system, it is sent through a bandlimited channel which is modeled to produce a phase error and have additive white Gaussian noise. 
+
 \subsubsection{Phase Error}
 \label{sec:phaseError}
-To enhance the realism of the model, non-coherent error was included in the transmission. The $\delta\phi$ block represents a block that introduces frequency offset on the carrier.  The effect of this is to blur the symbol constellations.  \\
-
-The new block was modeled by introducing a first order phase term.  Recall, phase is related to frequency by Equation ~\ref{eq:phaseToFreq}.
+To enhance the realism of the model, non-coherent error was included in the transmission. The $\delta\phi$ block represents a frequency offset on the carrier.  The effect of this is to blur the symbol constellations.  The new block was modeled by introducing a first order phase term.  Recall, phase is related to frequency by Equation~\ref{eq:phaseToFreq}.
 
 \begin{equation}
 \label{eq:phaseToFreq}
 f(t) = \frac{1}{2 \pi} \phi^\prime(t)
 \end{equation}
 
-Appendix ~\ref{app:freq} shows how this was implemented in the simulations.  We used a frequency offset of $100 \mathtt{kHz}$.  
+Appendix~\ref{app:freq} shows how this was implemented in the simulations.  We used a frequency offset of $100 \mathtt{kHz}$.  
 
 \subsubsection{Channel Gain}
 \label{sec:channelFilter}
-We  have the following bandlimited channel response installed in our system model:
+We have the following bandlimited channel response installed in our system model:
  $$h(t) = 0.1\delta(t + 100 \mathtt{ns}) + 0.8\delta(t -40 \mathtt{ns}) + 0.95\delta(t - 30 \mathtt{ns}) + 0.7\delta(t - 100 \mathtt{ns}) - 0.35\delta(t - 170 \mathtt{ns})  $$
  
-This has to be converted into vector from in order to process in MATLAB. Thus the following calculation is made: 
+This has to be converted into vector form in order to process in MATLAB. Thus the following calculation is made: 
  
  $$h(t) = 0.1\delta(t + 100 \frac{\mathtt{ns}}{T_s}) + 0.8\delta(t -40 \frac{\mathtt{ns}}{T_s}) + 0.95\delta(t - 30 \frac{\mathtt{ns}}{T_s}) + 0.7\delta(t - 100 \frac{\mathtt{ns}}{T_s}) - 0.35\delta(t - 170 \frac{\mathtt{ns}}{T_s})  $$
  
@@ -216,36 +210,34 @@ This has to be converted into vector from in order to process in MATLAB. Thus th
  
 Although this channel introduces significant ISI, we have perfect knowledge of the channel, so handling the interference is not difficult. \\
 
-The implementation of the bandlimited channel is shown in Appendix ~\ref{app:bandlimited} and  ~\ref{app:chan_snip}.
+The implementation of the bandlimited channel is shown in Appendix~\ref{app:bandlimited} and~\ref{app:chan_snip}.
 
 \subsubsection{Noise}
 \label{sec:awgn}
 The channel additionally has a source of Additive White Gaussian Noise (AWGN) as implemented in Appendix~\ref{app:awgn_channel}. The variance of this channel noise is determined by the SNR values picked at the beginning of each simulation. We can relate the two by the following:
 
 $$\sigma^2 = \frac{S}{10^{SNR/10}}$$
-where S is the average signal power of the chosen modulation scheme.  This is then the end of the channel model (\#4 in Figure ~\ref{fig:system}). \\
-
-We could have had this noise be colored by the channel itself, but could just have easily used a whitening filter to flatten the frequency response back to Gaussian.  Such a complication could be added in future models.  
+where S is the average signal power of the chosen modulation scheme.  The AWGN concludes the channel model (\#4 in Figure~\ref{fig:system}). \footnote{We could have made this noise be colored by the channel itself: move the summer before the channel block.  However, we then could easily introduce a whitening filter to flatten the frequency response back to Gaussian.  Such a complication could be added in future models.} 
 
 \subsection{Noise Limiting Filter}
 \label{sec:noiseLPF}
-An anti-aliasing low-pass filter constrains, or band limits, the channel-filtered waveform (\#5 in Figure ~\ref{fig:system}).  In this setting, the LPF protects against aliasing of high frequency content being recorded at the lower frequency.  We use the same Butterworth filter (implemented in Appendix ~\ref{app:butterworth} ) to accomplish this function set the cut-off frequency to approx. 5 $\mathtt{kHz}$ at the RX. The output of this filter is demonstrated in Figure ~\ref{fig:atod}. Furthermore the issues and challenges caused by bilinear transformation of an analog filter to digital filter and RX cut-off frequency sensitivity are addressed in Section ~\ref{sec:issues}.
+Prior to digitization, an anti-aliasing low-pass filter constrains, or bandlimits, the channel-filtered waveform (\#5 in Figure~\ref{fig:system}).  In this setting, the LPF protects against aliasing of high frequency content being recorded at the lower frequency.  We use the same Butterworth filter (implemented in Appendix~\ref{app:butterworth}) and set the cut-off frequency to approximately 5 $\mathtt{kHz}$ at the receiver. The output of this filter is demonstrated in Figure~\ref{fig:atod}. Again, issues and challenges caused by bilinear transformation of an analog filter to digital filter and RX cut-off frequency sensitivity are addressed in Section~\ref{sec:issues}.
 
 \subsection{Analog-To-Digital Converter}
 \label{sec:adc}
-To bring the analog waveform back to the digital world, an Analog-to-Digital converter is used with the implementation shown in Appendix~\ref{app:ad}.  From here (\#6 in Figure ~\ref{fig:system}) on out, the waveform is back in the digital domain for processing. \\
+To bring the analog waveform back to the digital world, an Analog-to-Digital converter is used with the implementation shown in Appendix~\ref{app:ad}.  From here (\#6 in Figure~\ref{fig:system}) on out, the waveform is back in the digital domain for processing. \\
 
-A demonstration of the output of this block can be seen in Figure ~\ref{fig:atod} and the issues and challenges caused by the sampling instances of the converter is addressed in Section ~\ref{sec:issues}.
+The output of this block can be seen in Figure~\ref{fig:atod}.  Issues and challenges caused by the converter sampling instances are addressed in Section~\ref{sec:issues}.
 
-	\begin{figure}[H]
-	\centering
-	\includegraphics[width=\textwidth]	{AtoD.jpg}
-	\caption{The original received analog signal and the outputs of A/D converter and noise-limiting filter at SNR=100dB for the first 100 symbols (QPSK modulation)\label{fig:atod}}
-	\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]	{AtoD.jpg}
+\caption{The original received analog signal and the outputs of A/D converter and noise-limiting filter at SNR=100dB for the first 100 symbols (QPSK modulation)\label{fig:atod}}
+\end{figure}
 
 \subsection{Tracking Loop}
 \label{sec:tracking}
-The frequency offset  recovery is accomplished via a Costas loop (Feedback background is explained in explained in detail in Section ~\ref{sec:feedback}) whose implementation is given in Appendix ~\ref{app:RX_snip}. The I and Q component of the received signal (\#7i and \#7q in Figure ~\ref{fig:system}) are both sent through a $\tanh\left(\cdot\right)$ block in order to discern their sign.  This works because, for $k>>1$, $\text{sign}\left(x\right) \approx \tanh \left(x\right)$.  These $\pm1$ signals are multiplied by the opposite component signal.  The I component is then subtracted from the Q component, creating a phase error metric [\ref{eq:costas}].  This is labeled in Figure~\ref{fig:system} as \#8. 
+The frequency offset recovery is accomplished via a Costas Loop whose implementation is given in Appendix~\ref{app:RX_snip}. The I and Q component of the received signal (\#7i and \#7q in Figure~\ref{fig:system}) are both sent through a $\tanh\left(\cdot\right)$ block in order to discern their sign.  This works because, for $k>>1$, $\text{sign}\left(x\right) \approx \tanh \left(x\right)$.  These $\pm1$ signals are multiplied by the opposite component signal.  The I component is then subtracted from the Q component, creating a phase error metric [Equation~\ref{eq:costas}].  The phase error is labeled in Figure~\ref{fig:system} as \#8. 
 
 \begin{align}
   \label{eq:costas}
@@ -253,34 +245,36 @@ The frequency offset  recovery is accomplished via a Costas loop (Feedback backg
   &\qquad {} - \left[I\left(t\right)\cos\left(\phi_e\right)-Q\left(t\right)\sin\left(\phi_e\right)\right]\text{sign}\left(I\left(t\right)\sin\left(\phi_e\right)+Q\left(t\right)\cos\left(\phi_e\right)\right)
   \end{align}
 
-This value is run into the loop filter, the first integrater in the feedback leg of the loop, and then through the VCO, the second integrator.
-  
+The error is run into the loop filter, the first integrator in the feedback leg of the loop.  Further background on feedback loops is given in detail in Section~\ref{sec:feedback}. The output of the loop filter is sent into another integrator, a Voltage Controlled Oscillator (VCO). \\
+
+A VCO is a device whose output oscillation is variably controlled by the voltage level of the input.  The transfer function, relating the input to the output, for this block is shown in Equation~\ref{eq:vco}. The integral action can help eliminate phase error. To implement a VCO in simulation, a phase accumulator does the integration action and then, to keep the result in the correct domain, the result is put through a modulo $2\pi$ block. \\
+
 \begin{align}
 \label{eq:vco}
 \phi_{\text{out}} &= \int \! k_{VCO}V_{in} \mathrm{d}t
 \end{align}
-A VCO is a device with output oscillation which is varied by the voltage level of the input.  The transfer function, relating the input to the output, for this block is shown in Equation~\ref{eq:vco}. The integral action can help eliminate phase error. To implement a VCO in simulation, a phase accumulator does the integration action and then, to keep the result in the correct domain, the result is put through a modulo $2\pi$ block. \\
 
-Finally the I and Q components are recombined by a summer (\#10 in Figure ~\ref{fig:system}). \\
+Finally, after the VCO and feedback action, the I and Q components are recombined by a summer (\#10 in Figure~\ref{fig:system}). \\
 
-The crucial point in designing the feedback loop is finding the right coefficients for the loop filter which will provide a fast tracking of the frequency offset. This makes sure the loop reaches the steady state as fast as possible, thus less errors are seen in the output bits. \\
+The crucial point in designing the feedback loop is finding the right coefficients for the loop filter.  The filter must provide a fast tracking of the frequency offset. Doing so ensures the loop reaches the steady state as fast as possible, allowing for fewer errors in the output bits. \\
 
-Another important issue we have to address is the challenges caused by using a phase tracker and two integrators to cancel out the frequency offset. This is discussed in Section ~\ref{sec:issues}.
-
+Another important issue we had to address is the challenges caused by using a phase tracker and two integrators to cancel out the frequency offset. This is discussed in Section~\ref{sec:issues}.
 
 \subsection{Matched Filter}
 \label{sec:matched}
-A matched filter is used for optimal detection of the transmitted signal. The same square root raised cosine pulse (as implemented in Appendix ~\ref{app:sqrt_raised_cosine}) is used to pick up the waveform (\#11 in Figure ~\ref{fig:system}).
+After the signal is back to a complex form, a matched filter is used for optimal detection. The same square root raised cosine pulse (as implemented in Appendix~\ref{app:sqrt_raised_cosine}) is used to pick up the waveform (\#11 in Figure~\ref{fig:system}).
 
 \subsection{Sampler}
 \label{sec:sample}
-After the matched filter, the signal has to be sampled at 10 $\mathtt{GHz}$.  We should keep in mind that the signal is oversampled by a factor of 4 in the TX end of the system. In other words the sampler has to pick one of the 4 oversampled points. Preferably the one with the highest value, meaning it is matched the best. Usually this is the value at the integer multiples of  $T_s$. \\
+After the matched filter, the signal has to be sampled at 10 $\mathtt{GHz}$.  We should keep in mind that the signal is oversampled by a factor of four in the TX end of the system. In other words the sampler has to pick one of the four oversampled points.  We would prefer the sampler pick the point with the highest value - this would mean it matched the best point. Usually this is the value at the integer multiples of  $T_s$. \\
 
 The implementation of this block is shown in Appendix~\ref{app:sampler}.
 
 \subsection{ZF Equalizer}
 \label{sec:equal}
-The equalizer (necessary background for general architecture of equalizers is given in Section ~\ref{sec:ISIbackground}) we implemented was a Zero-Forcing (ZF) architecture as shown in ~\ref{app:RX_snip} and ~\ref{app:zf}. To meet the goal of satisfying Condition~\ref{thm:zero}, the weight vector, $\mathbf{f}$, must perfectly negate all taps except the present-time one.  The present received symbol is a column within the $R$ matrix: $\mathbf{r}[i]$, often chosen to be the center one.  
+Because of Inter-Symbol Interference (ISI), there is an equalizer set to level the system frequency response.  Section~\ref{sec:ISIbackground} further explains ISI and equalization.
+
+The equalizer implemented here is a Zero-Forcing (ZF) architecture, as shown in~\ref{app:RX_snip} and~\ref{app:zf}. To satisfy the Zero ISI Condition~\ref{thm:zero}, the weight vector, $\mathbf{f}$, must perfectly negate all taps except the present-time one.  The present received symbol is a column within the $R$ matrix: $\mathbf{r}[i]$, often chosen to be the center one.  
 $$ \mathbf{f}^{\ast}R = \mathbf{w}[i]^{\top} $$
 Here, we used  $\mathbf{w} [i] \in \mathbb{R}^n$ to represent the i$^{th}$ Standard basis vector, or a column of zeros except in row $i$.  In this setting, we can find the tap weight vector to accomplish this by Equation~\ref{eq:zf}. 
 
@@ -291,13 +285,14 @@ Here, we used  $\mathbf{w} [i] \in \mathbb{R}^n$ to represent the i$^{th}$ Stand
 
 \subsection{Demodulation}
 \label{sec:demod}
-After the equalization (\#11 in Figure ~\ref{fig:system}), the signal is ready to be mapped back into bits.  The demodulation in this block is the reverse of mapper used in the transmitter whose implementation is shown in ~\ref{app:16qam_demod}.  At this step, we are finally ready to evaluate how well the system worked.
+After the equalization (\#11 in Figure~\ref{fig:system}), the signal is ready to be mapped back into bits.  The demodulation in this block is the reverse of mapper used in the transmitter.  The implementation of this is shown in Appendix~\ref{app:16qam_demod}.  \\
+
+At this step, we are finally ready to evaluate how well the system worked.
 
 \section{Issues and Challenges}
 \label{sec:issues}
-
 \subsection{Bilinear Transformation}
-An important issue we had to deal with, was the bilinear transform MATLAB uses to transform the analog Butterworth filter into the discrete domain. As shown in the figure below $tan(.)$ function is non-linear at higher frequencies and linear at frequencies close to 0:
+An important issue we had to deal with was the bilinear transform MATLAB uses to transform the analog Butterworth filter into the discrete domain.  As shown in the figure below, the $tan(.)$ function is nonlinear at higher frequencies and linear at frequencies close to zero:
 
 \begin{figure}[H]
 \centering
@@ -305,11 +300,11 @@ An important issue we had to deal with, was the bilinear transform MATLAB uses t
 \caption{SER plot as a function of delay at the samplin g points of the A/D converter at SNR=20dB (QPSK modulation). \label{fig:delay}}
 \end{figure} 
 
-Thus in order to have normalized cut-off frequencies at the linear regions (assumed to be linear around $\left[ -\pi/10,\pi/10 \right] $) of the $tan(.)$ function, the over sampling rate of the analog signal is set to 80 times more than the digital signal. \\
+Thus, in order to have normalized cut-off frequencies at the linear regions (assumed to be linear around $\left[ -\pi/10,\pi/10 \right] $) of the $tan(.)$ function, the over sampling rate of the analog signal is set to 80 times more than the digital signal. \\
 
 \subsection{TX Cut-off Frequency Sensitivity}
-A sensitivity analysis is done for the cutoff frequency of the TX reconstruction filter. Recall, this filter is in place to bandlimit the DAC output so the high frequency content in the stairs does not create aliases in the lower, passband. The filter model is controlled by a normalized cutoff frequency, where zero and one are mapped to $\left(0,f_s\right)$.  As such, we expect that the cutoff frequency will not make much difference except if it is lower than $\pi/$(over sampling size of analog signal).  Even by choosing $f_c$ near $\pi/10$ (end of assumed linear region), all frequencies above the sampling frequency will be attenuated and the filter serves its purpose.  However, if $f_c$ gets too low, the information in the waveform may be lost. 
-Figure~\ref{fig:freqTX} shows the sensitivity analysis of the anti-aliasing LPF normalized cutoff frequency. The graph confirms the expected behavior discussed above.
+\label{sec:TXcutoff}
+A sensitivity analysis is done for the cutoff frequency of the TX reconstruction filter. Recall, this filter is in place to bandlimit the DAC output so the high frequency content in the `stairs' does not create aliases in the lower passband. The filter model is controlled by a normalized cutoff frequency, where zero and one are mapped to $\left(0,f_s\right)$.  As such, we expect that the cutoff frequency will not make much difference except if it is lower than $\pi/$(over sampling size of analog signal).  Even by choosing $f_c$ near $\pi/10$, the end of assumed linear region, all frequencies above the sampling frequency will be attenuated and the filter serves its purpose.  However, if $f_c$ gets too low, the information in the waveform may be lost. Figure~\ref{fig:freqTX} shows the sensitivity analysis of the anti-aliasing LPF normalized cutoff frequency. The graph confirms the expected behavior discussed above.
 
 \begin{figure}[H]
 \centering
@@ -318,8 +313,8 @@ Figure~\ref{fig:freqTX} shows the sensitivity analysis of the anti-aliasing LPF 
 \end{figure}
 
 \subsection{RX Cut-off Frequency Sensitivity}
-
-We performed a sensitivity analysis on the cutoff frequency in the RX noise-limiting filter. This filter was aimed to low pass filter the high frequency content from the noise and only allow the signal through. The same filter model was used with a lower cut-off frequency, so a similar trend was expected. Again at near zero cutoff, again we expect loss of data. But also this time, when the cut-off frequency is increased to the limits of the linear region we see an increase of the BER due to the fact that more noise is passing through the filter. Figure~\ref{fig:freqRX} shows the sensitivity analysis of the noise-limiting LPF normalized cutoff frequency. The graph confirms the expected behavior discussed above.
+\label{sec:RXcutoff}
+We also performed a sensitivity analysis on the cutoff frequency in the RX noise-limiting filter. This filter was aimed to low pass filter the high frequency content from the noise and only allow the signal through. The same filter model was used with a lower cut-off frequency, so a similar trend was expected. Again at near zero cutoff,  we expect loss of data. But this time, when the cut-off frequency is increased to the limits of the linear region, we see an increase of the Bit Error Rate due to the fact that more noise is passing through the filter. Figure~\ref{fig:freqRX} shows the sensitivity analysis of the noise-limiting LPF normalized cutoff frequency. 
 
 \begin{figure}[H]
 \centering
@@ -328,8 +323,8 @@ We performed a sensitivity analysis on the cutoff frequency in the RX noise-limi
 \end{figure}
 
 \subsection{Sampling Delay Sensitivity}
-
-The importance of sampling timing on the bit error rate is crucial due to the fact that we using low pass filters at both RX and TX  which delay the signals passing through them. From a sensitivity analysis of the delay through the system, the A/D will sample at varying degrees of synch. From such an experiment written in Appendix~\ref{app:delay}, when all other parameters like SNR and cutoff frequencies are kept equal to the optimal, we end up seeing the system works best at sampling delays 1 and 2. This is shown in Figure~\ref{fig:delay}.
+\label{sec:delaySensitivity}
+The importance of sampling timing on the bit error rate is crucial due to the fact that we use low pass filters at both RX and TX.  These filters delay the signals passing through them and may through off the sampling timing. By doing a sensitivity analysis of the delay through the system, we found the A/D will sample at varying degrees of synch.  As seen in Appendix~\ref{app:delay}, when all other parameters (SNR and cutoff frequencies, etc.) are kept at their optimal, we find the system works best at sampling delays of one and two. This is shown in Figure~\ref{fig:delay}.
 
 \begin{figure}[H]
 \centering
@@ -338,20 +333,20 @@ The importance of sampling timing on the bit error rate is crucial due to the fa
 \end{figure}
 
 \subsection{ZF Equalizer Noise-Enhancement}
-
-A common metric for the price of Zero Forcing is the \emph{noise enhancement}.  Because the equalizer is amplifying the system frequency response in the channel-attenuated zones in order to maintain a uniformly flat character, the noise from the channel gets similarly amplified by the equalizer.  This is the cost of knocking out ISI.  For ZF, this is a factor by which the system SNR must be scaled by in order to maintain equivalent performance after the equalizer as compared to the output after the matched filter in a no-ISI setting.  It can lead to cases where there is large noise PSD compared to the signal after the equalizer.
+\label{sec:noiseEnhancement}
+A common metric for the cost of using Zero Forcing is \emph{noise enhancement}.  Because the equalizer is amplifying the system frequency response in the channel-attenuated zones in order to maintain a uniformly flat character, the noise from the channel gets similarly amplified by the equalizer.  This is the cost of knocking out Inter-Symbol Interference.  For ZF, this is a factor by which the system SNR must be scaled by in order to maintain equivalent performance after the equalizer.  The reference level is the system output after the matched filter in a no-ISI setting.  Noise enhancement can lead to cases where there is large noise PSD after a ZF equalizer where there would not have been if the equalizer was omitted.
 
 \subsection{Costas Loop Frequency Offset Tracking}
-As explained in Section ~\ref{sec:phaseError} a phase tracker with two integrators are used to cancel out the frequency offset which is introduced to the system in the channel. The problem with using a phase tracker instead of a frequency tracker when there is frequency offset, is that the feedback loop will only get rid of the offset if it is relatively small compared to the sampling period. 
+As explained in Section~\ref{sec:phaseError}, a phase tracker with two integrators cancels out the frequency offset introduced to the system in the channel medium. The problem with using a phase tracker instead of a frequency tracker to deal with a frequency offset is that the feedback loop will only get rid of the offset if it is relatively small compared to the sampling period.  Again, refer to Appendix~\ref{app:feedback} for further discussion of feedback.\\
 
-Because both the frequency offset is $100 \mathtt{kHz}$ (period of $10 \mathtt{\mu s}$) and is comparable to our signal bandwidth, and we want our tracking loop settling time to be reasonable, we decided to sample the waveform much faster than necessary in order to have tie resolution to deal with the frequency offset.
+Because both the frequency offset (period of $10 \mathtt{\mu s}$) is small compared to our signal bandwidth and the fact we want our tracking loop settling time to be reasonable, we decided to sample the waveform much faster than necessary.  A higher sampling rate gives greater time resolution, allowing more data points per period and a faster understanding of the frequency offset.
 
 \newpage
 \section{Results}
 \label{sec:results}
 The results of the simulations are presented in this section. These include the following for both QPSK and 16-QAM schemes:
 \begin{itemize}
-\item Phase error between the local oscillator at the RX and the incoming signal. In other words the output of the loop filter in costas loop.
+\item Phase error between the local oscillator at the RX and the incoming signal. In other words the output of the loop filter in the Costas Loop.
 \item Eye diagram of the signal after the RX matched filter, and after the equalizer for the bandlimited channel case.
 \item Eye diagram of the signal after the RX matched filter for the AWGN only case.
 \end{itemize}
@@ -362,18 +357,18 @@ The results of the simulations are presented in this section. These include the 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{qpSNR.jpg}
-\caption{Probability of error graph for QPSK scheme, showing hte results of simulations dones with no equalizer, with equalizer, with only AWGN and the theoretical limit \label{fig:qpBER}}
+\caption{Probability of error graph for QPSK scheme, showing the results of different simulations done with no equalizer, with equalizer, with only AWGN, and the theoretical limit \label{fig:qpBER}}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{loop_filter_qpsk20.jpg}
-\caption{The output of the loop filter used in the costas recovery loop is given to show the phase error between the local oscillator at RX-end and the incoming signal. Simulated at 20 dB SNR. \label{fig:qpLoop}}
+\includegraphics[width=0.4\textwidth]{loop_filter_qpsk20.jpg}
+\caption{The output of the loop filter used in the Costas recovery loop.  This shows there is phase error between the local oscillator at RX-end and the incoming signal. Simulated at 20 dB SNR. \label{fig:qpLoop}}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{matched_eye_qpsk20.jpg}
+\includegraphics[width=0.4\textwidth]{matched_eye_qpsk20.jpg}
 \caption{The eye-diagram of the output of the matched filter at RX-end under bandlimited channel condition is shown. Simulated at 20 dB SNR. \label{fig:qpEyeMatch}}
 \end{figure}
 
@@ -439,11 +434,11 @@ In addition to make the simulation close to real conditions, some impairments ar
 \item DAC/ADC converters and the effects of choice of LPF cut-off frequency and sampling delay on the efficiency of the system  
 \end{itemize}
 
-In order to realize this system and simulate it, the block diagram in Figure ~\ref{fig:system} was implemented and results of the simulations are given in Section ~\ref{sec:results}.
+In order to realize this system and simulate it, the block diagram in Figure~\ref{fig:system} was implemented and results of the simulations are given in Section~\ref{sec:results}.
 
 From the analysis of these results, we can deduce the following conclusions about our communication system:
 \begin{itemize}
-\item Looking at the probability of error rate graphs for both QPSK and 16-QAM schemes given in Figures ~\ref{fig:qpBER} and ~\ref{fig:qamBER}, we see that the theoretical limits form a lower bound and our simulations cannot reach this lower bound. There is almost 3dB difference (at high SNR values) between the theoretical limit and the simulations with equalizers for both QPSK and 16-QAM. This is caused by the fact that we are using A/D and D/A converters in our system. Although the results obtained are fairly close to the theoretical values, they can never achieve the limit due to the fact that we need infinite over sampling to construct an analog signal from a digital signal. 
+\item Looking at the probability of error rate graphs for both QPSK and 16-QAM schemes given in Figures~\ref{fig:qpBER} and~\ref{fig:qamBER}, we see that the theoretical limits form a lower bound and our simulations cannot reach this lower bound. There is almost 3dB difference (at high SNR values) between the theoretical limit and the simulations with equalizers for both QPSK and 16-QAM. This is caused by the fact that we are using A/D and D/A converters in our system. Although the results obtained are fairly close to the theoretical values, they can never achieve the limit due to the fact that we need infinite over sampling to construct an analog signal from a digital signal. 
 
 Furthermore it can be observed that result of system with only AWGN and result of the system with equalizers are almost the same. This was expected as the equalizer is supposed cancel out the ISI effect of the bandlimited channel so that we only seethe effects of AWGN. Thus we can deduce that the ZF equalizer is working correctly.  
 
@@ -451,15 +446,15 @@ On the other hand the system with no equalization isn't suitable for communicati
 
 \item The objective of the costas loop is to recover the system from the frequency offsets that might be present in the received signal and the loop filter output provide vital information about the phase error between the local oscillator at the RX and the incoming signal. This output shows how the feedback loop cancels out the error in each iteration and converges into a steady-state where there is almost no error.  
 
-The Figures ~\ref{fig:qamLoop} and ~\ref{fig:qpLoop} which are at 20dB SNR shows the typical convergence shape we would expect for frequency offsets.  The same structure exists in the lower SNR case, but the settling time happens in only a few samples and gets lost.  
+The Figures~\ref{fig:qamLoop} and~\ref{fig:qpLoop} which are at 20dB SNR shows the typical convergence shape we would expect for frequency offsets.  The same structure exists in the lower SNR case, but the settling time happens in only a few samples and gets lost.  
 
-However setting the loop filter coefficients to the right values and increasing the sampling rate solves this problem, which is discussed in Section ~\ref{sec:issues}. The loop filter output graphs prove this result, as it can be seen that frequency error estimate converges to steady state very fast. This also means that we don't really need to throw any of the received bits.
+However setting the loop filter coefficients to the right values and increasing the sampling rate solves this problem, which is discussed in Section~\ref{sec:issues}. The loop filter output graphs prove this result, as it can be seen that frequency error estimate converges to steady state very fast. This also means that we don't really need to throw any of the received bits.
 
-\item Looking at the eye-diagrams of the matched filter output shown in Figures ~\ref{fig:qamEyeMatch} and ~\ref{fig:qpEyeMatch}, we observe that no "eyes" are present at the sampling points $T_s$. This shows that the system has a very poor performance if no equalization block is present at the RX-end. This conclusion is also backed up by the probability of error rate graph of the system with no equalization. 
+\item Looking at the eye-diagrams of the matched filter output shown in Figures~\ref{fig:qamEyeMatch} and~\ref{fig:qpEyeMatch}, we observe that no "eyes" are present at the sampling points $T_s$. This shows that the system has a very poor performance if no equalization block is present at the RX-end. This conclusion is also backed up by the probability of error rate graph of the system with no equalization. 
 
-On the other hand, in the eye-diagrams of the equalizer output, shown in Figures ~\ref{fig:qamEyeEqu} and ~\ref{fig:qpEyeEqu}, the "eye" structures are evident. At the sampling points $T_s$, it is clearly seen that there are 4 possible constellation points for 16-QAM and 2 possible constellation points for QPSK. Thus the demodulation of the system with equalization is painless compared to no equalization case.  
+On the other hand, in the eye-diagrams of the equalizer output, shown in Figures~\ref{fig:qamEyeEqu} and~\ref{fig:qpEyeEqu}, the "eye" structures are evident. At the sampling points $T_s$, it is clearly seen that there are 4 possible constellation points for 16-QAM and 2 possible constellation points for QPSK. Thus the demodulation of the system with equalization is painless compared to no equalization case.  
 
-Furthermore the eye-diagrams of the system with only AWGN channel make a reference point for the system with bandlimited channel as we are expecting close similarities between the eye diagram of the equalizer outputs and the matched filter outputs under only AWGN which are shown in Figures ~\ref{fig:qamEyeAWGN} and ~\ref{fig:qpEyeAWGN}. 
+Furthermore the eye-diagrams of the system with only AWGN channel make a reference point for the system with bandlimited channel as we are expecting close similarities between the eye diagram of the equalizer outputs and the matched filter outputs under only AWGN which are shown in Figures~\ref{fig:qamEyeAWGN} and~\ref{fig:qpEyeAWGN}. 
 
 
 
@@ -485,22 +480,21 @@ In future, additions can be made to the system in order to both improve  the res
 \bibliographystyle{plain}
 \bibliography{final}
 \newpage
-%% the \\ insures the section title is centered below the phrase: Appendix B
-%\section{Project Assignment}
-%\label{app:assign}
-%\includepdf[pages={1-5}]{project_overview.pdf}
-%\cleardoublepage
-%\newpage
+% the \\ insures the section title is centered below the phrase: Appendix B
+\section{Project Assignment}
+\label{app:assign}
+\includepdf[pages={1-5}]{project_overview.pdf}
+\cleardoublepage
+\newpage
 
 \section{Communication Background}
-
 \subsection{Feedback Theory}
-\label{sec:feedback}
-In control theory when there is steady state error in the open loop system, feedback, or `closing the loop' can track out the error. This is just the case because of the frequency error steady state error.  Depending on the order of the system, this error can become unbounded and damning.  Simple feedback can track this error if the open loop system Type is 0.  \footnote{Recall, a system is of Type N when there are N poles at the s-plane origin.}  Here however, we have a Type 1 system - ramp input of phase error.  An additional integrator increases the order of the closed loop system to allow bounding of higher type systems. Notice in Figure~\ref{fig:costas}, the loop filter is Proportional-Integral.  With two integrators in the feedback path, we can bound phase error to a constant steady state level.  Because frequency can be thought of as first order phase [\ref{eq:phaseFreq}], we track out the frequency error.\\
+\label{app:feedback}
+In control theory when there is steady state error in the open loop system, feedback, or `closing the loop' can track out the error. This is appropriate for our simulation because we introduced frequency steady state error.  Depending on the order of the system, this error can become unbounded and damning.  Simple feedback can track this error if the open loop system Type is 0.  Recall, a system is of Type N when there are N poles at the s-plane origin.  Here however, we have a Type 1 system - ramp input of phase error.  The frequency offset introduced is actually a Type 1 phase error [Equation~\ref{eq:phaseToFreq}].  Introducing an additional integrator increases the order of the closed loop system to allow bounding of higher type systems. Notice in Figure~\ref{fig:system}, the loop filter is Proportional-Integral and the VCO is as well. With two integrators in the feedback path, we can bound phase error to a constant steady state level.  \\
 
 \subsection{Data Conversion}
-\label{sec:converter}
-This step of the project introduces complications from using computers and digital methods to analyze analog signals.  Data conversion, the process of taking a continuous signal and descretizing it, can lead to additional and sometimes catastrophic errors.\\
+\label{app:converter}
+Data conversion, the process of taking a continuous signal and descretizing it, can lead to additional and sometimes catastrophic errors.\\
 
 Recall, digital signals are quantized into samples, discrete points in time.  Conversely, an analog signal has a continuous value.  Going from one to the other requires a converter.  To take an analog signal and digitize it, an Analog-to-Digial Converter (A/D) is used.  Both types of signals are shown in Figure~\ref{fig:digitization}.  There is a wrinkle: the rate of conversion is critical to preserving the information.  By the Nyquist-Shannon Sampling Theorem (\ref{eq:nyquist}), the sampling frequency must be at least twice the highest frequency in the signal.  Without reaching this frequency, the samples can wrongfully convey a lower frequency signal, alias, of the true signal.  This is shown in Figure~\ref{fig:alias}.  
 
@@ -516,7 +510,7 @@ f_s \geq 2 f_{max}
                 \caption{Analog and Digital signals}
                 \label{fig:digitization}
         \end{subfigure}%
-        \qquad \quad %add desired spacing between images, e. g. ~, \quad, \qquad etc.
+        \qquad \quad %add desired spacing between images, e. g.~, \quad, \qquad etc.
           %(or a blank line to force the subfigure onto a new line)
         \begin{subfigure}[b]{0.5\textwidth}
                 \includegraphics[width=\textwidth]{aliasing.jpg}
@@ -528,8 +522,8 @@ f_s \geq 2 f_{max}
 
 \newpage
 \subsection{Inter Symbol Interference and Equalization}
-\label{sec:ISIbackground}
-Inter Symbol Interference (ISI) is when residual signal from symbols meddles the level of subsequent symbols.  Because of the bandlimiting, where the response of the system is 0 above a limiting frequency, the symbols will interfere with one another. To deal with the dispersion, the Zero-ISI condition [\ref{thm:zero}] must be met.  A number of techniques can be utilized to accomplish what effectively amounts to canceling out delayed versions of symbols:
+\label{app:ISIbackground}
+Inter Symbol Interference (ISI) is when residual signal from symbols meddles the level of subsequent symbols.  Because of the bandlimiting, where the response of the system is zero above a limiting frequency, the symbols will interfere with one another. To deal with the dispersion, the Zero-ISI condition [\ref{thm:zero}] must be met.  A number of techniques can be utilized to accomplish what effectively amounts to canceling out delayed versions of symbols:
 
 \begin{itemize}
 \item Use $C^{-1}\left(f\right)$ to undo the channel
@@ -537,13 +531,8 @@ Inter Symbol Interference (ISI) is when residual signal from symbols meddles the
 \item Use Nyquist's Pulse-Shaping Criterion and MLSE
 \item Use an Equalizer
 \end{itemize}
-For this to be effective, the system channel medium must be known or estimated [Section~\ref{sec:estimate}].\\
 
-\begin{figure}[b]
-\centering
-\includegraphics[width=.6\textwidth]{equalizer.png}
-\caption{Generic Equalizer Filter to zero out the ISI\label{fig:equalizer}}
-\end{figure}
+For this to be effective, the system channel medium must be known or estimated [Section~\ref{sec:estimate}].\\
 
 \begin{thm}
 \label{thm:zero}
@@ -555,14 +544,20 @@ $$x\left(nT\right) = \left\{
 \end{array} \right.$$
 \end{thm}
 
+\begin{figure}[b]
+\centering
+\includegraphics[width=.6\textwidth]{equalizer.png}
+\caption{Generic Equalizer Filter to zero out the ISI\label{fig:equalizer}}
+\end{figure}
+
 \subsection{Estimation}
-\label{sec:estimate}
+\label{app:estimate}
 Considering this system, where Table~\ref{tab:filtersummary} describes the variables and Table~\ref{tab:Paramsummary} describes the dimension parameters, the channel is must be known before anything else. \\
 
 To do channel estimation, a known sequence is sent through the system and error on the signal at output is measured.  That is, the input ($r$) and output ($y$) of the filter are known, and the tap weights ($f$) are to be determined - we can look at the impulse response of the unknown channel facing the known input.  Once the channel is understood, we can use an assortment of metrics to perform equalization.
 
 \subsection{Equalization}
-\label{sec:equal}
+\label{app:equal}
 An equalizer is a filter that zeros out the ISI in the end-to-end system.  It can be preset to handle the channel, or can adapt to the time-varying nature of a channel.  In the latter case, the equalizer parameter are adjusted on the fly by periodic transmission of a known sequence to re-estimate the channel.  In either case, the equalizer is a filter whose frequency response counteracts the system model such that Condition~\ref{thm:zero} is met. 
 
 \begin{table}[H]
@@ -636,6 +631,7 @@ r \left[p \right] & r\left[ p-1 \right] & \cdots & r\left[ p-n \right]
 \end{equation}
 What we want is force the channel to zero for all other symbols other than the present one.  As an aside, because there is delay in the system, the intuitive sense of causality is blurred. That is, forward symbols from the present moment can actually cause interference to the present symbol. 
 
+\newpage
 \section{Random Bit Sequence Generator}
 \label{app:random_bit_generator}
 \lstinputlisting{random_bit_generator.m}
@@ -698,16 +694,12 @@ What we want is force the channel to zero for all other symbols other than the p
 
 \section{Conversion}
 \label{app:convert}
-
-\subsection{Zero Hold}
-\label{app:zero}
-\subsection{Decimation}
-\label{app:ad}
-\lstinputlisting{ZeroHoldDecimation.m}
-\subsection{Interpolation}
+\subsection{Zero Order Interpolation}
 \label{app:da}
 \lstinputlisting{ZeroHoldInterpolation.m}
-
+\subsection{Zero Order Decimation}
+\label{app:ad}
+\lstinputlisting{ZeroHoldDecimation.m}
 
 \section{Simulations Related Code Snippets}
 \subsection{TX-End}
